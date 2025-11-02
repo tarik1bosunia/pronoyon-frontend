@@ -1,65 +1,159 @@
-import Image from "next/image";
+'use client'
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
+import { MCQForm } from '@/components/MCQForm';
+import { CQForm } from '@/components/CQForm';
+import { QuestionCard } from '@/components/QuestionCard';
+import { Question, MCQOption, CQSubQuestion } from '@/types/question';
+import { BookOpen, FileText, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function Home() {
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  const handleAddMCQ = (questionText: string, marks: number, options: MCQOption[]) => {
+    const newQuestion: Question = {
+      id: uuidv4(),
+      type: 'mcq',
+      questionText,
+      marks,
+      options,
+      createdAt: new Date(),
+    };
+    setQuestions([newQuestion, ...questions]);
+    toast({
+      title: "MCQ Added!",
+      description: "Multiple choice question added successfully",
+    });
+  };
+
+  const handleAddCQ = (questionText: string, marks: number, subQuestions: CQSubQuestion[]) => {
+    const newQuestion: Question = {
+      id: uuidv4(),
+      type: 'cq',
+      questionText,
+      marks,
+      subQuestions,
+      createdAt: new Date(),
+    };
+    setQuestions([newQuestion, ...questions]);
+    toast({
+      title: "CQ Added!",
+      description: "Creative question added successfully",
+    });
+  };
+
+  const handleDeleteQuestion = (id: string) => {
+    setQuestions(questions.filter(q => q.id !== id));
+    toast({
+      title: "Question Deleted",
+      description: "Question removed from your question bank",
+    });
+  };
+
+  const handleExport = () => {
+    toast({
+      title: "Export Ready",
+      description: "Question export functionality can be implemented",
+    });
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b bg-card shadow-sm">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Question Bank</h1>
+                <p className="text-sm text-muted-foreground">
+                  Create questions with Markdown & LaTeX support
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-right mr-4">
+                <div className="text-2xl font-bold">{questions.length}</div>
+                <div className="text-xs text-muted-foreground">Questions</div>
+              </div>
+              <Button onClick={handleExport} variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      <div className="container mx-auto px-6 py-8">
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Create Question Panel */}
+          <div className="lg:col-span-2">
+            <Card className="p-6">
+              <Tabs defaultValue="mcq" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="mcq" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Multiple Choice (MCQ)
+                  </TabsTrigger>
+                  <TabsTrigger value="cq" className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    Creative Question (CQ)
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="mcq">
+                  <MCQForm onSubmit={handleAddMCQ} />
+                </TabsContent>
+
+                <TabsContent value="cq">
+                  <CQForm onSubmit={handleAddCQ} />
+                </TabsContent>
+              </Tabs>
+            </Card>
+          </div>
+
+          {/* Questions List */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Your Questions</h2>
+              {questions.length > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {questions.filter(q => q.type === 'mcq').length} MCQ,{' '}
+                  {questions.filter(q => q.type === 'cq').length} CQ
+                </span>
+              )}
+            </div>
+
+            {questions.length === 0 ? (
+              <Card className="p-8 text-center">
+                <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                <h3 className="font-semibold mb-2">No questions yet</h3>
+                <p className="text-sm text-muted-foreground">
+                  Create your first question using the forms above
+                </p>
+              </Card>
+            ) : (
+              <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+                {questions.map((question) => (
+                  <QuestionCard
+                    key={question.id}
+                    question={question}
+                    onDelete={handleDeleteQuestion}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
-}
+};
