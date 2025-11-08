@@ -1,16 +1,15 @@
-/* Tailwind v4 core + plugins you actually use */
 @import "tailwindcss";
-@plugin "@tailwindcss/typography"; /* needed for `prose` classes */
 
-/* 1) Class-based dark mode variant (so `dark:` works when <html class="dark"> …) */
-@custom-variant dark (&:where(.dark, .dark *)); /* your original is fine, this is the robust form */
+@plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 
-/* 2) A custom container utility (max-width snaps + padding) */
+/* Class-based dark mode so `dark:*` works when <html class="dark"> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Container utility aligned to Tailwind breakpoints */
 @utility container {
   margin-inline: auto;
   padding-inline: 2rem;
-
-  /* use your Tailwind breakpoints via --theme() */
   @media (width >= --theme(--breakpoint-sm)) {
     max-width: none;
   }
@@ -19,8 +18,7 @@
   }
 }
 
-/* 3) Map Tailwind theme tokens to your CSS variables.
-   These `--color-*` tokens make `bg-background`, `text-foreground`, `border-border`, etc. work. */
+/* Map your HSL number tokens to Tailwind color tokens */
 @theme {
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
@@ -82,7 +80,7 @@
   }
 }
 
-/* 4) v4 border default compatibility (Tailwind v4 changed default to currentColor) */
+/* v4 border default compat */
 @layer base {
   *,
   ::after,
@@ -93,7 +91,7 @@
   }
 }
 
-/* 5) Your primitive design tokens (HSL numbers only!) */
+/* ========= Design tokens (HSL numbers only) ========= */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -149,7 +147,6 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  /* class-based dark palette (pairs with @custom-variant above) */
   .dark {
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
@@ -202,7 +199,7 @@
   }
 }
 
-/* 6) Base element styles + markdown/KaTeX */
+/* ========= Base + components ========= */
 @layer base {
   * { @apply border-border; }
 
@@ -211,7 +208,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Markdown preview area (needs @tailwindcss/typography plugin above) */
+  /* Markdown preview (requires @tailwindcss/typography) */
   .markdown-preview {
     @apply prose prose-slate dark:prose-invert max-w-none;
   }
@@ -249,4 +246,66 @@
 
   .katex { font-size: 1.1em; }
   .katex-display { overflow-x: auto; overflow-y: hidden; }
+
+  /* ---------- Tiptap Editor Styles ---------- */
+  .ProseMirror { outline: none; }
+
+  .ProseMirror p.is-editor-empty:first-child::before {
+    color: hsl(var(--muted-foreground));
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  .ProseMirror h1 { @apply text-3xl font-bold my-4; }
+  .ProseMirror h2 { @apply text-2xl font-semibold my-3; }
+  .ProseMirror h3 { @apply text-xl font-semibold my-2; }
+  .ProseMirror p  { @apply my-2; }
+
+  .ProseMirror code {
+    @apply px-1.5 py-0.5 rounded text-sm;
+    background-color: hsl(var(--muted));
+    font-family: "Courier New", monospace;
+  }
+  .ProseMirror pre {
+    @apply p-4 rounded-lg my-4 overflow-x-auto;
+    background-color: hsl(var(--muted));
+  }
+  .ProseMirror pre code { @apply p-0 text-sm; background: none; }
+
+  .ProseMirror blockquote {
+    @apply pl-4 my-4 italic;
+    border-left: 4px solid hsl(var(--primary));
+    color: hsl(var(--muted-foreground));
+  }
+
+  .ProseMirror ul,
+  .ProseMirror ol { @apply pl-6 my-2; }
+  .ProseMirror li { @apply my-1; }
+
+  .ProseMirror a { @apply underline cursor-pointer; color: hsl(var(--primary)); }
+  .ProseMirror a:hover { color: hsl(var(--primary) / 0.8); }
+
+  .ProseMirror img { @apply max-w-full h-auto rounded-lg my-4; }
+
+  .ProseMirror table {
+    @apply w-full my-4 overflow-hidden rounded-lg;
+    border-collapse: collapse;
+    border: 1px solid hsl(var(--border));
+  }
+  .ProseMirror td,
+  .ProseMirror th {
+    @apply p-2 relative;
+    border: 1px solid hsl(var(--border));
+    min-width: 100px;
+    vertical-align: top;
+  }
+  .ProseMirror th {
+    @apply font-semibold text-left;
+    background-color: hsl(var(--muted));
+  }
+  .ProseMirror .selectedCell { background-color: hsl(var(--accent) / 0.3); }
+  .ProseMirror .math-inline { @apply inline; }
+  .ProseMirror .math-display { @apply block my-4 text-center; }
 }

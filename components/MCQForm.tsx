@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { InlineEditor } from './InlineEditor';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { Plus, Trash2, CheckCircle2, Circle } from 'lucide-react';
 import { MCQOption } from '@/types/question';
@@ -72,13 +72,13 @@ export const MCQForm = ({ onSubmit }: Props) => {
         <div className="space-y-4">
           <div>
             <Label htmlFor="question">Question (Supports Markdown & LaTeX)</Label>
-            <Textarea
-              id="question"
-              value={questionText}
-              onChange={(e) => setQuestionText(e.target.value)}
-              placeholder="Enter your question here... Use $...$ for inline math and $$...$$ for display math"
-              className="min-h-[150px] font-mono text-sm mt-2"
-            />
+            <div className="mt-2">
+              <InlineEditor
+                content={questionText}
+                onChange={setQuestionText}
+                placeholder="Type your question... Use **bold**, *italic*, or $E=mc^2$ for math"
+              />
+            </div>
           </div>
 
           <div>
@@ -102,36 +102,41 @@ export const MCQForm = ({ onSubmit }: Props) => {
               </Button>
             </div>
             {options.map((option, index) => (
-              <div key={option.id} className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleCorrect(option.id)}
-                  className="px-2"
-                >
-                  {option.isCorrect ? (
-                    <CheckCircle2 className="h-5 w-5 text-success" />
-                  ) : (
-                    <Circle className="h-5 w-5" />
-                  )}
-                </Button>
-                <Input
-                  value={option.text}
-                  onChange={(e) => updateOption(option.id, e.target.value)}
-                  placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                  className="flex-1 font-mono text-sm"
-                />
-                {options.length > 2 && (
+              <Card key={option.id} className="p-3 space-y-2">
+                <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => removeOption(option.id)}
+                    onClick={() => toggleCorrect(option.id)}
                     className="px-2"
                   >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    {option.isCorrect ? (
+                      <CheckCircle2 className="h-5 w-5 text-success" />
+                    ) : (
+                      <Circle className="h-5 w-5" />
+                    )}
                   </Button>
-                )}
-              </div>
+                  <span className="font-semibold text-sm min-w-[20px]">
+                    {String.fromCharCode(65 + index)}.
+                  </span>
+                  {options.length > 2 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeOption(option.id)}
+                      className="ml-auto px-2"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  )}
+                </div>
+                <InlineEditor
+                  content={option.text}
+                  onChange={(text) => updateOption(option.id, text)}
+                  placeholder={`Option ${String.fromCharCode(65 + index)} (supports markdown & LaTeX)`}
+                  className="text-sm"
+                />
+              </Card>
             ))}
           </div>
 

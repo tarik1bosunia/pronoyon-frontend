@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { InlineEditor } from './InlineEditor';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { Plus, Trash2 } from 'lucide-react';
 import { CQSubQuestion } from '@/types/question';
@@ -64,13 +65,13 @@ export const CQForm = ({ onSubmit }: Props) => {
         <div className="space-y-4">
           <div>
             <Label htmlFor="cq-question">Main Question (Supports Markdown & LaTeX)</Label>
-            <Textarea
-              id="cq-question"
-              value={questionText}
-              onChange={(e) => setQuestionText(e.target.value)}
-              placeholder="Enter your main question... Use $...$ for inline math and $$...$$ for display math"
-              className="min-h-[120px] font-mono text-sm mt-2"
-            />
+            <div className="mt-2">
+              <InlineEditor
+                content={questionText}
+                onChange={setQuestionText}
+                placeholder="Type your main question... Use **bold**, *italic*, or $E=mc^2$ for math"
+              />
+            </div>
           </div>
 
           <div>
@@ -94,36 +95,36 @@ export const CQForm = ({ onSubmit }: Props) => {
               </Button>
             </div>
             {subQuestions.map((sq, index) => (
-              <Card key={sq.id} className="p-4 space-y-2">
+              <Card key={sq.id} className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-semibold">
                     Sub-Question {index + 1}
                   </Label>
-                  {subQuestions.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeSubQuestion(sq.id)}
-                      className="h-8 px-2"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={sq.marks}
+                      onChange={(e) => updateSubQuestion(sq.id, 'marks', parseInt(e.target.value) || 0)}
+                      placeholder="Marks"
+                      className="w-20 h-8"
+                    />
+                    {subQuestions.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSubQuestion(sq.id)}
+                        className="h-8 px-2"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <Textarea
-                  value={sq.text}
-                  onChange={(e) => updateSubQuestion(sq.id, 'text', e.target.value)}
-                  placeholder={`Enter sub-question ${index + 1}...`}
-                  className="font-mono text-sm"
-                  rows={3}
-                />
-                <Input
-                  type="number"
-                  min={0}
-                  value={sq.marks}
-                  onChange={(e) => updateSubQuestion(sq.id, 'marks', parseInt(e.target.value) || 0)}
-                  placeholder="Marks"
-                  className="w-24"
+                <InlineEditor
+                  content={sq.text}
+                  onChange={(text) => updateSubQuestion(sq.id, 'text', text)}
+                  placeholder={`Enter sub-question ${index + 1}... (supports markdown & LaTeX)`}
                 />
               </Card>
             ))}
