@@ -37,6 +37,7 @@ export const RichTextEditor = ({
   const [equationEditorOpen, setEquationEditorOpen] = useState(false);
   
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
