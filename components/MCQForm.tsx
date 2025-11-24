@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { InlineEditor } from './editor/InlineEditor';
-import { MarkdownRenderer } from './MarkdownRenderer';
+import { MarkdownRenderer } from './editor/MarkdownRenderer';
 import { Plus, Trash2, CheckCircle2, Circle } from 'lucide-react';
 import { MCQOption } from '@/types/question';
 import { v4 as uuidv4 } from 'uuid';

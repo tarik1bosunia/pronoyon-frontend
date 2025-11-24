@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { InlineEditor } from './editor/InlineEditor';
-import { MarkdownRenderer } from './MarkdownRenderer';
+import { MarkdownRenderer } from './editor/MarkdownRenderer';
 import { Plus, Trash2 } from 'lucide-react';
 import { CQSubQuestion } from '@/types/question';
 import { v4 as uuidv4 } from 'uuid';

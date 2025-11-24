@@ -1,6 +1,6 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MarkdownRenderer } from './MarkdownRenderer';
+import { MarkdownRenderer } from './editor/MarkdownRenderer';
 import { Question } from '@/types/question';
 import { Trash2, CheckCircle2 } from 'lucide-react';
 

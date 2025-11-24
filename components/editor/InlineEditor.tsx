@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { RichTextEditor } from './RichTextEditor';
-import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 import { cn } from '@/lib/utils';
 
 interface InlineEditorProps {

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { InlineEditor } from './InlineEditor';
 import { UnifiedQuestionForm } from './QuestionForms';
+import { PrintPreviewModal } from './PrintPreviewModal'; // Import the new modal
 import { cn } from '@/lib/utils';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
@@ -24,6 +25,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
+  const [isPrintModalOpen, setPrintModalOpen] = useState(false); // State for print modal
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
 
   // --- Inline Update Handlers ---
@@ -55,8 +57,12 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     setQuestions(questions.map(q => q.id === id ? { ...q, marks: newMarks } : q));
   };
 
-  // --- Other Actions ---
-  const handlePrint = () => window.print();
+  // --- Actions ---
+  
+  // Updated: Open custom modal instead of window.print()
+  const handlePrintClick = () => {
+    setPrintModalOpen(true);
+  };
   
   const handleSettings = (id: string) => {
     setEditingId(id);
@@ -105,7 +111,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" className="hidden md:flex gap-2" onClick={handlePrint}>
+          <Button variant="outline" size="sm" className="hidden md:flex gap-2" onClick={handlePrintClick}>
             <Printer className="h-4 w-4" /> প্রিন্ট করুন
           </Button>
           <Button size="sm" className="bg-[#009d6e] hover:bg-[#008a60] gap-2">
@@ -140,9 +146,9 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
           </div>
         </aside>
 
-        {/* Center: A4 Paper Preview */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#E3E5E8] print:bg-white print:p-0">
-          <div className="print-container w-full max-w-[210mm] min-h-[297mm] bg-white shadow-lg p-[15mm] relative">
+        {/* Center: Paper Preview */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#E3E5E8] print:bg-white print:p-0 print:block">
+          <div className="print-container w-full max-w-5xl min-h-[297mm] bg-white shadow-lg p-[15mm] relative print:max-w-[210mm] print:w-[210mm] print:mx-auto">
             
             {/* Paper Header */}
             <div className="text-center border-b-2 border-double border-gray-800 pb-4 mb-8">
@@ -189,7 +195,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                             </div>
 
                             <div className="flex gap-2 items-baseline">
-                              {/* Question Number - Aligned Baseline */}
                               <span className="font-bold font-serif text-lg select-none min-w-[24px]">{index + 1}.</span>
                               
                               <div className="flex-1 space-y-1">
@@ -208,10 +213,8 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                   <div className="grid grid-cols-2 gap-x-12 gap-y-1 mt-1 ml-1">
                                     {q.options.map((opt, i) => (
                                       <div key={opt.id} className={cn("flex gap-2 text-[17px] font-serif items-baseline", opt.isCorrect ? "font-semibold text-gray-900" : "text-gray-800")}>
-                                        {/* Label (ক, খ, etc.) */}
                                         <span className="select-none min-w-[20px]">{['ক','খ','গ','ঘ'][i]}.</span>
                                         
-                                        {/* Option Text */}
                                         <div className="flex-1">
                                             <InlineEditor 
                                                 content={opt.text} 
@@ -229,7 +232,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                 {q.type === 'cq' && q.subQuestions && (
                                   <div className="space-y-1 mt-3">
                                     {q.subQuestions.map((sq) => (
-                                      // FIXED: items-start -> items-baseline to align (ক) with text properly
                                       <div key={sq.id} className="flex justify-between items-baseline group/sq">
                                         <div className="flex gap-2 flex-1 items-baseline">
                                           <span className="font-semibold text-[17px] font-serif select-none whitespace-nowrap">({sq.label})</span>
@@ -243,9 +245,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                           </div>
                                         </div>
                                         
-                                        {/* Marks Area */}
                                         <div className="flex items-center">
-                                            {/* Editable Input (Hidden on print) */}
                                             <div className="w-12 text-right opacity-0 group-hover/sq:opacity-100 transition-opacity no-print">
                                                 <Input 
                                                     type="number" 
@@ -258,7 +258,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                     className="h-6 w-12 text-right text-xs p-1 bg-white"
                                                 />
                                             </div>
-                                            {/* Printable Mark */}
                                             <span className="hidden print:inline text-sm font-bold text-gray-600 ml-4">{sq.marks}</span>
                                         </div>
                                       </div>
@@ -287,7 +286,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         </main>
       </div>
 
-      {/* Sidebar for Settings */}
+      {/* Settings Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="min-w-[100%] sm:min-w-[550px] overflow-y-auto p-0 border-l shadow-2xl no-print">
           <SheetHeader className="px-6 py-4 border-b bg-gray-50 sticky top-0 z-20">
@@ -317,6 +316,14 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* PRINT PREVIEW MODAL */}
+      <PrintPreviewModal 
+        open={isPrintModalOpen}
+        onOpenChange={setPrintModalOpen}
+        questions={questions}
+        paperTitle={paperTitle}
+      />
     </div>
   );
 }
