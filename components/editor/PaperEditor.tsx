@@ -8,7 +8,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   ArrowLeft, Save, Printer, Trash2, 
-  GripVertical, Plus, FileText, BookOpen, Settings, MoreVertical 
+  GripVertical, Plus, FileText, BookOpen, Settings, MoreVertical, 
+  ListChecks, FilePlus
 } from 'lucide-react';
 import { InlineEditor } from './InlineEditor';
 import { UnifiedQuestionForm } from './QuestionForms';
@@ -17,13 +18,14 @@ import { cn } from '@/lib/utils';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { RichTextEditor } from './RichTextEditor';
+import { v4 as uuidv4 } from 'uuid';
 
 interface PaperEditorProps {
   initialQuestions: Question[];
   onBack: () => void;
 }
 
-// --- HELPER: Combined Question Component (Now uses structured data) ---
+// --- HELPER: Combined Question Component ---
 const CombinedQuestionEditor = ({ 
   question, 
   onUpdate 
@@ -32,9 +34,8 @@ const CombinedQuestionEditor = ({
   onUpdate: (updates: Partial<Question>) => void; 
 }) => {
   
-  // Initialize structure if missing
   const statements = question.romanStatements || ["", "", ""];
-  const stem = question.stem || question.text || ""; // Fallback to text if stem missing
+  const stem = question.stem || question.text || ""; 
   const footer = question.footer || "নিচের কোনটি সঠিক?";
 
   const updateStem = (val: string) => onUpdate({ stem: val });
@@ -47,7 +48,6 @@ const CombinedQuestionEditor = ({
 
   return (
     <div className="space-y-2">
-      {/* Stem */}
       <div className="mb-2">
         <InlineEditor 
           content={stem} 
@@ -57,38 +57,20 @@ const CombinedQuestionEditor = ({
         />
       </div>
 
-      {/* Horizontal Statements (i, ii, iii) */}
       <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-        <div className="flex items-baseline gap-1">
-          <span className="font-semibold min-w-[16px]">i.</span>
-          <InlineEditor 
-            content={statements[0]} 
-            onChange={(v) => updateStatement(0, v)}
-            placeholder="বিবৃতি ১"
-            className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-          />
-        </div>
-        <div className="flex items-baseline gap-1">
-          <span className="font-semibold min-w-[20px]">ii.</span>
-          <InlineEditor 
-            content={statements[1]} 
-            onChange={(v) => updateStatement(1, v)}
-            placeholder="বিবৃতি ২"
-            className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-          />
-        </div>
-        <div className="flex items-baseline gap-1">
-          <span className="font-semibold min-w-[24px]">iii.</span>
-          <InlineEditor 
-            content={statements[2]} 
-            onChange={(v) => updateStatement(2, v)}
-            placeholder="বিবৃতি ৩"
-            className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-          />
-        </div>
+        {['i', 'ii', 'iii'].map((roman, idx) => (
+          <div key={roman} className="flex items-baseline gap-1">
+            <span className="font-semibold min-w-[16px]">{roman}.</span>
+            <InlineEditor 
+              content={statements[idx]} 
+              onChange={(v) => updateStatement(idx, v)}
+              placeholder={`বিবৃতি ${idx + 1}`}
+              className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+            />
+          </div>
+        ))}
       </div>
 
-      {/* Footer */}
       <div className="mt-2">
         <InlineEditor 
           content={footer} 
@@ -109,9 +91,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
   const [isPrintModalOpen, setPrintModalOpen] = useState(false);
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
 
-  // --- Inline Update Handlers ---
-  
-  // General update handler for any field
+  // --- Update Handlers ---
   const updateQuestion = (id: string, updates: Partial<Question>) => {
     setQuestions(questions.map(q => q.id === id ? { ...q, ...updates } : q));
   };
@@ -126,7 +106,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     }));
   };
 
-  // New Handler: Toggle Correct Option
   const toggleOptionCorrectness = (qId: string, optId: string) => {
     setQuestions(questions.map(q => {
       if (q.id !== qId) return q;
@@ -134,7 +113,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         ...q,
         options: q.options?.map(opt => ({
           ...opt,
-          isCorrect: opt.id === optId // Set clicked as correct, others as incorrect (Single Select)
+          isCorrect: opt.id === optId 
         }))
       };
     }));
@@ -157,7 +136,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     setSheetOpen(true);
   };
 
-  const handleAddNew = (type: 'mcq' | 'cq') => {
+  const handleAddNew = (type: 'mcq' | 'cq' | 'combined') => {
     setEditingId(`new-${type}`);
     setSheetOpen(true);
   };
@@ -168,7 +147,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
 
   const handleSaveForm = (updatedQuestion: Question) => {
     if (editingId?.startsWith('new')) {
-      setQuestions([...questions, { ...updatedQuestion, id: Math.random().toString(36).substr(2, 9) }]);
+      setQuestions([...questions, { ...updatedQuestion, id: uuidv4() }]);
     } else {
       setQuestions(questions.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
     }
@@ -181,6 +160,58 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     setQuestions(items);
+  };
+
+  // --- Defaults for New Questions ---
+  const getNewQuestionDefaults = (typeStr: string): Question => {
+    const type = typeStr.replace('new-', '') as 'mcq' | 'cq' | 'combined';
+    
+    if (type === 'cq') {
+      return {
+        id: 'temp',
+        type: 'cq',
+        text: '',
+        marks: 10,
+        subQuestions: [
+          { id: uuidv4(), label: 'ক', text: '', marks: 1 },
+          { id: uuidv4(), label: 'খ', text: '', marks: 2 },
+          { id: uuidv4(), label: 'গ', text: '', marks: 3 },
+          { id: uuidv4(), label: 'ঘ', text: '', marks: 4 },
+        ]
+      } as Question;
+    }
+
+    if (type === 'combined') {
+      return {
+        id: 'temp',
+        type: 'mcq',
+        text: '', // Will be constructed from parts
+        stem: '',
+        romanStatements: ['', '', ''],
+        footer: 'নিচের কোনটি সঠিক?',
+        marks: 1,
+        options: [
+          { id: uuidv4(), text: 'i ও ii', isCorrect: false },
+          { id: uuidv4(), text: 'i ও iii', isCorrect: false },
+          { id: uuidv4(), text: 'ii ও iii', isCorrect: false },
+          { id: uuidv4(), text: 'i, ii ও iii', isCorrect: false },
+        ]
+      } as Question;
+    }
+
+    // Standard MCQ
+    return {
+      id: 'temp',
+      type: 'mcq',
+      text: '',
+      marks: 1,
+      options: [
+        { id: uuidv4(), text: '', isCorrect: false },
+        { id: uuidv4(), text: '', isCorrect: false },
+        { id: uuidv4(), text: '', isCorrect: false },
+        { id: uuidv4(), text: '', isCorrect: false },
+      ]
+    } as Question;
   };
 
   return (
@@ -224,12 +255,34 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
               </div>
             ))}
           </ScrollArea>
-          <div className="p-4 border-t space-y-2">
-            <Button variant="outline" className="w-full justify-start" onClick={() => handleAddNew('mcq')}>
-              <Plus className="h-4 w-4 mr-2" /> Add MCQ
+          
+          {/* Updated Add Buttons Section */}
+          <div className="p-4 border-t space-y-3 bg-gray-50/50">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+              onClick={() => handleAddNew('mcq')}
+            >
+              <Plus className="h-4 w-4 mr-3 text-gray-500" /> 
+              Add MCQ
             </Button>
-            <Button variant="outline" className="w-full justify-start" onClick={() => handleAddNew('cq')}>
-              <Plus className="h-4 w-4 mr-2" /> Add Creative
+            
+            <Button 
+              variant="outline" 
+              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+              onClick={() => handleAddNew('combined')}
+            >
+              <ListChecks className="h-4 w-4 mr-3 text-gray-500" /> 
+              Add Combined MCQ
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+              onClick={() => handleAddNew('cq')}
+            >
+              <div className="h-5 w-5 mr-2.5 rounded-full bg-gray-800 text-white flex items-center justify-center text-[10px] font-bold">N</div>
+              Add Creative
             </Button>
           </div>
         </aside>
@@ -269,7 +322,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                               snapshot.isDragging ? "bg-white shadow-2xl ring-2 ring-[#009d6e] z-50" : "hover:bg-gray-50 hover:border-gray-200"
                             )}
                           >
-                            {/* Hover Actions (Hidden on print) */}
+                            {/* Hover Actions */}
                             <div className="absolute right-0 top-0 hidden group-hover:flex gap-1 bg-white shadow border rounded p-1 z-10 no-print">
                               <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleSettings(q.id)} title="Settings">
                                 <Settings className="h-3 w-3 text-gray-600" />
@@ -286,16 +339,13 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                               <span className="font-bold font-serif text-lg select-none min-w-[24px]">{index + 1}.</span>
                               
                               <div className="flex-1 space-y-1">
-                                {/* Main Question Logic */}
                                 <div className="text-gray-900 font-serif text-lg leading-snug">
                                   {q.romanStatements ? (
-                                    // Render Combined Editor if structured data exists
                                     <CombinedQuestionEditor 
                                       question={q} 
                                       onUpdate={(updates) => updateQuestion(q.id, updates)} 
                                     />
                                   ) : (
-                                    // Standard Inline Editor for simple text
                                     <InlineEditor 
                                       content={q.text} 
                                       onChange={(val) => updateQuestion(q.id, { text: val })}
@@ -305,12 +355,10 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                   )}
                                 </div>
 
-                                {/* MCQ Options Grid */}
                                 {q.type === 'mcq' && q.options && (
                                   <div className="grid grid-cols-2 gap-x-12 gap-y-1 mt-1 ml-1">
                                     {q.options.map((opt, i) => (
                                       <div key={opt.id} className="flex gap-2 text-[17px] font-serif items-baseline group/opt">
-                                        {/* Clickable Option Number/Circle */}
                                         <div 
                                           onClick={() => toggleOptionCorrectness(q.id, opt.id)}
                                           className={cn(
@@ -324,7 +372,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                           {['ক','খ','গ','ঘ'][i]}
                                         </div>
                                         
-                                        {/* Option Text */}
                                         <div className="flex-1">
                                             <InlineEditor 
                                                 content={opt.text} 
@@ -338,7 +385,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                   </div>
                                 )}
 
-                                {/* CQ Sub-questions */}
                                 {q.type === 'cq' && q.subQuestions && (
                                   <div className="space-y-1 mt-3">
                                     {q.subQuestions.map((sq) => (
@@ -375,7 +421,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                 )}
                               </div>
                               
-                              {/* Question Total Marks */}
                               {q.type === 'cq' && (
                                 <div className="text-right w-8 font-bold text-sm text-gray-500 pt-1 print:text-black">
                                    {q.marks}
@@ -395,7 +440,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         </main>
       </div>
 
-      {/* Sidebar for Settings */}
       <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="min-w-[100%] sm:min-w-[550px] overflow-y-auto p-0 border-l shadow-2xl no-print">
           <SheetHeader className="px-6 py-4 border-b bg-gray-50 sticky top-0 z-20">
@@ -410,14 +454,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
             <UnifiedQuestionForm 
               key={editingId} 
               question={editingId?.startsWith('new') 
-                ? { 
-                    id: 'temp', 
-                    type: editingId.includes('mcq') ? 'mcq' : 'cq', 
-                    text: '', 
-                    marks: editingId.includes('mcq') ? 1 : 10,
-                    options: [], 
-                    subQuestions: [] 
-                  } as Question
+                ? getNewQuestionDefaults(editingId)
                 : questions.find(q => q.id === editingId)!
               }
               onSave={handleSaveForm}
@@ -426,7 +463,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         </SheetContent>
       </Sheet>
 
-      {/* PRINT PREVIEW MODAL */}
       <PrintPreviewModal 
         open={isPrintModalOpen}
         onOpenChange={setPrintModalOpen}
