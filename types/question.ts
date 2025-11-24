@@ -8,6 +8,7 @@ export interface MCQOption {
 
 export interface CQSubQuestion {
   id: string;
+  label: string; // e.g., 'ক', 'খ'
   text: string;
   marks: number;
 }
@@ -15,14 +16,13 @@ export interface CQSubQuestion {
 export interface Question {
   id: string;
   type: QuestionType;
-  questionText: string;
+  text: string;
   marks: number;
-  
-  // For MCQ
+  // MCQ Specifics
   options?: MCQOption[];
-  
-  // For CQ
+  // CQ Specifics
   subQuestions?: CQSubQuestion[];
-  
-  createdAt: Date;
+  topic?: string;
+  board?: string;
+  year?: string;
 }

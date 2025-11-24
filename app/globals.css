@@ -309,3 +309,34 @@
   .ProseMirror .math-inline { @apply inline; }
   .ProseMirror .math-display { @apply block my-4 text-center; }
 }
+
+
+@media print {
+  /* Hide all UI elements */
+  aside, header, button, .no-print {
+    display: none !important;
+  }
+
+  /* Reset main container for print */
+  body, main, .print-container {
+    background: white !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Ensure the A4 paper looks right */
+  .print-container {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+  }
+  
+  /* Force text colors for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

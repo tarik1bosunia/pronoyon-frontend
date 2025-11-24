@@ -4,7 +4,6 @@ import Placeholder from '@tiptap/extension-placeholder';
 import { Bold, Italic, List, ListOrdered, Sigma } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
 
 interface Props {
   content: string;
@@ -14,14 +13,7 @@ interface Props {
 }
 
 export function RichTextEditor({ content, onChange, placeholder, className }: Props) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   const editor = useEditor({
-    immediatelyRender: false, // FIX: This prevents the SSR hydration mismatch error
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: placeholder || 'Start typing...' }),
@@ -33,17 +25,17 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Pr
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm max-w-none focus:outline-none min-h-[60px] p-3",
+          "prose prose-sm max-w-none focus:outline-none min-h-[100px] p-3",
           className
         ),
       },
     },
   });
 
-  if (!isMounted || !editor) return null;
+  if (!editor) return null;
 
   return (
-    <div className="border rounded-md overflow-hidden bg-white focus-within:ring-2 ring-[#009d6e]/20 transition-all shadow-sm">
+    <div className="border rounded-md overflow-hidden bg-white focus-within:ring-2 ring-[#009d6e]/20 transition-all">
       <div className="flex items-center gap-1 border-b bg-gray-50/50 p-1">
         <MenuButton 
           onClick={() => editor.chain().focus().toggleBold().run()} 
@@ -69,6 +61,7 @@ export function RichTextEditor({ content, onChange, placeholder, className }: Pr
         <div className="flex-1" />
         <MenuButton 
             onClick={() => {
+                // Insert a placeholder for Math (You can connect EquationEditor here)
                 editor.chain().focus().insertContent(' $x$ ').run();
             }}
             isActive={false}
@@ -85,7 +78,7 @@ const MenuButton = ({ onClick, isActive, icon }: any) => (
     variant="ghost"
     size="sm"
     onClick={onClick}
-    className={cn("h-7 w-7 p-0", isActive && "bg-gray-200 text-black")}
+    className={cn("h-8 w-8 p-0", isActive && "bg-gray-200 text-black")}
     type="button"
   >
     {icon}

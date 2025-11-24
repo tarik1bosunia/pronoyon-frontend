@@ -8,6 +8,7 @@
 
 ## initial installed packages
 ```bash
+npm i @hello-pangea/dnd
 npm install react-katex katex
 npm i --save-dev @types/react-katex
 npm install @tailwindcss/typography
