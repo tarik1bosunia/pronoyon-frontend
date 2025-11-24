@@ -9,8 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { 
-  Columns, AlignLeft, Grid, Type, 
-  Printer, FileText, X, Settings2 
+  Printer, FileText, X 
 } from 'lucide-react';
 import { Question } from '@/types/question';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -29,10 +28,10 @@ export function PrintPreviewModal({
   questions, 
   paperTitle 
 }: PrintPreviewModalProps) {
-  // --- State for Print Settings ---
   const [columns, setColumns] = useState<1 | 2 | 3>(1);
   const [textSize, setTextSize] = useState<'medium' | 'large' | 'big'>('large');
-  const [optionLayout, setOptionLayout] = useState<'1' | '2'>('2'); // 1 column or 2 columns for options
+  // Added '4' for full horizontal inline options
+  const [optionLayout, setOptionLayout] = useState<'1' | '2' | '4'>('4'); 
   const [showSolution, setShowSolution] = useState(false);
   const [showAnswer, setShowAnswer] = useState(false);
 
@@ -40,13 +39,68 @@ export function PrintPreviewModal({
     window.print();
   };
 
-  // Helper to determine text size class
   const getTextSizeClass = () => {
     switch (textSize) {
       case 'medium': return 'text-sm';
       case 'big': return 'text-xl';
-      default: return 'text-base'; // large
+      default: return 'text-base'; 
     }
+  };
+
+  // Helper to parse and render Combined MCQ text (Stem + Horizontal Roman + Footer)
+  const renderCombinedText = (text: string) => {
+    // Simple heuristic to detect Roman Numeral format
+    const hasRoman = text.match(/i\./) && text.match(/ii\./);
+    
+    if (!hasRoman) {
+      return <div className="font-serif mb-2"><MarkdownRenderer content={text} /></div>;
+    }
+
+    // Split into parts
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const stem = [];
+    const romans = [];
+    const footer = [];
+    let phase = 'stem';
+
+    for (const line of lines) {
+      if (/^(i|ii|iii)\./.test(line)) {
+        phase = 'romans';
+        romans.push(line);
+      } else if (phase === 'romans' && (line.includes('?') || line.includes('নিচের'))) {
+        phase = 'footer';
+        footer.push(line);
+      } else {
+        if (phase === 'stem') stem.push(line);
+        else if (phase === 'romans') romans.push(line); // Fallback
+        else footer.push(line);
+      }
+    }
+
+    return (
+      <div className="font-serif mb-2">
+        {/* Stem */}
+        <div className="mb-1">
+           <MarkdownRenderer content={stem.join('\n')} />
+        </div>
+        
+        {/* Horizontal Romans */}
+        {romans.length > 0 && (
+          <div className="flex flex-wrap gap-x-6 gap-y-1 my-1 px-1 justify-start">
+            {romans.map((r, idx) => (
+              <span key={idx} className="whitespace-nowrap font-medium">{r}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Footer (e.g., নিচের কোনটি সঠিক?) */}
+        {footer.length > 0 && (
+          <div className="mt-1">
+             <MarkdownRenderer content={footer.join('\n')} />
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -56,9 +110,8 @@ export function PrintPreviewModal({
         {/* Header */}
         <DialogHeader className="flex flex-row items-center justify-between px-6 py-4 border-b bg-white space-y-0">
           <DialogTitle className="text-2xl font-bold text-gray-800">Print Question</DialogTitle>
-          
           <DialogDescription id="print-preview-desc" className="sr-only">
-            Preview the question paper layout before printing.
+            Preview layout before printing.
           </DialogDescription>
           
           <div className="flex items-center gap-6">
@@ -70,9 +123,7 @@ export function PrintPreviewModal({
               <Label htmlFor="answer" className="font-medium text-gray-600">Answer</Label>
               <Switch id="answer" checked={showAnswer} onCheckedChange={setShowAnswer} />
             </div>
-            
             <div className="h-6 w-px bg-gray-300 mx-2" />
-            
             <Button onClick={handleSystemPrint} className="bg-[#009d6e] hover:bg-[#008a60]">
               <Printer className="w-4 h-4 mr-2" /> Print
             </Button>
@@ -89,8 +140,7 @@ export function PrintPreviewModal({
           
           {/* Left Sidebar: Settings */}
           <aside className="w-80 bg-white border-r p-6 overflow-y-auto space-y-8">
-            
-            {/* Column Settings */}
+            {/* Columns */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Number of Columns</h3>
               <RadioGroup 
@@ -121,7 +171,7 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
-            {/* Text Size Settings */}
+            {/* Text Size */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Text Size</h3>
               <RadioGroup 
@@ -146,86 +196,109 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
-            {/* Option Layout Settings */}
+            {/* Option Layout */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Option Per Row</h3>
               <RadioGroup 
                 value={optionLayout} 
                 onValueChange={(v: any) => setOptionLayout(v)}
-                className="grid grid-cols-2 gap-4"
+                className="flex flex-col gap-4"
               >
-                {/* 1 Column Style */}
-                <div 
-                  className={cn(
-                    "border-2 rounded-lg p-2 cursor-pointer transition-all",
-                    optionLayout === '1' ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
-                  )}
-                  onClick={() => setOptionLayout('1')}
-                >
-                  <div className="space-y-2 mb-2">
-                    <div className="h-2 w-full bg-gray-300 rounded" />
-                    <div className="h-2 w-full bg-gray-300 rounded" />
+                <div className="grid grid-cols-2 gap-4">
+                  {/* 1 Column Style */}
+                  <div 
+                    className={cn(
+                      "border-2 rounded-lg p-2 cursor-pointer transition-all",
+                      optionLayout === '1' ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                    )}
+                    onClick={() => setOptionLayout('1')}
+                  >
+                    <div className="space-y-2 mb-2">
+                      <div className="h-2 w-full bg-gray-300 rounded" />
+                      <div className="h-2 w-full bg-gray-300 rounded" />
+                    </div>
+                    <div className="flex justify-center">
+                      <RadioGroupItem value="1" id="opt-1" />
+                    </div>
                   </div>
-                  <div className="flex justify-center">
-                    <RadioGroupItem value="1" id="opt-1" />
+
+                  {/* 2 Column Style */}
+                  <div 
+                    className={cn(
+                      "border-2 rounded-lg p-2 cursor-pointer transition-all",
+                      optionLayout === '2' ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                    )}
+                    onClick={() => setOptionLayout('2')}
+                  >
+                    <div className="grid grid-cols-2 gap-2 mb-2">
+                      <div className="h-2 bg-blue-300 rounded" />
+                      <div className="h-2 bg-blue-300 rounded" />
+                      <div className="h-2 bg-blue-300 rounded" />
+                      <div className="h-2 bg-blue-300 rounded" />
+                    </div>
+                    <div className="flex justify-center">
+                      <RadioGroupItem value="2" id="opt-2" />
+                    </div>
                   </div>
                 </div>
 
-                {/* 2 Column Style */}
+                {/* 4 Column Style (Inline/Horizontal) */}
                 <div 
                   className={cn(
                     "border-2 rounded-lg p-2 cursor-pointer transition-all",
-                    optionLayout === '2' ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+                    optionLayout === '4' ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                   )}
-                  onClick={() => setOptionLayout('2')}
+                  onClick={() => setOptionLayout('4')}
                 >
-                  <div className="grid grid-cols-2 gap-2 mb-2">
-                    <div className="h-2 bg-blue-300 rounded" />
-                    <div className="h-2 bg-blue-300 rounded" />
-                    <div className="h-2 bg-blue-300 rounded" />
-                    <div className="h-2 bg-blue-300 rounded" />
+                  <div className="flex gap-2 mb-2">
+                    <div className="h-2 w-1/4 bg-blue-300 rounded" />
+                    <div className="h-2 w-1/4 bg-blue-300 rounded" />
+                    <div className="h-2 w-1/4 bg-blue-300 rounded" />
+                    <div className="h-2 w-1/4 bg-blue-300 rounded" />
                   </div>
-                  <div className="flex justify-center">
-                    <RadioGroupItem value="2" id="opt-2" />
+                  <div className="flex justify-center items-center gap-2">
+                    <RadioGroupItem value="4" id="opt-4" />
+                    <Label htmlFor="opt-4" className="text-xs cursor-pointer">Inline (4 Columns)</Label>
                   </div>
                 </div>
               </RadioGroup>
             </div>
-
           </aside>
 
           {/* Right Side: Live Preview */}
           <main className="flex-1 overflow-y-auto p-8 flex justify-center bg-gray-100">
             <div 
-              className="bg-white shadow-lg p-[10mm] min-h-[297mm] w-full max-w-[210mm] print:shadow-none print:w-full print:max-w-none"
-              style={{ 
-                columnCount: columns,
-                columnGap: '2rem',
-                columnRule: columns > 1 ? '1px solid #e5e7eb' : 'none'
-              }}
+              className="bg-white shadow-lg p-[10mm] min-h-[297mm] w-full max-w-[210mm] print:shadow-none print:w-full print:max-w-none block"
             >
-              {/* Paper Header - Added [column-span:all] to fix layout */}
+              {/* Paper Header - Forced Full Span */}
               <div className="text-center border-b-2 border-gray-800 pb-4 mb-6 [column-span:all]">
                 <h1 className="text-2xl font-bold mb-2">{paperTitle}</h1>
                 <p className="text-sm font-medium">Question Paper</p>
                 <p className="text-sm text-gray-600">{questions.length} Questions · 100 Minutes</p>
               </div>
 
-              {/* Questions */}
-              <div className={getTextSizeClass()}>
+              {/* Questions Container */}
+              <div 
+                className={getTextSizeClass()}
+                style={{ 
+                  columnCount: columns,
+                  columnGap: '2rem',
+                  columnRule: columns > 1 ? '1px solid #e5e7eb' : 'none'
+                }}
+              >
                 {questions.map((q, index) => (
-                  <div key={q.id} className="mb-6 break-inside-avoid">
+                  <div key={q.id} className="mb-6 break-inside-avoid-column">
                     <div className="flex gap-2 items-baseline">
                       <span className="font-bold">{index + 1}.</span>
                       <div className="flex-1">
-                        <div className="font-serif mb-2">
-                          <MarkdownRenderer content={q.text} />
-                        </div>
+                        {/* Auto-detects and formats combined questions horizontally */}
+                        {renderCombinedText(q.text)}
 
                         {/* MCQ Options */}
                         {q.type === 'mcq' && q.options && (
                           <div className={cn(
                             "grid gap-y-1 gap-x-4",
+                            optionLayout === '4' ? "grid-cols-4" : 
                             optionLayout === '2' ? "grid-cols-2" : "grid-cols-1"
                           )}>
                             {q.options.map((opt, i) => (

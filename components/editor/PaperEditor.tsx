@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Question } from '@/types/question';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,29 +8,112 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   ArrowLeft, Save, Printer, Trash2, 
-  GripVertical, Plus, FileText, BookOpen, Settings 
+  GripVertical, Plus, FileText, BookOpen, Settings, MoreVertical 
 } from 'lucide-react';
 import { InlineEditor } from './InlineEditor';
 import { UnifiedQuestionForm } from './QuestionForms';
-import { PrintPreviewModal } from './PrintPreviewModal'; // Import the new modal
+import { PrintPreviewModal } from './PrintPreviewModal';
 import { cn } from '@/lib/utils';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { MarkdownRenderer } from './MarkdownRenderer';
+import { RichTextEditor } from './RichTextEditor';
 
 interface PaperEditorProps {
   initialQuestions: Question[];
   onBack: () => void;
 }
 
+// --- HELPER: Combined Question Component (Now uses structured data) ---
+const CombinedQuestionEditor = ({ 
+  question, 
+  onUpdate 
+}: { 
+  question: Question; 
+  onUpdate: (updates: Partial<Question>) => void; 
+}) => {
+  
+  // Initialize structure if missing
+  const statements = question.romanStatements || ["", "", ""];
+  const stem = question.stem || question.text || ""; // Fallback to text if stem missing
+  const footer = question.footer || "নিচের কোনটি সঠিক?";
+
+  const updateStem = (val: string) => onUpdate({ stem: val });
+  const updateStatement = (index: number, val: string) => {
+    const newStatements = [...statements];
+    newStatements[index] = val;
+    onUpdate({ romanStatements: newStatements });
+  };
+  const updateFooter = (val: string) => onUpdate({ footer: val });
+
+  return (
+    <div className="space-y-2">
+      {/* Stem */}
+      <div className="mb-2">
+        <InlineEditor 
+          content={stem} 
+          onChange={updateStem} 
+          placeholder="উদ্দীপক..."
+          className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+        />
+      </div>
+
+      {/* Horizontal Statements (i, ii, iii) */}
+      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
+        <div className="flex items-baseline gap-1">
+          <span className="font-semibold min-w-[16px]">i.</span>
+          <InlineEditor 
+            content={statements[0]} 
+            onChange={(v) => updateStatement(0, v)}
+            placeholder="বিবৃতি ১"
+            className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+          />
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="font-semibold min-w-[20px]">ii.</span>
+          <InlineEditor 
+            content={statements[1]} 
+            onChange={(v) => updateStatement(1, v)}
+            placeholder="বিবৃতি ২"
+            className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+          />
+        </div>
+        <div className="flex items-baseline gap-1">
+          <span className="font-semibold min-w-[24px]">iii.</span>
+          <InlineEditor 
+            content={statements[2]} 
+            onChange={(v) => updateStatement(2, v)}
+            placeholder="বিবৃতি ৩"
+            className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+          />
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-2">
+        <InlineEditor 
+          content={footer} 
+          onChange={updateFooter} 
+          placeholder="প্রশ্ন..."
+          className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+        />
+      </div>
+    </div>
+  );
+};
+
+
 export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
-  const [isPrintModalOpen, setPrintModalOpen] = useState(false); // State for print modal
+  const [isPrintModalOpen, setPrintModalOpen] = useState(false);
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
 
   // --- Inline Update Handlers ---
-  const updateQuestionText = (id: string, newText: string) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, text: newText } : q));
+  
+  // General update handler for any field
+  const updateQuestion = (id: string, updates: Partial<Question>) => {
+    setQuestions(questions.map(q => q.id === id ? { ...q, ...updates } : q));
   };
 
   const updateOptionText = (qId: string, optId: string, newText: string) => {
@@ -53,16 +136,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     }));
   };
 
-  const updateMarks = (id: string, newMarks: number) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, marks: newMarks } : q));
-  };
-
-  // --- Actions ---
-  
-  // Updated: Open custom modal instead of window.print()
-  const handlePrintClick = () => {
-    setPrintModalOpen(true);
-  };
+  const handlePrintClick = () => setPrintModalOpen(true);
   
   const handleSettings = (id: string) => {
     setEditingId(id);
@@ -132,7 +206,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                 className="p-2 text-sm text-gray-600 hover:bg-gray-100 rounded cursor-pointer truncate flex gap-2"
               >
                 <span className="font-bold text-gray-400">{idx + 1}.</span>
-                {q.text.replace(/<[^>]*>?/gm, '')}
+                {(q.stem || q.text).split('\n')[0].substring(0, 30)}...
               </div>
             ))}
           </ScrollArea>
@@ -164,7 +238,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
               </div>
             </div>
 
-            {/* Questions List with Inline Editing */}
+            {/* Questions List */}
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="paper-questions">
                 {(provided) => (
@@ -198,14 +272,23 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                               <span className="font-bold font-serif text-lg select-none min-w-[24px]">{index + 1}.</span>
                               
                               <div className="flex-1 space-y-1">
-                                {/* Main Question Text */}
+                                {/* Main Question Logic */}
                                 <div className="text-gray-900 font-serif text-lg leading-snug">
-                                  <InlineEditor 
-                                    content={q.text} 
-                                    onChange={(val) => updateQuestionText(q.id, val)}
-                                    placeholder="প্রশ্ন লিখুন..."
-                                    className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-                                  />
+                                  {q.romanStatements ? (
+                                    // Render Combined Editor if structured data exists
+                                    <CombinedQuestionEditor 
+                                      question={q} 
+                                      onUpdate={(updates) => updateQuestion(q.id, updates)} 
+                                    />
+                                  ) : (
+                                    // Standard Inline Editor for simple text
+                                    <InlineEditor 
+                                      content={q.text} 
+                                      onChange={(val) => updateQuestion(q.id, { text: val })}
+                                      placeholder="প্রশ্ন লিখুন..."
+                                      className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                    />
+                                  )}
                                 </div>
 
                                 {/* MCQ Options Grid */}
@@ -214,7 +297,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                     {q.options.map((opt, i) => (
                                       <div key={opt.id} className={cn("flex gap-2 text-[17px] font-serif items-baseline", opt.isCorrect ? "font-semibold text-gray-900" : "text-gray-800")}>
                                         <span className="select-none min-w-[20px]">{['ক','খ','গ','ঘ'][i]}.</span>
-                                        
                                         <div className="flex-1">
                                             <InlineEditor 
                                                 content={opt.text} 
@@ -244,7 +326,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                             />
                                           </div>
                                         </div>
-                                        
                                         <div className="flex items-center">
                                             <div className="w-12 text-right opacity-0 group-hover/sq:opacity-100 transition-opacity no-print">
                                                 <Input 
@@ -286,7 +367,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         </main>
       </div>
 
-      {/* Settings Sheet */}
+      {/* Sidebar for Settings */}
       <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="min-w-[100%] sm:min-w-[550px] overflow-y-auto p-0 border-l shadow-2xl no-print">
           <SheetHeader className="px-6 py-4 border-b bg-gray-50 sticky top-0 z-20">

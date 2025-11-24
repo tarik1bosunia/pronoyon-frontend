@@ -10,14 +10,14 @@ import {
   Search, Plus, Filter, CheckCircle, 
   LayoutDashboard, GraduationCap, Layers, 
   Settings, LogOut, FileText, Users, Menu,
-  X, ChevronDown, Maximize2
+  X, ChevronDown, Maximize2, Check
 } from 'lucide-react';
 import { 
   Select, SelectContent, SelectItem, 
   SelectTrigger, SelectValue 
 } from "@/components/ui/select";
 import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { PaperEditor } from '@/components/editor/PaperEditor';
@@ -33,7 +33,9 @@ const SUBJECTS_LIST = [
   "উচ্চতর গণিত ১ম পত্র",
   "উচ্চতর গণিত ২য় পত্র",
   "তথ্য ও যোগাযোগ প্রযুক্তি",
-  "বাংলা ১ম পত্র"
+  "বাংলা ১ম পত্র",
+  "বাংলা ২য় পত্র",
+  "পদার্থবিজ্ঞান ১ম পত্র"
 ];
 
 const CHAPTERS_LIST = [
@@ -42,42 +44,13 @@ const CHAPTERS_LIST = [
   "কোষ রসায়ন",
   "অণুজীব",
   "শৈবাল ও ছত্রাক",
-  "ব্রায়োফাইটা ও টেরিডোফাইটা"
-];
-
-// --- Filter Data ---
-const GENERAL_FILTERS = [
-  "রিপিটেড বোর্ড প্রশ্ন",
-  "গাণিতিক",
-  "তত্ত্বীয়",
-  "চিত্রযুক্ত প্রশ্ন",
-  "বহুপদী সমাপ্তিসূচক",
-  "অভিন্ন তথ্যভিত্তিক"
-];
-
-const BOARD_LIST = [
-  "ঢাকা বোর্ড",
-  "বরিশাল বোর্ড",
-  "রাজশাহী বোর্ড",
-  "দিনাজপুর বোর্ড",
-  "ময়মনসিংহ বোর্ড",
-  "যশোর বোর্ড",
-  "সিলেট বোর্ড",
-  "কুমিল্লা বোর্ড",
-  "চট্টগ্রাম বোর্ড"
-];
-
-const TOPIC_FILTERS = [
-  "কোষ, কোষপ্রাচীর, প্রোটোপ্লাজম",
-  "সাইটোপ্লাজম ও অঙ্গাণু",
-  "রাইবোজোম, গলজি বস্তু, লাইসোজোম, সেন্ট্রিওল",
-  "মাইটোকন্ড্রিয়া",
-  "ময়মনসিংহ বোর্ড", // Included as per image visual, though unusual for a topic list
-  "প্লাস্টিড",
-  "নিউক্লিয়াস, ক্রোমোজোম",
-  "DNA, RNA",
-  "DNA প্রতিলিপন, জিন ও জেনেটিক কোড",
-  "ট্রান্সক্রিপশন ও ট্রান্সলেশন"
+  "ব্রায়োফাইটা ও টেরিডোফাইটা",
+  "নগ্নবীজী ও আবৃতবীজী উদ্ভিদ",
+  " টিস্যু ও টিস্যুতন্ত্র",
+  "উদ্ভিদ শারীরতত্ত্ব",
+  "উদ্ভিদ প্রজনন",
+  "জীবপ্রযুক্তি",
+  "জীবের পরিবেশ, বিস্তার ও সংরক্ষণ"
 ];
 
 // --- Mock Questions Data ---
@@ -85,16 +58,53 @@ const mockQuestions: Question[] = [
   {
     id: '1',
     type: 'mcq',
-    text: 'বাংলাদেশের রাজধানী কোনটি?',
+    text: 'কোষের "পাওয়ার হাউস" (Power House) বলা হয় কোনটিকে?',
     marks: 1,
     options: [
-      { id: 'o1', text: 'চট্টগ্রাম', isCorrect: false },
-      { id: 'o2', text: 'ঢাকা', isCorrect: true },
-      { id: 'o3', text: 'খুলনা', isCorrect: false },
-      { id: 'o4', text: 'রাজশাহী', isCorrect: false },
+      { id: 'o1', text: 'নিউক্লিয়াস', isCorrect: false },
+      { id: 'o2', text: 'মাইটোকন্ড্রিয়া', isCorrect: true },
+      { id: 'o3', text: 'প্লাস্টিড', isCorrect: false },
+      { id: 'o4', text: 'গলগি বডি', isCorrect: false },
     ],
     board: 'ঢাকা বোর্ড',
     year: '২০২৩'
+  },
+  {
+    id: '2',
+    type: 'mcq',
+    text: 'নিচের কোনটি আদিকোষের বৈশিষ্ট্য?',
+    marks: 1,
+    options: [
+      { id: 'o1', text: 'সুগঠিত নিউক্লিয়াস থাকে', isCorrect: false },
+      { id: 'o2', text: 'মাইটোকন্ড্রিয়া থাকে', isCorrect: false },
+      { id: 'o3', text: 'রাইবোজোম ৭০S প্রকৃতির', isCorrect: true },
+      { id: 'o4', text: 'কোষ বিভাজন মাইটোসিস প্রক্রিয়ায় হয়', isCorrect: false },
+    ],
+    board: 'রাজশাহী বোর্ড',
+    year: '২০২২'
+  },
+  {
+    id: '3',
+    type: 'mcq',
+    // Standard text fallback
+    text: 'DNA তে থাকে— i. ডিঅক্সিরাইবোজ সুগার ii. ইউরাসিল ক্ষারক iii. ফসফরিক এসিড',
+    // Structured Data for Combined MCQ
+    stem: 'DNA তে থাকে—',
+    romanStatements: [
+      'ডিঅক্সিরাইবোজ সুগার',
+      'ইউরাসিল ক্ষারক',
+      'ফসফরিক এসিড'
+    ],
+    footer: 'নিচের কোনটি সঠিক?',
+    marks: 1,
+    options: [
+      { id: 'c1', text: 'i ও ii', isCorrect: false },
+      { id: 'c2', text: 'i ও iii', isCorrect: true },
+      { id: 'c3', text: 'ii ও iii', isCorrect: false },
+      { id: 'c4', text: 'i, ii ও iii', isCorrect: false },
+    ],
+    board: 'যশোর বোর্ড',
+    year: '২০২১'
   },
   {
     id: '4',
@@ -107,14 +117,14 @@ const mockQuestions: Question[] = [
       { id: 'sq3', label: 'গ', text: 'উদ্দীপকের বিভাজনটির গুরুত্ব ব্যাখ্যা কর।', marks: 3 },
       { id: 'sq4', label: 'ঘ', text: 'উক্ত বিভাজন না থাকলে জীবজগতে কী সমস্যা হতো? বিশ্লেষণ কর।', marks: 4 },
     ],
-    board: 'যশোর বোর্ড',
+    board: 'সিলেট বোর্ড',
     year: '২০২০'
   }
 ];
 
 export default function QuestionBankUI() {
   const [viewMode, setViewMode] = useState<ViewMode>('setup');
-  const [selectedIds, setSelectedIds] = useState<string[]>(['4']); 
+  const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4']); 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   // --- Actions ---
@@ -160,156 +170,129 @@ export default function QuestionBankUI() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
         
-        <div className="flex flex-1 overflow-hidden">
-          {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
-            <div className="max-w-4xl mx-auto">
-              <div className="mb-6 text-center">
-                <h2 className="text-2xl font-bold text-gray-800">প্রশ্ন সিলেক্ট করুন</h2>
-                <p className="text-gray-500 mt-1">প্রশ্নগুলো সিলেক্ট করে সাবমিট করলেই প্রশ্ন তৈরি হয়ে যাবে!</p>
-              </div>
-
-              <div className="space-y-4">
-                {mockQuestions.map((q, index) => {
-                  const isSelected = selectedIds.includes(q.id);
-                  return (
-                    <div 
-                      key={q.id}
-                      onClick={() => toggleSelection(q.id)}
-                      className={cn(
-                        "cursor-pointer transition-all duration-200 bg-white rounded-lg p-6 border shadow-sm hover:shadow-md relative overflow-hidden group",
-                        isSelected 
-                          ? "border-2 border-[#009d6e] ring-1 ring-[#009d6e]/20" 
-                          : "border-gray-200 hover:border-gray-300"
-                      )}
-                    >
-                      {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#009d6e]" />}
-                      
-                      <div className="flex justify-between items-start mb-4 pl-2">
-                        <h3 className="text-lg font-semibold text-gray-800 flex gap-2">
-                          <span>{index + 1}.</span>
-                          <span>{q.text}</span>
-                        </h3>
-                        {isSelected && <CheckCircle className="h-5 w-5 text-[#009d6e]" />}
-                      </div>
-
-                      {q.type === 'mcq' && q.options && (
-                        <div className="grid grid-cols-2 gap-y-3 gap-x-8 pl-6 text-gray-600">
-                          {q.options.map((opt, idx) => (
-                            <div key={idx} className="flex items-center gap-2">
-                              <span className="font-medium text-gray-400 text-sm">
-                                {['ক','খ','গ','ঘ'][idx]}.
-                              </span>
-                              <span>{opt.text}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2 pl-6">
-                          <Badge variant="secondary" className="bg-gray-100 font-normal">{q.board}</Badge>
-                          <Badge variant="secondary" className="bg-gray-100 font-normal">{q.year}</Badge>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-8 flex flex-col items-center gap-4 pb-10">
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border">
-                  <Button variant="ghost" size="sm" disabled>← পূর্ববর্তী</Button>
-                  <span className="font-medium px-2">1 / 1</span>
-                  <Button variant="ghost" size="sm" disabled>পরবর্তী →</Button>
-                </div>
-                
-                <Button 
-                  size="lg" 
-                  onClick={handleSubmitQuestions}
-                  className="bg-[#009d6e] hover:bg-[#008a60] text-white px-8 h-12 text-lg shadow-lg shadow-green-600/20"
-                >
-                  সাবমিট করুন
-                </Button>
-              </div>
+        <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-800">প্রশ্ন সিলেক্ট করুন</h2>
+              <p className="text-gray-500 mt-1">প্রশ্নগুলো সিলেক্ট করে সাবমিট করলেই প্রশ্ন তৈরি হয়ে যাবে!</p>
             </div>
-          </main>
-          
-          {/* Right Sidebar Filter - Updated to match image */}
-          <aside className="w-80 bg-[#F3F4F6] p-4 overflow-y-auto hidden xl:block border-l space-y-4">
-             {/* General Filters */}
-             <Card className="p-4 shadow-sm border-none">
-               <div className="space-y-3">
-                 {GENERAL_FILTERS.map((filter, idx) => (
-                   <div key={idx} className="flex items-center gap-2.5">
-                     <Checkbox id={`gen-${idx}`} defaultChecked={idx === 0} className="border-gray-400 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500" /> 
-                     <label htmlFor={`gen-${idx}`} className="text-[13px] font-medium text-gray-700 cursor-pointer select-none leading-none">
-                       {filter}
-                     </label>
-                   </div>
-                 ))}
-               </div>
-             </Card>
 
-             {/* Board Filters */}
-             <Card className="p-4 shadow-sm border-none">
-               <h3 className="font-semibold text-gray-800 mb-3 text-sm">বোর্ড</h3>
-               <Select>
-                 <SelectTrigger className="w-full mb-3 h-9 text-sm">
-                   <SelectValue placeholder="Year" />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="2023">2023</SelectItem>
-                   <SelectItem value="2022">2022</SelectItem>
-                 </SelectContent>
-               </Select>
-               <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
-                 {BOARD_LIST.map((board, idx) => (
-                   <div key={idx} className="flex items-center gap-2.5">
-                     <Checkbox id={`board-${idx}`} defaultChecked={idx === 0} className="border-gray-400 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500" />
-                     <label htmlFor={`board-${idx}`} className="text-[13px] font-medium text-gray-700 cursor-pointer select-none leading-none">
-                       {board}
-                     </label>
-                   </div>
-                 ))}
-               </div>
-             </Card>
+            <div className="space-y-4">
+              {mockQuestions.map((q, index) => {
+                const isSelected = selectedIds.includes(q.id);
+                return (
+                  <div 
+                    key={q.id}
+                    onClick={() => toggleSelection(q.id)}
+                    className={cn(
+                      "cursor-pointer transition-all duration-200 bg-white rounded-lg p-6 border shadow-sm hover:shadow-md relative overflow-hidden group",
+                      isSelected 
+                        ? "border-2 border-[#009d6e] ring-1 ring-[#009d6e]/20" 
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#009d6e]" />}
+                    
+                    {/* UPDATED: Question Text Rendering to support Combined/Roman Questions */}
+                    <div className="flex justify-between items-start mb-4 pl-2">
+                      <div className="flex gap-2 text-lg font-semibold text-gray-800 w-full">
+                        <span className="shrink-0">{index + 1}.</span>
+                        <div className="flex flex-col w-full">
+                          {/* Main Stem */}
+                          <span>{q.stem || q.text}</span>
+                          
+                          {/* Roman Statements (Render if they exist) */}
+                          {q.romanStatements && q.romanStatements.length > 0 && (
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-base font-normal text-gray-700">
+                              {q.romanStatements.map((stmt, i) => (
+                                <span key={i} className="whitespace-nowrap">
+                                  {['i', 'ii', 'iii'][i]}. {stmt}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {isSelected && <CheckCircle className="h-6 w-6 text-[#009d6e] shrink-0 ml-2" />}
+                    </div>
 
-             {/* Topic Filters */}
-             <Card className="p-4 shadow-sm border-none">
-               <h3 className="font-semibold text-gray-800 mb-3 text-sm leading-tight">টপিক - ১ম অধ্যায়: কোষ ও কোষের গঠন</h3>
-               <div className="space-y-2.5">
-                 {TOPIC_FILTERS.map((topic, idx) => (
-                   <div key={idx} className="flex items-start gap-2.5">
-                     <Checkbox id={`topic-${idx}`} defaultChecked={idx === 0} className="mt-0.5 border-gray-400 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 shrink-0" />
-                     <label htmlFor={`topic-${idx}`} className="text-[13px] font-medium text-gray-700 cursor-pointer select-none leading-tight">
-                       {topic}
-                     </label>
-                   </div>
-                 ))}
-               </div>
-             </Card>
-          </aside>
-        </div>
+                    {/* Options Grid */}
+                    {q.type === 'mcq' && q.options && (
+                      <div className="grid grid-cols-2 gap-y-3 gap-x-8 pl-6 text-gray-600 mt-2">
+                        {q.options.map((opt, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-sm">
+                            <span className="font-medium text-gray-400 min-w-[20px]">
+                              {['ক','খ','গ','ঘ'][idx]}.
+                            </span>
+                            <span className="truncate">{opt.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Footer Badges */}
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2 pl-6">
+                        <Badge variant="secondary" className="bg-gray-100 font-normal hover:bg-gray-200">{q.board}</Badge>
+                        <Badge variant="secondary" className="bg-gray-100 font-normal hover:bg-gray-200">{q.year}</Badge>
+                        <Badge variant="outline" className="ml-auto text-gray-500">{q.type === 'mcq' ? 'MCQ' : 'Creative'}</Badge>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex flex-col items-center gap-4 pb-10">
+              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border">
+                <Button variant="ghost" size="sm" disabled>← পূর্ববর্তী</Button>
+                <span className="font-medium px-2">1 / 1</span>
+                <Button variant="ghost" size="sm" disabled>পরবর্তী →</Button>
+              </div>
+              
+              <Button 
+                size="lg" 
+                onClick={handleSubmitQuestions}
+                className="bg-[#009d6e] hover:bg-[#008a60] text-white px-8 h-12 text-lg shadow-lg shadow-green-600/20"
+              >
+                সাবমিট করুন ({selectedIds.length})
+              </Button>
+            </div>
+          </div>
+        </main>
       </div>
+      
+      <aside className="w-80 bg-white border-l p-5 overflow-y-auto hidden xl:block">
+         <div className="flex items-center justify-between mb-6">
+           <h3 className="font-bold text-gray-800">ফিল্টার</h3>
+           <Filter className="h-4 w-4 text-gray-500" />
+         </div>
+         <div className="space-y-4">
+             <div className="space-y-2">
+               <label className="text-sm font-medium">বোর্ড</label>
+               <div className="space-y-2">
+                 {['ঢাকা', 'রাজশাহী', 'যশোর', 'সিলেট', 'কুমিল্লা'].map(b => (
+                   <div key={b} className="flex items-center gap-2">
+                     <Checkbox id={b} /> <label htmlFor={b} className="text-sm text-gray-600">{b}</label>
+                   </div>
+                 ))}
+               </div>
+             </div>
+         </div>
+      </aside>
     </div>
   );
 }
 
-// --- Setup View Component ---
-
+// ... (Rest of the components SetupView, MultiSelectModal, etc. remain unchanged) ...
 function SetupView({ onStart }: { onStart: () => void }) {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<string[]>([]);
-  
-  // State for modals
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
   const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
 
-  // Logic: Oddhay disappears if multiple subjects are selected
-  const shouldShowChapterField = selectedSubjects.length <= 1;
+  const showChapterField = selectedSubjects.length <= 1;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center font-sans">
-      {/* Hero Header */}
       <div className="w-full h-[45vh] bg-[#082f49] flex flex-col items-center justify-start pt-16 relative">
         <div className="absolute top-6 left-6 flex gap-2">
            <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -322,7 +305,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
         <p className="text-blue-100 text-lg">আপনার ক্লাসে প্রযুক্তির শাখা বাড়ান !</p>
       </div>
 
-      {/* Floating Form Card */}
       <div className="w-full max-w-xl px-4 -mt-32 z-10 pb-20">
         <Card className="bg-white p-8 shadow-2xl border-0 rounded-xl">
           <div className="text-center mb-6 border-b border-dashed border-gray-200 pb-6">
@@ -334,15 +316,13 @@ function SetupView({ onStart }: { onStart: () => void }) {
           </div>
 
           <div className="space-y-5">
-            {/* Exam Name */}
             <Input 
               placeholder="প্রোগ্রাম/পরীক্ষার নাম লিখুন *" 
-              className="h-12 border-gray-300 bg-white text-base"
+              className="h-12 border-gray-300 bg-white text-base focus-visible:ring-[#009d6e]"
             />
             
-            {/* Class Selection */}
             <Select>
-              <SelectTrigger className="h-12 border-gray-300 bg-white">
+              <SelectTrigger className="h-12 border-gray-300 bg-white focus:ring-[#009d6e]">
                 <SelectValue placeholder="শ্রেণি" />
               </SelectTrigger>
               <SelectContent>
@@ -352,10 +332,9 @@ function SetupView({ onStart }: { onStart: () => void }) {
               </SelectContent>
             </Select>
 
-            {/* Subject Multi-Select */}
             <div 
               onClick={() => setIsSubjectModalOpen(true)}
-              className="h-12 border border-gray-300 rounded-md flex items-center justify-between px-3 cursor-pointer bg-white hover:bg-gray-50 transition-colors"
+              className="h-12 border border-gray-300 rounded-md flex items-center justify-between px-3 cursor-pointer bg-white hover:bg-gray-50 transition-colors group"
             >
               {selectedSubjects.length === 0 ? (
                 <span className="text-muted-foreground">বিষয়</span>
@@ -364,14 +343,13 @@ function SetupView({ onStart }: { onStart: () => void }) {
                   {selectedSubjects.join(', ')}
                 </span>
               )}
-              <Maximize2 className="h-4 w-4 text-gray-400" />
+              <Maximize2 className="h-4 w-4 text-gray-400 group-hover:text-[#009d6e]" />
             </div>
 
-            {/* Chapter Multi-Select (Conditional) */}
-            {shouldShowChapterField && (
+            {showChapterField && (
               <div 
                 onClick={() => setIsChapterModalOpen(true)}
-                className="h-12 border border-gray-300 rounded-md flex items-center justify-between px-3 cursor-pointer bg-white hover:bg-gray-50 transition-colors animate-in fade-in slide-in-from-top-2"
+                className="h-12 border border-gray-300 rounded-md flex items-center justify-between px-3 cursor-pointer bg-white hover:bg-gray-50 transition-colors group animate-in fade-in slide-in-from-top-2"
               >
                 {selectedChapters.length === 0 ? (
                   <span className="text-muted-foreground">অধ্যায়</span>
@@ -380,11 +358,10 @@ function SetupView({ onStart }: { onStart: () => void }) {
                     {selectedChapters.join(', ')}
                   </span>
                 )}
-                <Maximize2 className="h-4 w-4 text-gray-400" />
+                <Maximize2 className="h-4 w-4 text-gray-400 group-hover:text-[#009d6e]" />
               </div>
             )}
 
-            {/* Type & Count Grid */}
             <div className="grid grid-cols-2 gap-4">
               <Select>
                 <SelectTrigger className="h-12 border-gray-300 bg-white">
@@ -397,7 +374,7 @@ function SetupView({ onStart }: { onStart: () => void }) {
               </Select>
               
               <Input 
-                placeholder="100" 
+                placeholder="প্রশ্ন সংখ্যা" 
                 defaultValue="100"
                 type="number" 
                 className="h-12 border-gray-300 bg-white" 
@@ -414,9 +391,8 @@ function SetupView({ onStart }: { onStart: () => void }) {
         </Card>
       </div>
 
-      {/* Subject Selection Modal */}
       <MultiSelectModal 
-        open={isSubjectModalOpen}
+        open={isSubjectModalOpen} 
         onOpenChange={setIsSubjectModalOpen}
         title="বিষয় সিলেক্ট করুন"
         items={SUBJECTS_LIST}
@@ -424,9 +400,8 @@ function SetupView({ onStart }: { onStart: () => void }) {
         onSelectionChange={setSelectedSubjects}
       />
 
-      {/* Chapter Selection Modal */}
       <MultiSelectModal 
-        open={isChapterModalOpen}
+        open={isChapterModalOpen} 
         onOpenChange={setIsChapterModalOpen}
         title="অধ্যায় সিলেক্ট করুন"
         items={CHAPTERS_LIST}
@@ -437,16 +412,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
   );
 }
 
-// --- Helper Component: Multi-Select Modal ---
-interface MultiSelectModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
-  items: string[];
-  selectedItems: string[];
-  onSelectionChange: (items: string[]) => void;
-}
-
 function MultiSelectModal({ 
   open, 
   onOpenChange, 
@@ -454,19 +419,24 @@ function MultiSelectModal({
   items, 
   selectedItems, 
   onSelectionChange 
-}: MultiSelectModalProps) {
-  // Local state for handling selections before confirming
-  const [tempSelected, setTempSelected] = useState<string[]>(selectedItems);
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  items: string[];
+  selectedItems: string[];
+  onSelectionChange: (items: string[]) => void;
+}) {
+  const [tempSelection, setTempSelection] = useState<string[]>(selectedItems);
 
-  // Sync local state whenever the modal opens or selectedItems changes
   useEffect(() => {
     if (open) {
-      setTempSelected(selectedItems);
+      setTempSelection(selectedItems);
     }
   }, [open, selectedItems]);
 
   const toggleItem = (item: string) => {
-    setTempSelected(prev => 
+    setTempSelection(prev => 
       prev.includes(item) 
         ? prev.filter(i => i !== item) 
         : [...prev, item]
@@ -474,43 +444,39 @@ function MultiSelectModal({
   };
 
   const handleConfirm = () => {
-    onSelectionChange(tempSelected);
+    onSelectionChange(tempSelection);
     onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
-        <DialogHeader className="p-4 border-b bg-gray-50 flex flex-row items-center justify-between">
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden rounded-xl">
+        <DialogHeader className="p-4 border-b bg-gray-50/50 flex flex-row items-center justify-between">
           <DialogTitle className="text-gray-700 font-bold text-lg">{title}</DialogTitle>
         </DialogHeader>
         
-        <div className="p-2 max-h-[300px] overflow-y-auto">
+        <div className="p-2 max-h-[400px] overflow-y-auto">
           {items.map((item) => {
-            const isSelected = tempSelected.includes(item);
+            const isSelected = tempSelection.includes(item);
             return (
               <div 
-                key={item} 
-                className={cn(
-                  "flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors select-none",
-                  isSelected ? "bg-green-50" : "hover:bg-gray-50"
-                )}
+                key={item}
                 onClick={() => toggleItem(item)}
+                className={cn(
+                  "flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-all select-none mx-1 my-1",
+                  isSelected ? "bg-green-50 border border-green-100" : "hover:bg-gray-50 border border-transparent"
+                )}
               >
-                <div 
-                  className={cn(
-                    "h-5 w-5 rounded border border-gray-300 flex items-center justify-center transition-all",
-                    isSelected ? "bg-[#009d6e] border-[#009d6e]" : "bg-white"
-                  )}
-                >
-                  {isSelected && <CheckCircle className="h-3.5 w-3.5 text-white" />}
+                <div className={cn(
+                  "h-5 w-5 rounded border flex items-center justify-center transition-colors",
+                  isSelected ? "bg-[#009d6e] border-[#009d6e]" : "border-gray-300 bg-white"
+                )}>
+                  {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
                 </div>
-                <span 
-                  className={cn(
-                    "text-sm font-medium leading-none flex-1",
-                    isSelected ? "text-[#009d6e]" : "text-gray-700"
-                  )}
-                >
+                <span className={cn(
+                  "text-sm font-medium flex-1",
+                  isSelected ? "text-[#009d6e]" : "text-gray-700"
+                )}>
                   {item}
                 </span>
               </div>
@@ -518,16 +484,16 @@ function MultiSelectModal({
           })}
         </div>
 
-        <div className="flex border-t divide-x">
+        <div className="grid grid-cols-2 border-t divide-x">
           <button 
-            className="flex-1 p-3 text-center font-medium text-[#009d6e] hover:bg-green-50 transition-colors"
             onClick={handleConfirm}
+            className="p-3 text-sm font-semibold text-white bg-[#009d6e] hover:bg-[#008a60] transition-colors"
           >
-            সিলেক্ট করুন ({tempSelected.length})
+            সিলেক্ট করুন ({tempSelection.length})
           </button>
           <button 
-            className="flex-1 p-3 text-center font-medium text-red-500 hover:bg-red-50 transition-colors"
             onClick={() => onOpenChange(false)}
+            className="p-3 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
           >
             বন্ধ করুন
           </button>
