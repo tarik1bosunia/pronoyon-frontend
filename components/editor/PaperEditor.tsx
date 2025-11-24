@@ -229,31 +229,38 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                 {q.type === 'cq' && q.subQuestions && (
                                   <div className="space-y-1 mt-3">
                                     {q.subQuestions.map((sq) => (
-                                      <div key={sq.id} className="flex justify-between items-start group/sq">
-                                        <div className="flex gap-2 flex-1">
-                                          <span className="font-semibold text-[17px] font-serif select-none">({sq.label})</span>
+                                      // FIXED: items-start -> items-baseline to align (ক) with text properly
+                                      <div key={sq.id} className="flex justify-between items-baseline group/sq">
+                                        <div className="flex gap-2 flex-1 items-baseline">
+                                          <span className="font-semibold text-[17px] font-serif select-none whitespace-nowrap">({sq.label})</span>
                                           <div className="flex-1 font-serif text-[17px]">
                                             <InlineEditor 
                                                 content={sq.text} 
                                                 onChange={(val) => updateSubQuestionText(q.id, sq.id, val)}
                                                 placeholder="উপ-প্রশ্ন লিখুন..."
-                                                className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none"
+                                                className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
                                             />
                                           </div>
                                         </div>
-                                        <div className="w-12 text-right opacity-0 group-hover/sq:opacity-100 transition-opacity no-print">
-                                            <Input 
-                                                type="number" 
-                                                value={sq.marks} 
-                                                onChange={(e) => {
-                                                    const newMarks = parseInt(e.target.value) || 0;
-                                                    const newSqs = q.subQuestions?.map(s => s.id === sq.id ? {...s, marks: newMarks} : s);
-                                                    setQuestions(questions.map(qu => qu.id === q.id ? {...qu, subQuestions: newSqs} : qu));
-                                                }}
-                                                className="h-6 w-12 text-right text-xs p-1 bg-white"
-                                            />
+                                        
+                                        {/* Marks Area */}
+                                        <div className="flex items-center">
+                                            {/* Editable Input (Hidden on print) */}
+                                            <div className="w-12 text-right opacity-0 group-hover/sq:opacity-100 transition-opacity no-print">
+                                                <Input 
+                                                    type="number" 
+                                                    value={sq.marks} 
+                                                    onChange={(e) => {
+                                                        const newMarks = parseInt(e.target.value) || 0;
+                                                        const newSqs = q.subQuestions?.map(s => s.id === sq.id ? {...s, marks: newMarks} : s);
+                                                        setQuestions(questions.map(qu => qu.id === q.id ? {...qu, subQuestions: newSqs} : qu));
+                                                    }}
+                                                    className="h-6 w-12 text-right text-xs p-1 bg-white"
+                                                />
+                                            </div>
+                                            {/* Printable Mark */}
+                                            <span className="hidden print:inline text-sm font-bold text-gray-600 ml-4">{sq.marks}</span>
                                         </div>
-                                        <span className="hidden print:inline text-sm font-bold text-gray-600">{sq.marks}</span>
                                       </div>
                                     ))}
                                   </div>
