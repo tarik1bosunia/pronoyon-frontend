@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { RichTextEditor } from '../RichTextEditor';
-import { MarkdownRenderer } from '../MarkdownRenderer';
+import React, { useEffect, useRef, useState } from 'react';
+import { RichTextEditor } from './RichTextEditor';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { cn } from '@/lib/utils';
 
 interface InlineEditorProps {
@@ -26,18 +26,22 @@ export const InlineEditor = ({
     }
   };
 
-  // Close edit mode when clicking outside
+  // Close edit mode only when clicking outside the editor container
   useEffect(() => {
     if (!isEditing) return;
-    
     const handlePointerDown = (e: PointerEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      const targetNode = e.target as Node;
+      const targetEl = e.target as Element;
+      // Ignore clicks inside the equation editor panel (portal)
+      if (targetEl && targetEl.closest && targetEl.closest('[data-equation-editor]')) {
+        return;
+      }
+      if (containerRef.current && !containerRef.current.contains(targetNode)) {
         setIsEditing(false);
       }
     };
-    
-    document.addEventListener('pointerdown', handlePointerDown);
-    return () => document.removeEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    return () => document.removeEventListener('pointerdown', handlePointerDown, true);
   }, [isEditing]);
 
   if (isEditing) {

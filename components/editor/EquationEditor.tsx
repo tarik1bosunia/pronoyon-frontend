@@ -77,7 +77,7 @@ export const EquationEditor = ({ open, onOpenChange, onInsert }: EquationEditorP
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" data-equation-editor className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent side="right" data-equation-editor className="w-full sm:max-w-lg overflow-y-auto pt-10 z-[9999]">
         <SheetHeader className="flex flex-row items-center justify-between">
           <SheetTitle>Equation editor</SheetTitle>
         </SheetHeader>
@@ -103,7 +103,7 @@ export const EquationEditor = ({ open, onOpenChange, onInsert }: EquationEditorP
           </div>
 
           {/* Save Button */}
-          <Button onClick={handleSave} className="w-full" size="lg">
+          <Button onClick={handleSave} className="w-full bg-[#009d6e] hover:bg-[#008a60]" size="lg">
             Save
           </Button>
 
