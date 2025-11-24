@@ -126,6 +126,20 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     }));
   };
 
+  // New Handler: Toggle Correct Option
+  const toggleOptionCorrectness = (qId: string, optId: string) => {
+    setQuestions(questions.map(q => {
+      if (q.id !== qId) return q;
+      return {
+        ...q,
+        options: q.options?.map(opt => ({
+          ...opt,
+          isCorrect: opt.id === optId // Set clicked as correct, others as incorrect (Single Select)
+        }))
+      };
+    }));
+  };
+
   const updateSubQuestionText = (qId: string, sqId: string, newText: string) => {
     setQuestions(questions.map(q => {
       if (q.id !== qId) return q;
@@ -295,8 +309,22 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                 {q.type === 'mcq' && q.options && (
                                   <div className="grid grid-cols-2 gap-x-12 gap-y-1 mt-1 ml-1">
                                     {q.options.map((opt, i) => (
-                                      <div key={opt.id} className={cn("flex gap-2 text-[17px] font-serif items-baseline", opt.isCorrect ? "font-semibold text-gray-900" : "text-gray-800")}>
-                                        <span className="select-none min-w-[20px]">{['ক','খ','গ','ঘ'][i]}.</span>
+                                      <div key={opt.id} className="flex gap-2 text-[17px] font-serif items-baseline group/opt">
+                                        {/* Clickable Option Number/Circle */}
+                                        <div 
+                                          onClick={() => toggleOptionCorrectness(q.id, opt.id)}
+                                          className={cn(
+                                            "h-6 w-6 rounded-full border flex items-center justify-center text-xs cursor-pointer select-none transition-colors shrink-0 mt-0.5",
+                                            opt.isCorrect 
+                                              ? "bg-slate-900 text-white border-slate-900" 
+                                              : "bg-white text-gray-500 border-gray-400 hover:border-gray-600"
+                                          )}
+                                          title={opt.isCorrect ? "Correct Answer" : "Mark as Correct"}
+                                        >
+                                          {['ক','খ','গ','ঘ'][i]}
+                                        </div>
+                                        
+                                        {/* Option Text */}
                                         <div className="flex-1">
                                             <InlineEditor 
                                                 content={opt.text} 
