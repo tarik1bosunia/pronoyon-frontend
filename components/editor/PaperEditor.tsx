@@ -188,18 +188,18 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                               </div>
                             </div>
 
-                            <div className="flex gap-2">
-                              {/* Question Number */}
+                            <div className="flex gap-2 items-baseline">
+                              {/* Question Number - Aligned Baseline */}
                               <span className="font-bold font-serif text-lg select-none min-w-[24px]">{index + 1}.</span>
                               
                               <div className="flex-1 space-y-1">
                                 {/* Main Question Text */}
-                                <div className="text-gray-900 font-serif text-lg leading-snug -mt-1">
+                                <div className="text-gray-900 font-serif text-lg leading-snug">
                                   <InlineEditor 
                                     content={q.text} 
                                     onChange={(val) => updateQuestionText(q.id, val)}
                                     placeholder="প্রশ্ন লিখুন..."
-                                    className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none"
+                                    className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
                                   />
                                 </div>
 
@@ -217,7 +217,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                 content={opt.text} 
                                                 onChange={(val) => updateOptionText(q.id, opt.id, val)}
                                                 placeholder={`অপশন`}
-                                                // Custom classes to strip padding/margins for strict alignment
                                                 className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0 [&_.ProseMirror]:min-h-0"
                                             />
                                         </div>
@@ -242,7 +241,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                             />
                                           </div>
                                         </div>
-                                        {/* Marks hidden by default, visible on hover/edit */}
                                         <div className="w-12 text-right opacity-0 group-hover/sq:opacity-100 transition-opacity no-print">
                                             <Input 
                                                 type="number" 
@@ -255,7 +253,6 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                 className="h-6 w-12 text-right text-xs p-1 bg-white"
                                             />
                                         </div>
-                                        {/* Print-only marks */}
                                         <span className="hidden print:inline text-sm font-bold text-gray-600">{sq.marks}</span>
                                       </div>
                                     ))}
@@ -263,7 +260,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                 )}
                               </div>
                               
-                              {/* Question Total Marks (Only for CQ usually, or hidden for MCQ paper style) */}
+                              {/* Question Total Marks */}
                               {q.type === 'cq' && (
                                 <div className="text-right w-8 font-bold text-sm text-gray-500 pt-1 print:text-black">
                                    {q.marks}
