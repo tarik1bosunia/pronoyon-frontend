@@ -568,7 +568,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                   )}
 
                                                   {(q.type === 'cq' || q.type === 'writing') && q.subQuestions && (
-                                                    <div className="space-y-1 mt-3">
+                                                    <div className="space-y-1 mt-2">
                                                       {q.subQuestions.map((sq) => (
                                                         <div key={sq.id} className="flex justify-between items-baseline group/sq">
                                                           <div className="flex gap-2 flex-1 items-baseline">
@@ -581,6 +581,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                                 onChange={(val) => updateSubQuestionText(q.id, sq.id, val)}
                                                                 placeholder="উপ-প্রশ্ন লিখুন..."
                                                                 className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                                                density="compact"
                                                               />
                                                             </div>
                                                           </div>
