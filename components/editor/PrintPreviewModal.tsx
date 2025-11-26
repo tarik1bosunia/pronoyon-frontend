@@ -142,7 +142,7 @@ export function PrintPreviewModal({
           </div>
         </DialogHeader>
 
-        <div className="flex flex-1 overflow-hidden bg-gray-50">
+        <div className="flex flex-1 overflow-hidden bg-gray-50 print:bg-white">
           
           {/* Left Sidebar: Settings */}
           <aside className="w-80 bg-white border-r p-6 overflow-y-auto space-y-8">
@@ -272,9 +272,9 @@ export function PrintPreviewModal({
           </aside>
 
           {/* Right Side: Live Preview */}
-          <main className="flex-1 overflow-y-auto p-8 flex justify-center bg-gray-100">
+          <main className="flex-1 overflow-y-auto p-8 flex justify-center bg-gray-100 print:bg-white">
             <div 
-              className="bg-white shadow-lg p-[10mm] min-h-[297mm] w-full max-w-[210mm] print:shadow-none print:w-full print:max-w-none block"
+              className="bg-white shadow-lg p-[10mm] min-h-[297mm] w-full max-w-[210mm] print:shadow-none print:border print:border-transparent print:p-[15mm] print:w-full print:max-w-none block"
             >
               {/* Paper Header - Forced Full Span */}
               <div className="text-center border-b-2 border-double border-gray-800 pb-4 mb-8 [column-span:all]">
