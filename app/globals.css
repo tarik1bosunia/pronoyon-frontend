@@ -244,6 +244,23 @@
   .markdown-preview a  { @apply text-primary hover:underline; }
   .markdown-preview img { @apply max-w-full h-auto rounded-lg my-4; }
 
+  .markdown-preview--compact {
+    @apply leading-tight;
+  }
+  .markdown-preview--compact p,
+  .markdown-preview--compact li {
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+  }
+  .markdown-preview--compact p:first-child,
+  .markdown-preview--compact li:first-child {
+    margin-top: 0;
+  }
+  .markdown-preview--compact p:last-child,
+  .markdown-preview--compact li:last-child {
+    margin-bottom: 0;
+  }
+
   .katex { font-size: 1.1em; }
   .katex-display { overflow-x: auto; overflow-y: hidden; }
 
@@ -288,6 +305,15 @@
   .ProseMirror a:hover { color: hsl(var(--primary) / 0.8); }
 
   .ProseMirror img { @apply max-w-full h-auto rounded-lg my-4; }
+
+  .inline-editor--compact .ProseMirror {
+    @apply p-2;
+  }
+  .inline-editor--compact .ProseMirror p,
+  .inline-editor--compact .ProseMirror li {
+    margin-top: 0.15rem;
+    margin-bottom: 0.15rem;
+  }
 
   .ProseMirror table {
     @apply w-full my-4 overflow-hidden rounded-lg;

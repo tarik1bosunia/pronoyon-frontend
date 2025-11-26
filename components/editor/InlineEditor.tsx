@@ -8,13 +8,15 @@ interface InlineEditorProps {
   onChange: (content: string) => void;
   placeholder?: string;
   className?: string;
+  density?: 'default' | 'compact';
 }
 
 export const InlineEditor = ({ 
   content, 
   onChange, 
   placeholder = 'Click to edit...',
-  className = ''
+  className = '',
+  density = 'default'
 }: InlineEditorProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,12 +48,22 @@ export const InlineEditor = ({
 
   if (isEditing) {
     return (
-      <div ref={containerRef} className="relative z-20" onClick={(e) => e.stopPropagation()}>
+      <div
+        ref={containerRef}
+        className={cn(
+          'relative z-20',
+          density === 'compact' && 'inline-editor--compact'
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
         <RichTextEditor
           content={content}
           onChange={onChange}
           placeholder={placeholder}
-          className={className}
+          className={cn(
+            className,
+            density === 'compact' && 'inline-editor--compact'
+          )}
         />
       </div>
     );
@@ -63,11 +75,12 @@ export const InlineEditor = ({
       className={cn(
         "cursor-pointer min-h-[24px] rounded hover:bg-gray-100/80 hover:ring-1 hover:ring-gray-200 transition-all px-1 -ml-1",
         !content && "text-muted-foreground italic",
+        density === 'compact' && 'inline-editor--compact',
         className
       )}
     >
       {content ? (
-        <MarkdownRenderer content={content} />
+        <MarkdownRenderer content={content} compact={density === 'compact'} />
       ) : (
         <span className="opacity-50">{placeholder}</span>
       )}

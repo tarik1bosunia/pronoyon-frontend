@@ -57,6 +57,7 @@ const CombinedQuestionEditor = ({
           onChange={updateStem} 
           placeholder="উদ্দীপক..."
           className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+          density="compact"
         />
       </div>
 
@@ -69,6 +70,7 @@ const CombinedQuestionEditor = ({
               onChange={(v) => updateStatement(idx, v)}
               placeholder={`বিবৃতি ${idx + 1}`}
               className="min-h-[auto] min-w-[100px] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+              density="compact"
             />
           </div>
         ))}
@@ -80,6 +82,7 @@ const CombinedQuestionEditor = ({
           onChange={updateFooter} 
           placeholder="প্রশ্ন..."
           className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+          density="compact"
         />
       </div>
     </div>
@@ -94,6 +97,9 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
   const [isPrintModalOpen, setPrintModalOpen] = useState(false);
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
   const [examDuration, setExamDuration] = useState("২ ঘন্টা ৩০ মিনিট");
+  const [optionGap, setOptionGap] = useState(4);
+  const [optionBlockGap, setOptionBlockGap] = useState(12);
+  const [optionPadding, setOptionPadding] = useState(2);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
   const pageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -171,7 +177,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', handleResize);
     };
-  }, [questions, paperTitle, examDuration]);
+  }, [questions, paperTitle, examDuration, optionGap, optionBlockGap, optionPadding]);
 
   // --- Update Handlers ---
   const updateQuestion = (id: string, updates: Partial<Question>) => {
@@ -511,14 +517,29 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                         onChange={(val) => updateQuestion(q.id, { text: val })}
                                                         placeholder="প্রশ্ন লিখুন..."
                                                         className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                                        density="compact"
                                                       />
                                                     )}
                                                   </div>
 
                                                   {q.type === 'mcq' && q.options && (
-                                                    <div className="grid grid-cols-2 gap-x-12 gap-y-1 mt-1 ml-1">
+                                                    <div
+                                                      className="grid grid-cols-2 ml-0.5"
+                                                      style={{
+                                                        columnGap: optionGap,
+                                                        rowGap: Math.max(optionGap / 2, 2),
+                                                        marginTop: Math.max(optionBlockGap, 0)
+                                                      }}
+                                                    >
                                                       {q.options.map((opt, i) => (
-                                                        <div key={opt.id} className="flex gap-2 text-[17px] font-serif items-baseline group/opt">
+                                                        <div
+                                                          key={opt.id}
+                                                          className="flex gap-3 text-[17px] font-serif items-baseline group/opt"
+                                                          style={{
+                                                            paddingTop: optionPadding,
+                                                            paddingBottom: optionPadding
+                                                          }}
+                                                        >
                                                           <div
                                                             onClick={() => toggleOptionCorrectness(q.id, opt.id)}
                                                             className={cn(
@@ -537,7 +558,8 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                               content={opt.text}
                                                               onChange={(val) => updateOptionText(q.id, opt.id, val)}
                                                               placeholder={`অপশন`}
-                                                              className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0 [&_.ProseMirror]:min-h-0"
+                                                              className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0 [&_.ProseMirror]:min-h-0 leading-tight"
+                                                              density="compact"
                                                             />
                                                           </div>
                                                         </div>

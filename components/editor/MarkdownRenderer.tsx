@@ -5,15 +5,22 @@ import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { cn } from '@/lib/utils';
 
 interface Props {
   content: string;
   className?: string;
+  compact?: boolean;
 }
 
-export const MarkdownRenderer = ({ content, className = '' }: Props) => {
+export const MarkdownRenderer = ({ content, className = '', compact = false }: Props) => {
   // Detect if the string is likely HTML (from Tiptap)
   const isHtml = content.includes('<') && content.includes('>');
+  const containerClass = cn(
+    'markdown-preview',
+    compact && 'markdown-preview--compact',
+    className
+  );
 
   if (isHtml) {
     // 1) Convert possible Tiptap math spans into KaTeX HTML
@@ -40,7 +47,7 @@ export const MarkdownRenderer = ({ content, className = '' }: Props) => {
 
     return (
       <div
-        className={`markdown-preview ${className}`}
+        className={containerClass}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     );
@@ -48,7 +55,7 @@ export const MarkdownRenderer = ({ content, className = '' }: Props) => {
 
   // Markdown path: use remark-math + rehype-katex
   return (
-    <div className={`markdown-preview ${className}`}>
+    <div className={containerClass}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex, rehypeRaw as any]}
