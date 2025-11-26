@@ -20,13 +20,15 @@ interface PrintPreviewModalProps {
   onOpenChange: (open: boolean) => void;
   questions: Question[];
   paperTitle: string;
+  examDuration: string;
 }
 
 export function PrintPreviewModal({ 
   open, 
   onOpenChange, 
   questions, 
-  paperTitle 
+  paperTitle,
+  examDuration
 }: PrintPreviewModalProps) {
   const [columns, setColumns] = useState<1 | 2 | 3>(1);
   const [textSize, setTextSize] = useState<'medium' | 'large' | 'big'>('large');
@@ -53,7 +55,11 @@ export function PrintPreviewModal({
     const hasRoman = text.match(/i\./) && text.match(/ii\./);
     
     if (!hasRoman) {
-      return <div className="font-serif mb-2"><MarkdownRenderer content={text} /></div>;
+      return (
+        <div className="font-serif mb-1">
+          <MarkdownRenderer content={text} compact />
+        </div>
+      );
     }
 
     // Split into parts
@@ -80,8 +86,8 @@ export function PrintPreviewModal({
     return (
       <div className="font-serif mb-2">
         {/* Stem */}
-        <div className="mb-1">
-           <MarkdownRenderer content={stem.join('\n')} />
+          <div className="mb-1">
+            <MarkdownRenderer content={stem.join('\n')} compact />
         </div>
         
         {/* Horizontal Romans */}
@@ -96,7 +102,7 @@ export function PrintPreviewModal({
         {/* Footer (e.g., নিচের কোনটি সঠিক?) */}
         {footer.length > 0 && (
           <div className="mt-1">
-             <MarkdownRenderer content={footer.join('\n')} />
+             <MarkdownRenderer content={footer.join('\n')} compact />
           </div>
         )}
       </div>
@@ -271,10 +277,14 @@ export function PrintPreviewModal({
               className="bg-white shadow-lg p-[10mm] min-h-[297mm] w-full max-w-[210mm] print:shadow-none print:w-full print:max-w-none block"
             >
               {/* Paper Header - Forced Full Span */}
-              <div className="text-center border-b-2 border-gray-800 pb-4 mb-6 [column-span:all]">
-                <h1 className="text-2xl font-bold mb-2">{paperTitle}</h1>
-                <p className="text-sm font-medium">Question Paper</p>
-                <p className="text-sm text-gray-600">{questions.length} Questions · 100 Minutes</p>
+              <div className="text-center border-b-2 border-double border-gray-800 pb-4 mb-8 [column-span:all]">
+                <div className="text-2xl font-bold text-gray-900 font-serif">
+                  {paperTitle || 'পরীক্ষার নাম লিখুন'}
+                </div>
+                <div className="flex justify-between text-sm font-medium mt-4 px-4 text-gray-800">
+                  <span>সময়: {examDuration || '—'}</span>
+                  <span>পূর্ণমান: ১০০</span>
+                </div>
               </div>
 
               {/* Questions Container */}
@@ -289,27 +299,30 @@ export function PrintPreviewModal({
                 {questions.map((q, index) => (
                   <div 
                     key={q.id} 
-                    className="mb-6 break-inside-avoid-column print:break-inside-avoid print:page-break-inside-avoid"
+                    className="mb-3 break-inside-avoid-column print:break-inside-avoid print:page-break-inside-avoid"
                   >
                     <div className="flex gap-2 items-baseline">
-                      <span className="font-bold">{index + 1}.</span>
-                      <div className="flex-1">
+                      <span className="font-bold min-w-[24px] text-[17px]">{index + 1}.</span>
+                      <div className="flex-1 font-serif text-[17px] leading-snug">
                         {/* Auto-detects and formats combined questions horizontally */}
                         {renderCombinedText(q.text)}
 
                         {/* MCQ Options */}
                         {q.type === 'mcq' && q.options && (
                           <div className={cn(
-                            "grid gap-y-1 gap-x-4",
-                            optionLayout === '4' ? "grid-cols-4" : 
-                            optionLayout === '2' ? "grid-cols-2" : "grid-cols-1"
+                            "grid gap-y-[6px] mt-2",
+                            optionLayout === '4'
+                              ? "grid-cols-2 gap-x-12"
+                              : optionLayout === '2'
+                                ? "grid-cols-2 gap-x-10"
+                                : "grid-cols-1 gap-x-6"
                           )}>
                             {q.options.map((opt, i) => (
                               <div key={opt.id} className="flex gap-2 items-baseline">
                                 <span className="font-medium min-w-[20px]">
                                   {['ক','খ','গ','ঘ'][i]}.
                                 </span>
-                                <MarkdownRenderer content={opt.text} />
+                                <MarkdownRenderer content={opt.text} className="leading-tight" compact />
                               </div>
                             ))}
                           </div>
@@ -317,12 +330,12 @@ export function PrintPreviewModal({
 
                         {/* CQ Sub-questions */}
                         {q.type === 'cq' && q.subQuestions && (
-                          <div className="space-y-2 mt-2 ml-1">
+                          <div className="space-y-1 mt-2 ml-1">
                             {q.subQuestions.map((sq) => (
                               <div key={sq.id} className="flex gap-2 items-baseline">
                                 <span className="font-medium whitespace-nowrap">({sq.label})</span>
                                 <div>
-                                  <MarkdownRenderer content={sq.text} />
+                                  <MarkdownRenderer content={sq.text} className="leading-tight" compact />
                                 </div>
                                 <span className="ml-auto text-sm font-bold text-gray-500">
                                   {sq.marks}

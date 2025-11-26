@@ -98,7 +98,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
   const [examDuration, setExamDuration] = useState("২ ঘন্টা ৩০ মিনিট");
   const [optionGap, setOptionGap] = useState(4);
-  const [optionBlockGap, setOptionBlockGap] = useState(12);
+  const [optionBlockGap, setOptionBlockGap] = useState(8);
   const [optionPadding, setOptionPadding] = useState(2);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
   const pageContainerRef = useRef<HTMLDivElement>(null);
@@ -467,7 +467,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                 {pageIndex === 0 && pageHeader}
                                 <div className={cn("flex-1", pageIndex === 0 ? "" : "")}
                                 >
-                                  <div className="space-y-8">
+                                  <div className="space-y-3">
                                     {pageQuestions.map((q, localIdx) => {
                                       const questionIndex = span.start + localIdx;
                                       return (
@@ -534,7 +534,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                                       {q.options.map((opt, i) => (
                                                         <div
                                                           key={opt.id}
-                                                          className="flex gap-3 text-[17px] font-serif items-baseline group/opt"
+                                                          className="flex gap-2 text-[17px] font-serif items-baseline group/opt"
                                                           style={{
                                                             paddingTop: optionPadding,
                                                             paddingBottom: optionPadding
@@ -670,6 +670,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         onOpenChange={setPrintModalOpen}
         questions={questions}
         paperTitle={paperTitle}
+        examDuration={examDuration}
       />
     </div>
   );
