@@ -53,40 +53,6 @@ const CHAPTERS_LIST = [
   "জীবের পরিবেশ, বিস্তার ও সংরক্ষণ"
 ];
 
-const GENERAL_FILTERS = [
-  "রিপিটেড বোর্ড প্রশ্ন",
-  "গাণিতিক",
-  "তত্ত্বীয়",
-  "চিত্রযুক্ত প্রশ্ন",
-  "বহুপদী সমাপ্তিসূচক",
-  "অভিন্ন তথ্যভিত্তিক"
-];
-
-const BOARD_LIST = [
-  "ঢাকা বোর্ড",
-  "বরিশাল বোর্ড",
-  "রাজশাহী বোর্ড",
-  "দিনাজপুর বোর্ড",
-  "ময়মনসিংহ বোর্ড",
-  "যশোর বোর্ড",
-  "সিলেট বোর্ড",
-  "কুমিল্লা বোর্ড",
-  "চট্টগ্রাম বোর্ড"
-];
-
-const TOPIC_FILTERS = [
-  "কোষ, কোষপ্রাচীর, প্রোটোপ্লাজম",
-  "সাইটোপ্লাজম ও অঙ্গাণু",
-  "রাইবোজোম, গলজি বস্তু, লাইসোজোম, সেন্ট্রিওল",
-  "মাইটোকন্ড্রিয়া",
-  "ময়মনসিংহ বোর্ড",
-  "প্লাস্টিড",
-  "নিউক্লিয়াস, ক্রোমোজোম",
-  "DNA, RNA",
-  "DNA প্রতিলিপন, জিন ও জেনেটিক কোড",
-  "ট্রান্সক্রিপশন ও ট্রান্সলেশন"
-];
-
 // --- Mock Questions Data ---
 const mockQuestions: Question[] = [
   {
@@ -151,12 +117,26 @@ const mockQuestions: Question[] = [
     ],
     board: 'সিলেট বোর্ড',
     year: '২০২০'
+  },
+  {
+    id: '5',
+    type: 'writing',
+    text: 'নিচের প্রশ্নগুলোর উত্তর দাও:',
+    marks: 15,
+    subQuestions: [
+      { id: 'w1', label: '1', text: 'নিউক্লিয়াসের গঠন ও কাজ বর্ণনা কর।', marks: 5 },
+      { id: 'w2', label: '2', text: 'মাইটোকন্ড্রিয়াকে কেন কোষের শক্তিঘর বলা হয়? ব্যাখ্যা কর।', marks: 5 },
+      { id: 'w3', label: '3', text: 'প্লাস্টিডের প্রকারভেদ আলোচনা কর।', marks: 5 },
+    ],
+    board: 'বরিশাল বোর্ড',
+    year: '২০১৯'
   }
 ];
 
 export default function QuestionBankUI() {
   const [viewMode, setViewMode] = useState<ViewMode>('setup');
-  const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4']); 
+  // Added '5' to selected IDs to show the writing question example
+  const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4', '5']); 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   // --- Actions ---
@@ -202,172 +182,112 @@ export default function QuestionBankUI() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
         
-        <div className="flex flex-1 overflow-hidden">
-          {/* Main Content Area */}
-          <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
-            <div className="max-w-4xl mx-auto">
-              <div className="mb-6 text-center">
-                <h2 className="text-2xl font-bold text-gray-800">প্রশ্ন সিলেক্ট করুন</h2>
-                <p className="text-gray-500 mt-1">প্রশ্নগুলো সিলেক্ট করে সাবমিট করলেই প্রশ্ন তৈরি হয়ে যাবে!</p>
-              </div>
-
-              <div className="space-y-4">
-                {mockQuestions.map((q, index) => {
-                  const isSelected = selectedIds.includes(q.id);
-                  return (
-                    <div 
-                      key={q.id}
-                      onClick={() => toggleSelection(q.id)}
-                      className={cn(
-                        "cursor-pointer transition-all duration-200 bg-white rounded-lg p-6 border shadow-sm hover:shadow-md relative overflow-hidden group",
-                        isSelected 
-                          ? "border-2 border-[#009d6e] ring-1 ring-[#009d6e]/20" 
-                          : "border-gray-200 hover:border-gray-300"
-                      )}
-                    >
-                      {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#009d6e]" />}
-                      
-                      {/* UPDATED: Question Text Rendering to support Combined/Roman Questions */}
-                      <div className="flex justify-between items-start mb-4 pl-2">
-                        <div className="flex gap-2 text-lg font-semibold text-gray-800 w-full">
-                          <span className="shrink-0">{index + 1}.</span>
-                          <div className="flex flex-col w-full">
-                            {/* Main Stem */}
-                            <span>{q.stem || q.text}</span>
-                            
-                            {/* Roman Statements (Render if they exist) */}
-                            {q.romanStatements && q.romanStatements.length > 0 && (
-                              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-base font-normal text-gray-700">
-                                {q.romanStatements.map((stmt, i) => (
-                                  <span key={i} className="whitespace-nowrap">
-                                    {['i', 'ii', 'iii'][i]}. {stmt}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        {isSelected && <CheckCircle className="h-6 w-6 text-[#009d6e] shrink-0 ml-2" />}
-                      </div>
-
-                      {/* Options Grid */}
-                      {q.type === 'mcq' && q.options && (
-                        <div className="grid grid-cols-2 gap-y-3 gap-x-8 pl-6 text-gray-600 mt-2">
-                          {q.options.map((opt, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-sm">
-                              <span className="font-medium text-gray-400 min-w-[20px]">
-                                {['ক','খ','গ','ঘ'][idx]}.
-                              </span>
-                              <span className="truncate">{opt.text}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Footer Badges */}
-                      <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2 pl-6">
-                          <Badge variant="secondary" className="bg-gray-100 font-normal hover:bg-gray-200">{q.board}</Badge>
-                          <Badge variant="secondary" className="bg-gray-100 font-normal hover:bg-gray-200">{q.year}</Badge>
-                          <Badge variant="outline" className="ml-auto text-gray-500">{q.type === 'mcq' ? 'MCQ' : 'Creative'}</Badge>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-8 flex flex-col items-center gap-4 pb-10">
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border">
-                  <Button variant="ghost" size="sm" disabled>← পূর্ববর্তী</Button>
-                  <span className="font-medium px-2">1 / 1</span>
-                  <Button variant="ghost" size="sm" disabled>পরবর্তী →</Button>
-                </div>
-                
-                <Button 
-                  size="lg" 
-                  onClick={handleSubmitQuestions}
-                  className="bg-[#009d6e] hover:bg-[#008a60] text-white px-8 h-12 text-lg shadow-lg shadow-green-600/20"
-                >
-                  সাবমিট করুন ({selectedIds.length})
-                </Button>
-              </div>
+        <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+          <div className="max-w-4xl mx-auto">
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-800">প্রশ্ন সিলেক্ট করুন</h2>
+              <p className="text-gray-500 mt-1">প্রশ্নগুলো সিলেক্ট করে সাবমিট করলেই প্রশ্ন তৈরি হয়ে যাবে!</p>
             </div>
-          </main>
 
-          {/* Right Sidebar Filter - Restored */}
-          <aside className="w-80 bg-[#F3F4F6] p-4 overflow-y-auto hidden xl:block border-l space-y-4">
-             {/* General Filters */}
-             <Card className="p-4 shadow-sm border-none">
-               <div className="space-y-3">
-                 {GENERAL_FILTERS.map((filter, idx) => (
-                   <div key={idx} className="flex items-center gap-2.5">
-                     <Checkbox id={`gen-${idx}`} defaultChecked={idx === 0} className="border-gray-400 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500" /> 
-                     <label htmlFor={`gen-${idx}`} className="text-[13px] font-medium text-gray-700 cursor-pointer select-none leading-none">
-                       {filter}
-                     </label>
-                   </div>
-                 ))}
-               </div>
-             </Card>
+            <div className="space-y-4">
+              {mockQuestions.map((q, index) => {
+                const isSelected = selectedIds.includes(q.id);
+                return (
+                  <div 
+                    key={q.id}
+                    onClick={() => toggleSelection(q.id)}
+                    className={cn(
+                      "cursor-pointer transition-all duration-200 bg-white rounded-lg p-6 border shadow-sm hover:shadow-md relative overflow-hidden group",
+                      isSelected 
+                        ? "border-2 border-[#009d6e] ring-1 ring-[#009d6e]/20" 
+                        : "border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#009d6e]" />}
+                    
+                    <div className="flex justify-between items-start mb-4 pl-2">
+                      <h3 className="text-lg font-semibold text-gray-800 flex gap-2">
+                        <span>{index + 1}.</span>
+                        <span className="line-clamp-2">{(q.stem || q.text).split('\n')[0]}</span>
+                      </h3>
+                      {isSelected && <CheckCircle className="h-5 w-5 text-[#009d6e] shrink-0" />}
+                    </div>
 
-             {/* Board Filters */}
-             <Card className="p-4 shadow-sm border-none">
-               <h3 className="font-semibold text-gray-800 mb-3 text-sm">বোর্ড</h3>
-               <Select>
-                 <SelectTrigger className="w-full mb-3 h-9 text-sm">
-                   <SelectValue placeholder="Year" />
-                 </SelectTrigger>
-                 <SelectContent>
-                   <SelectItem value="2023">2023</SelectItem>
-                   <SelectItem value="2022">2022</SelectItem>
-                 </SelectContent>
-               </Select>
-               <div className="space-y-2.5 max-h-[200px] overflow-y-auto pr-1">
-                 {BOARD_LIST.map((board, idx) => (
-                   <div key={idx} className="flex items-center gap-2.5">
-                     <Checkbox id={`board-${idx}`} defaultChecked={idx === 0} className="border-gray-400 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500" />
-                     <label htmlFor={`board-${idx}`} className="text-[13px] font-medium text-gray-700 cursor-pointer select-none leading-none">
-                       {board}
-                     </label>
-                   </div>
-                 ))}
-               </div>
-             </Card>
+                    {q.type === 'mcq' && q.options && (
+                      <div className="grid grid-cols-2 gap-y-3 gap-x-8 pl-6 text-gray-600">
+                        {q.options.map((opt, idx) => (
+                          <div key={idx} className="flex items-center gap-2 text-sm">
+                            <span className="font-medium text-gray-400">
+                              {['ক','খ','গ','ঘ'][idx]}.
+                            </span>
+                            <span className="truncate">{opt.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-             {/* Topic Filters */}
-             <Card className="p-4 shadow-sm border-none">
-               <h3 className="font-semibold text-gray-800 mb-3 text-sm leading-tight">টপিক - ১ম অধ্যায়: কোষ ও কোষের গঠন</h3>
-               <div className="space-y-2.5">
-                 {TOPIC_FILTERS.map((topic, idx) => (
-                   <div key={idx} className="flex items-start gap-2.5">
-                     <Checkbox id={`topic-${idx}`} defaultChecked={idx === 0} className="mt-0.5 border-gray-400 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 shrink-0" />
-                     <label htmlFor={`topic-${idx}`} className="text-[13px] font-medium text-gray-700 cursor-pointer select-none leading-tight">
-                       {topic}
-                     </label>
-                   </div>
-                 ))}
-               </div>
-             </Card>
-          </aside>
-        </div>
+                    <div className="mt-4 pt-4 border-t border-gray-100 flex gap-2 pl-6">
+                        <Badge variant="secondary" className="bg-gray-100 font-normal hover:bg-gray-200">{q.board}</Badge>
+                        <Badge variant="secondary" className="bg-gray-100 font-normal hover:bg-gray-200">{q.year}</Badge>
+                        <Badge variant="outline" className="ml-auto text-gray-500">{q.type === 'mcq' ? 'MCQ' : (q.type === 'writing' ? 'Writing' : 'Creative')}</Badge>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex flex-col items-center gap-4 pb-10">
+              <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-md border">
+                <Button variant="ghost" size="sm" disabled>← পূর্ববর্তী</Button>
+                <span className="font-medium px-2">1 / 1</span>
+                <Button variant="ghost" size="sm" disabled>পরবর্তী →</Button>
+              </div>
+              
+              <Button 
+                size="lg" 
+                onClick={handleSubmitQuestions}
+                className="bg-[#009d6e] hover:bg-[#008a60] text-white px-8 h-12 text-lg shadow-lg shadow-green-600/20"
+              >
+                সাবমিট করুন ({selectedIds.length})
+              </Button>
+            </div>
+          </div>
+        </main>
       </div>
+      
+      <aside className="w-80 bg-white border-l p-5 overflow-y-auto hidden xl:block">
+         <div className="flex items-center justify-between mb-6">
+           <h3 className="font-bold text-gray-800">ফিল্টার</h3>
+           <Filter className="h-4 w-4 text-gray-500" />
+         </div>
+         <div className="space-y-4">
+             <div className="space-y-2">
+               <label className="text-sm font-medium">বোর্ড</label>
+               <div className="space-y-2">
+                 {['ঢাকা', 'রাজশাহী', 'যশোর', 'সিলেট', 'কুমিল্লা'].map(b => (
+                   <div key={b} className="flex items-center gap-2">
+                     <Checkbox id={b} /> <label htmlFor={b} className="text-sm text-gray-600">{b}</label>
+                   </div>
+                 ))}
+               </div>
+             </div>
+         </div>
+      </aside>
     </div>
   );
 }
 
-// --- Setup View Component ---
-
+// ... (Rest of the components SetupView, MultiSelectModal, etc. remain unchanged) ...
 function SetupView({ onStart }: { onStart: () => void }) {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [selectedChapters, setSelectedChapters] = useState<string[]>([]);
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
   const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
 
-  // Logic: If more than 1 subject is selected, hide the chapter field
   const showChapterField = selectedSubjects.length <= 1;
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center font-sans">
-      {/* Hero Header */}
       <div className="w-full h-[45vh] bg-[#082f49] flex flex-col items-center justify-start pt-16 relative">
         <div className="absolute top-6 left-6 flex gap-2">
            <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -380,7 +300,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
         <p className="text-blue-100 text-lg">আপনার ক্লাসে প্রযুক্তির শাখা বাড়ান !</p>
       </div>
 
-      {/* Floating Form Card */}
       <div className="w-full max-w-xl px-4 -mt-32 z-10 pb-20">
         <Card className="bg-white p-8 shadow-2xl border-0 rounded-xl">
           <div className="text-center mb-6 border-b border-dashed border-gray-200 pb-6">
@@ -392,13 +311,11 @@ function SetupView({ onStart }: { onStart: () => void }) {
           </div>
 
           <div className="space-y-5">
-            {/* Program Name */}
             <Input 
               placeholder="প্রোগ্রাম/পরীক্ষার নাম লিখুন *" 
               className="h-12 border-gray-300 bg-white text-base focus-visible:ring-[#009d6e]"
             />
             
-            {/* Class Selector */}
             <Select>
               <SelectTrigger className="h-12 border-gray-300 bg-white focus:ring-[#009d6e]">
                 <SelectValue placeholder="শ্রেণি" />
@@ -410,7 +327,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
               </SelectContent>
             </Select>
 
-            {/* Subject Multi-Select Trigger */}
             <div 
               onClick={() => setIsSubjectModalOpen(true)}
               className="h-12 border border-gray-300 rounded-md flex items-center justify-between px-3 cursor-pointer bg-white hover:bg-gray-50 transition-colors group"
@@ -425,7 +341,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
               <Maximize2 className="h-4 w-4 text-gray-400 group-hover:text-[#009d6e]" />
             </div>
 
-            {/* Chapter Multi-Select Trigger (Conditional) */}
             {showChapterField && (
               <div 
                 onClick={() => setIsChapterModalOpen(true)}
@@ -471,7 +386,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
         </Card>
       </div>
 
-      {/* Subject Modal */}
       <MultiSelectModal 
         open={isSubjectModalOpen} 
         onOpenChange={setIsSubjectModalOpen}
@@ -481,7 +395,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
         onSelectionChange={setSelectedSubjects}
       />
 
-      {/* Chapter Modal */}
       <MultiSelectModal 
         open={isChapterModalOpen} 
         onOpenChange={setIsChapterModalOpen}
@@ -494,7 +407,6 @@ function SetupView({ onStart }: { onStart: () => void }) {
   );
 }
 
-// --- Custom Multi-Select Modal Component ---
 function MultiSelectModal({ 
   open, 
   onOpenChange, 
@@ -510,10 +422,8 @@ function MultiSelectModal({
   selectedItems: string[];
   onSelectionChange: (items: string[]) => void;
 }) {
-  // Internal state for the modal to handle "Confirm" logic
   const [tempSelection, setTempSelection] = useState<string[]>(selectedItems);
 
-  // Sync internal state when modal opens
   useEffect(() => {
     if (open) {
       setTempSelection(selectedItems);

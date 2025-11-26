@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { 
   ArrowLeft, Save, Printer, Trash2, 
   GripVertical, Plus, FileText, BookOpen, Settings, MoreVertical, 
-  ListChecks, FilePlus
+  ListChecks, FilePlus, PenTool
 } from 'lucide-react';
 import { InlineEditor } from './InlineEditor';
 import { UnifiedQuestionForm } from './QuestionForms';
@@ -136,7 +136,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     setSheetOpen(true);
   };
 
-  const handleAddNew = (type: 'mcq' | 'cq' | 'combined') => {
+  const handleAddNew = (type: 'mcq' | 'cq' | 'combined' | 'writing') => {
     setEditingId(`new-${type}`);
     setSheetOpen(true);
   };
@@ -164,7 +164,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
 
   // --- Defaults for New Questions ---
   const getNewQuestionDefaults = (typeStr: string): Question => {
-    const type = typeStr.replace('new-', '') as 'mcq' | 'cq' | 'combined';
+    const type = typeStr.replace('new-', '') as 'mcq' | 'cq' | 'combined' | 'writing';
     
     if (type === 'cq') {
       return {
@@ -181,11 +181,23 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
       } as Question;
     }
 
+    if (type === 'writing') {
+      return {
+        id: 'temp',
+        type: 'writing',
+        text: '', // Main stem
+        marks: 5,
+        subQuestions: [
+          { id: uuidv4(), label: '1', text: '', marks: 5 }, // Starts with 1 sub-question
+        ]
+      } as Question;
+    }
+
     if (type === 'combined') {
       return {
         id: 'temp',
         type: 'mcq',
-        text: '', // Will be constructed from parts
+        text: '', 
         stem: '',
         romanStatements: ['', '', ''],
         footer: 'নিচের কোনটি সঠিক?',
@@ -256,7 +268,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
             ))}
           </ScrollArea>
           
-          {/* Updated Add Buttons Section */}
+          {/* Add Buttons Section */}
           <div className="p-4 border-t space-y-3 bg-gray-50/50">
             <Button 
               variant="outline" 
@@ -283,6 +295,15 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
             >
               <div className="h-5 w-5 mr-2.5 rounded-full bg-gray-800 text-white flex items-center justify-center text-[10px] font-bold">N</div>
               Add Creative
+            </Button>
+
+            <Button 
+              variant="outline" 
+              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+              onClick={() => handleAddNew('writing')}
+            >
+              <PenTool className="h-4 w-4 mr-3 text-gray-500" />
+              Add Writing
             </Button>
           </div>
         </aside>
@@ -385,12 +406,15 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                   </div>
                                 )}
 
-                                {q.type === 'cq' && q.subQuestions && (
+                                {/* CQ & Writing Sub-questions */}
+                                {(q.type === 'cq' || q.type === 'writing') && q.subQuestions && (
                                   <div className="space-y-1 mt-3">
                                     {q.subQuestions.map((sq) => (
                                       <div key={sq.id} className="flex justify-between items-baseline group/sq">
                                         <div className="flex gap-2 flex-1 items-baseline">
-                                          <span className="font-semibold text-[17px] font-serif select-none whitespace-nowrap">({sq.label})</span>
+                                          <span className="font-semibold text-[17px] font-serif select-none whitespace-nowrap">
+                                            {q.type === 'cq' ? `(${sq.label})` : `${sq.label}.`}
+                                          </span>
                                           <div className="flex-1 font-serif text-[17px]">
                                             <InlineEditor 
                                                 content={sq.text} 
@@ -421,7 +445,8 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
                                 )}
                               </div>
                               
-                              {q.type === 'cq' && (
+                              {/* Question Total Marks */}
+                              {(q.type === 'cq' || q.type === 'writing') && (
                                 <div className="text-right w-8 font-bold text-sm text-gray-500 pt-1 print:text-black">
                                    {q.marks}
                                 </div>
