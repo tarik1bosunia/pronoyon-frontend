@@ -93,6 +93,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [isPrintModalOpen, setPrintModalOpen] = useState(false);
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
+  const [examDuration, setExamDuration] = useState("২ ঘন্টা ৩০ মিনিট");
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
   const pageContainerRef = useRef<HTMLDivElement>(null);
 
@@ -170,7 +171,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', handleResize);
     };
-  }, [questions]);
+  }, [questions, paperTitle, examDuration]);
 
   // --- Update Handlers ---
   const updateQuestion = (id: string, updates: Partial<Question>) => {
@@ -273,7 +274,15 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         placeholder="পরীক্ষার নাম লিখুন"
       />
       <div className="flex justify-between text-sm font-medium mt-4 px-4">
-        <span>সময়: ২ ঘন্টা ৩০ মিনিট</span>
+        <label className="flex items-center gap-2">
+          <span>সময়:</span>
+          <Input
+            value={examDuration}
+            onChange={(e) => setExamDuration(e.target.value)}
+            className="h-auto w-32 border-none bg-transparent p-0 text-sm text-center shadow-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            placeholder="সময়"
+          />
+        </label>
         <span>পূর্ণমান: ১০০</span>
       </div>
     </div>
