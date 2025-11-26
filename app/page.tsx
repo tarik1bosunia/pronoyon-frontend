@@ -206,10 +206,31 @@ export default function QuestionBankUI() {
                     {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#009d6e]" />}
                     
                     <div className="flex justify-between items-start mb-4 pl-2">
-                      <h3 className="text-lg font-semibold text-gray-800 flex gap-2">
-                        <span>{index + 1}.</span>
-                        <span className="line-clamp-2">{(q.stem || q.text).split('\n')[0]}</span>
-                      </h3>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-800 flex gap-2">
+                          <span>{index + 1}.</span>
+                          <span className="line-clamp-2">{(q.stem || q.text).split('\n')[0]}</span>
+                        </h3>
+                        
+                        {/* Combined MCQ with Roman Statements */}
+                        {q.type === 'mcq' && q.romanStatements && q.romanStatements.length > 0 && (
+                          <div className="mt-3 ml-8 space-y-1.5 text-gray-700">
+                            {q.romanStatements.map((statement, idx) => (
+                              <div key={idx} className="flex gap-2 text-sm">
+                                <span className="font-medium">{['i', 'ii', 'iii', 'iv', 'v'][idx]})</span>
+                                <span>{statement}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Footer for combined questions */}
+                        {q.type === 'mcq' && q.footer && (
+                          <div className="mt-2 ml-8 text-sm text-gray-600">
+                            {q.footer}
+                          </div>
+                        )}
+                      </div>
                       {isSelected && <CheckCircle className="h-5 w-5 text-[#009d6e] shrink-0" />}
                     </div>
 
