@@ -287,7 +287,10 @@ export function PrintPreviewModal({
                 }}
               >
                 {questions.map((q, index) => (
-                  <div key={q.id} className="mb-6 break-inside-avoid-column">
+                  <div 
+                    key={q.id} 
+                    className="mb-6 break-inside-avoid-column print:break-inside-avoid print:page-break-inside-avoid"
+                  >
                     <div className="flex gap-2 items-baseline">
                       <span className="font-bold">{index + 1}.</span>
                       <div className="flex-1">

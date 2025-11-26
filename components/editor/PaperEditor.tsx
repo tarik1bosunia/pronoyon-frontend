@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Question } from '@/types/question';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,9 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { RichTextEditor } from './RichTextEditor';
 import { v4 as uuidv4 } from 'uuid';
+
+const PAGE_HEIGHT_PX = 1122; // 297mm at ~96dpi
+const PAGE_PADDING_PX = 56.7; // 15mm padding inside each page
 
 interface PaperEditorProps {
   initialQuestions: Question[];
@@ -90,6 +93,84 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [isPrintModalOpen, setPrintModalOpen] = useState(false);
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
+  const [pageBreaks, setPageBreaks] = useState<number[]>([]);
+  const pageContainerRef = useRef<HTMLDivElement>(null);
+
+  // Determine page breaks by measuring rendered question heights
+  useEffect(() => {
+    const computePageBreaks = () => {
+      if (!pageContainerRef.current) return;
+
+      const container = pageContainerRef.current;
+      const headerEl = container.querySelector('[data-paper-header]') as HTMLElement | null;
+      const headerHeight = headerEl ? headerEl.getBoundingClientRect().height : 0;
+      const questionEls = Array.from(
+        container.querySelectorAll<HTMLElement>('[data-question-index]')
+      );
+
+      if (!questionEls.length) {
+        setPageBreaks((prev) => (prev.length ? [] : prev));
+        return;
+      }
+
+      const usableHeight = PAGE_HEIGHT_PX - PAGE_PADDING_PX * 2;
+      let currentHeight = headerHeight;
+      const breaks: number[] = [];
+
+      questionEls.forEach((el, idx) => {
+        const rect = el.getBoundingClientRect();
+        const styles = window.getComputedStyle(el);
+        const marginTop = parseFloat(styles.marginTop || '0');
+        const marginBottom = parseFloat(styles.marginBottom || '0');
+        const totalHeight = rect.height + marginTop + marginBottom;
+
+        // Handle very first question with header space considered
+        if (idx === 0) {
+          if (currentHeight + totalHeight > usableHeight) {
+            breaks.push(idx);
+            currentHeight = totalHeight;
+          } else {
+            currentHeight += totalHeight;
+          }
+          return;
+        }
+
+        // If the single question itself exceeds usable height, force new page
+        if (totalHeight > usableHeight) {
+          breaks.push(idx);
+          currentHeight = totalHeight;
+          return;
+        }
+
+        if (currentHeight + totalHeight > usableHeight) {
+          breaks.push(idx);
+          currentHeight = totalHeight;
+        } else {
+          currentHeight += totalHeight;
+        }
+      });
+
+      const normalized = Array.from(new Set(breaks))
+        .filter((idx) => idx > 0 && idx < questionEls.length)
+        .sort((a, b) => a - b);
+
+      setPageBreaks((prev) => {
+        if (prev.length === normalized.length && prev.every((val, i) => val === normalized[i])) {
+          return prev;
+        }
+        return normalized;
+      });
+    };
+
+    const frame = requestAnimationFrame(computePageBreaks);
+    const handleResize = () => requestAnimationFrame(computePageBreaks);
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [questions]);
 
   // --- Update Handlers ---
   const updateQuestion = (id: string, updates: Partial<Question>) => {
@@ -161,6 +242,42 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
     items.splice(result.destination.index, 0, reorderedItem);
     setQuestions(items);
   };
+
+  const pageBoundaries = useMemo(() => {
+    const checkpoints = [0, ...pageBreaks, questions.length]
+      .filter((value, idx, arr) => idx === 0 || value > arr[idx - 1]);
+
+    const spans: Array<{ start: number; end: number }> = [];
+    for (let i = 0; i < checkpoints.length - 1; i += 1) {
+      spans.push({ start: checkpoints[i], end: checkpoints[i + 1] });
+    }
+
+    if (!spans.length) {
+      spans.push({ start: 0, end: questions.length });
+    }
+
+    return spans;
+  }, [pageBreaks, questions.length]);
+
+  const pageCount = pageBoundaries.length;
+
+  const pageHeader = (
+    <div
+      data-paper-header
+      className="text-center border-b-2 border-double border-gray-800 pb-4 mb-8"
+    >
+      <Input
+        value={paperTitle}
+        onChange={(e) => setPaperTitle(e.target.value)}
+        className="text-center text-2xl font-bold border-none shadow-none focus-visible:ring-0 p-0 h-auto bg-transparent placeholder:text-gray-300"
+        placeholder="পরীক্ষার নাম লিখুন"
+      />
+      <div className="flex justify-between text-sm font-medium mt-4 px-4">
+        <span>সময়: ২ ঘন্টা ৩০ মিনিট</span>
+        <span>পূর্ণমান: ১০০</span>
+      </div>
+    </div>
+  );
 
   // --- Defaults for New Questions ---
   const getNewQuestionDefaults = (typeStr: string): Question => {
@@ -237,7 +354,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
           <div>
             <h1 className="font-bold text-gray-800">প্রশ্ন এডিটর</h1>
             <p className="text-xs text-gray-500">
-              Total: {questions.length} | Marks: {questions.reduce((sum, q) => sum + q.marks, 0)}
+              Total: {questions.length} | Marks: {questions.reduce((sum, q) => sum + q.marks, 0)} | Pages: {pageCount}
             </p>
           </div>
         </div>
@@ -309,159 +426,187 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
         </aside>
 
         {/* Center: Paper Preview */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#E3E5E8] print:bg-white print:p-0 print:block">
-          <div className="print-container w-full max-w-5xl min-h-[297mm] bg-white shadow-lg p-[15mm] relative print:max-w-[210mm] print:w-[210mm] print:mx-auto">
-            
-            {/* Paper Header */}
-            <div className="text-center border-b-2 border-double border-gray-800 pb-4 mb-8">
-              <Input 
-                value={paperTitle}
-                onChange={(e) => setPaperTitle(e.target.value)}
-                className="text-center text-2xl font-bold border-none shadow-none focus-visible:ring-0 p-0 h-auto bg-transparent placeholder:text-gray-300" 
-                placeholder="পরীক্ষার নাম লিখুন"
-              />
-              <div className="flex justify-between text-sm font-medium mt-4 px-4">
-                <span>সময়: ২ ঘন্টা ৩০ মিনিট</span>
-                <span>পূর্ণমান: ১০০</span>
-              </div>
-            </div>
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#E3E5E8] print:bg-white print:p-0 print:block">
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="paper-questions">
+              {(provided) => {
+                const setDroppableRef = (node: HTMLDivElement | null) => {
+                  pageContainerRef.current = node ?? null;
+                  provided.innerRef(node);
+                };
 
-            {/* Questions List */}
-            <DragDropContext onDragEnd={onDragEnd}>
-              <Droppable droppableId="paper-questions">
-                {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-8">
-                    {questions.map((q, index) => (
-                      <Draggable key={q.id} draggableId={q.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            id={`q-${q.id}`}
-                            className={cn(
-                              "group relative pl-1 pr-2 py-1 rounded-lg border border-transparent transition-all",
-                              snapshot.isDragging ? "bg-white shadow-2xl ring-2 ring-[#009d6e] z-50" : "hover:bg-gray-50 hover:border-gray-200"
-                            )}
-                          >
-                            {/* Hover Actions */}
-                            <div className="absolute right-0 top-0 hidden group-hover:flex gap-1 bg-white shadow border rounded p-1 z-10 no-print">
-                              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleSettings(q.id)} title="Settings">
-                                <Settings className="h-3 w-3 text-gray-600" />
-                              </Button>
-                              <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleDelete(q.id)} title="Delete">
-                                <Trash2 className="h-3 w-3 text-red-500" />
-                              </Button>
-                              <div {...provided.dragHandleProps} className="h-6 w-6 flex items-center justify-center cursor-move" title="Move">
-                                <GripVertical className="h-3 w-3 text-gray-400" />
-                              </div>
-                            </div>
+                return (
+                  <div
+                    ref={setDroppableRef}
+                    {...provided.droppableProps}
+                    className="mx-auto flex w-full max-w-5xl flex-col gap-2 pb-16"
+                  >
+                    {pageBoundaries.map((span, pageIndex) => {
+                      const pageQuestions = questions.slice(span.start, span.end);
 
-                            <div className="flex gap-2 items-baseline">
-                              <span className="font-bold font-serif text-lg select-none min-w-[24px]">{index + 1}.</span>
-                              
-                              <div className="flex-1 space-y-1">
-                                <div className="text-gray-900 font-serif text-lg leading-snug">
-                                  {q.romanStatements ? (
-                                    <CombinedQuestionEditor 
-                                      question={q} 
-                                      onUpdate={(updates) => updateQuestion(q.id, updates)} 
-                                    />
-                                  ) : (
-                                    <InlineEditor 
-                                      content={q.text} 
-                                      onChange={(val) => updateQuestion(q.id, { text: val })}
-                                      placeholder="প্রশ্ন লিখুন..."
-                                      className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-                                    />
-                                  )}
-                                </div>
+                      return (
+                        <Fragment key={`page-${pageIndex}`}>
+                          <section className="relative flex justify-center">
+                            <div className="w-[210mm] min-h-[297mm] rounded-[3px] border border-slate-200 bg-white shadow-[0_28px_60px_-35px_rgba(15,23,42,0.55)]">
+                              <div className="flex h-full flex-col px-[15mm] py-[15mm]">
+                                {pageIndex === 0 && pageHeader}
+                                <div className={cn("flex-1", pageIndex === 0 ? "" : "")}
+                                >
+                                  <div className="space-y-8">
+                                    {pageQuestions.map((q, localIdx) => {
+                                      const questionIndex = span.start + localIdx;
+                                      return (
+                                        <Draggable key={q.id} draggableId={q.id} index={questionIndex}>
+                                          {(dragProvided, snapshot) => (
+                                            <div
+                                              ref={dragProvided.innerRef}
+                                              {...dragProvided.draggableProps}
+                                              data-question-index={questionIndex}
+                                              id={`q-${q.id}`}
+                                              className={cn(
+                                                "group relative pl-1 pr-2 py-1 rounded-lg border border-transparent transition-all bg-white",
+                                                "print:break-inside-avoid print:page-break-inside-avoid",
+                                                snapshot.isDragging
+                                                  ? "shadow-2xl ring-2 ring-[#009d6e] z-50"
+                                                  : "hover:bg-gray-50 hover:border-gray-200"
+                                              )}
+                                            >
+                                              {/* Hover Actions */}
+                                              <div className="absolute right-0 top-0 hidden group-hover:flex gap-1 bg-white shadow border rounded p-1 z-10 no-print">
+                                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleSettings(q.id)} title="Settings">
+                                                  <Settings className="h-3 w-3 text-gray-600" />
+                                                </Button>
+                                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleDelete(q.id)} title="Delete">
+                                                  <Trash2 className="h-3 w-3 text-red-500" />
+                                                </Button>
+                                                <div {...dragProvided.dragHandleProps} className="h-6 w-6 flex items-center justify-center cursor-move" title="Move">
+                                                  <GripVertical className="h-3 w-3 text-gray-400" />
+                                                </div>
+                                              </div>
 
-                                {q.type === 'mcq' && q.options && (
-                                  <div className="grid grid-cols-2 gap-x-12 gap-y-1 mt-1 ml-1">
-                                    {q.options.map((opt, i) => (
-                                      <div key={opt.id} className="flex gap-2 text-[17px] font-serif items-baseline group/opt">
-                                        <div 
-                                          onClick={() => toggleOptionCorrectness(q.id, opt.id)}
-                                          className={cn(
-                                            "h-6 w-6 rounded-full border flex items-center justify-center text-xs cursor-pointer select-none transition-colors shrink-0 mt-0.5",
-                                            opt.isCorrect 
-                                              ? "bg-slate-900 text-white border-slate-900" 
-                                              : "bg-white text-gray-500 border-gray-400 hover:border-gray-600"
-                                          )}
-                                          title={opt.isCorrect ? "Correct Answer" : "Mark as Correct"}
-                                        >
-                                          {['ক','খ','গ','ঘ'][i]}
-                                        </div>
-                                        
-                                        <div className="flex-1">
-                                            <InlineEditor 
-                                                content={opt.text} 
-                                                onChange={(val) => updateOptionText(q.id, opt.id, val)}
-                                                placeholder={`অপশন`}
-                                                className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0 [&_.ProseMirror]:min-h-0"
-                                            />
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
+                                              <div className="flex gap-2 items-baseline">
+                                                <span className="font-bold font-serif text-lg select-none min-w-[24px]">
+                                                  {questionIndex + 1}.
+                                                </span>
 
-                                {/* CQ & Writing Sub-questions */}
-                                {(q.type === 'cq' || q.type === 'writing') && q.subQuestions && (
-                                  <div className="space-y-1 mt-3">
-                                    {q.subQuestions.map((sq) => (
-                                      <div key={sq.id} className="flex justify-between items-baseline group/sq">
-                                        <div className="flex gap-2 flex-1 items-baseline">
-                                          <span className="font-semibold text-[17px] font-serif select-none whitespace-nowrap">
-                                            {q.type === 'cq' ? `(${sq.label})` : `${sq.label}.`}
-                                          </span>
-                                          <div className="flex-1 font-serif text-[17px]">
-                                            <InlineEditor 
-                                                content={sq.text} 
-                                                onChange={(val) => updateSubQuestionText(q.id, sq.id, val)}
-                                                placeholder="উপ-প্রশ্ন লিখুন..."
-                                                className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-                                            />
-                                          </div>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <div className="w-12 text-right opacity-0 group-hover/sq:opacity-100 transition-opacity no-print">
-                                                <Input 
-                                                    type="number" 
-                                                    value={sq.marks} 
-                                                    onChange={(e) => {
-                                                        const newMarks = parseInt(e.target.value) || 0;
-                                                        const newSqs = q.subQuestions?.map(s => s.id === sq.id ? {...s, marks: newMarks} : s);
-                                                        setQuestions(questions.map(qu => qu.id === q.id ? {...qu, subQuestions: newSqs} : qu));
-                                                    }}
-                                                    className="h-6 w-12 text-right text-xs p-1 bg-white"
-                                                />
+                                                <div className="flex-1 space-y-1">
+                                                  <div className="text-gray-900 font-serif text-lg leading-snug">
+                                                    {q.romanStatements ? (
+                                                      <CombinedQuestionEditor
+                                                        question={q}
+                                                        onUpdate={(updates) => updateQuestion(q.id, updates)}
+                                                      />
+                                                    ) : (
+                                                      <InlineEditor
+                                                        content={q.text}
+                                                        onChange={(val) => updateQuestion(q.id, { text: val })}
+                                                        placeholder="প্রশ্ন লিখুন..."
+                                                        className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                                      />
+                                                    )}
+                                                  </div>
+
+                                                  {q.type === 'mcq' && q.options && (
+                                                    <div className="grid grid-cols-2 gap-x-12 gap-y-1 mt-1 ml-1">
+                                                      {q.options.map((opt, i) => (
+                                                        <div key={opt.id} className="flex gap-2 text-[17px] font-serif items-baseline group/opt">
+                                                          <div
+                                                            onClick={() => toggleOptionCorrectness(q.id, opt.id)}
+                                                            className={cn(
+                                                              "h-6 w-6 rounded-full border flex items-center justify-center text-xs cursor-pointer select-none transition-colors shrink-0 mt-0.5",
+                                                              opt.isCorrect
+                                                                ? "bg-slate-900 text-white border-slate-900"
+                                                                : "bg-white text-gray-500 border-gray-400 hover:border-gray-600"
+                                                            )}
+                                                            title={opt.isCorrect ? "Correct Answer" : "Mark as Correct"}
+                                                          >
+                                                            {['ক', 'খ', 'গ', 'ঘ'][i]}
+                                                          </div>
+
+                                                          <div className="flex-1">
+                                                            <InlineEditor
+                                                              content={opt.text}
+                                                              onChange={(val) => updateOptionText(q.id, opt.id, val)}
+                                                              placeholder={`অপশন`}
+                                                              className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0 [&_.ProseMirror]:min-h-0"
+                                                            />
+                                                          </div>
+                                                        </div>
+                                                      ))}
+                                                    </div>
+                                                  )}
+
+                                                  {(q.type === 'cq' || q.type === 'writing') && q.subQuestions && (
+                                                    <div className="space-y-1 mt-3">
+                                                      {q.subQuestions.map((sq) => (
+                                                        <div key={sq.id} className="flex justify-between items-baseline group/sq">
+                                                          <div className="flex gap-2 flex-1 items-baseline">
+                                                            <span className="font-semibold text-[17px] font-serif select-none whitespace-nowrap">
+                                                              {q.type === 'cq' ? `(${sq.label})` : `${sq.label}.`}
+                                                            </span>
+                                                            <div className="flex-1 font-serif text-[17px]">
+                                                              <InlineEditor
+                                                                content={sq.text}
+                                                                onChange={(val) => updateSubQuestionText(q.id, sq.id, val)}
+                                                                placeholder="উপ-প্রশ্ন লিখুন..."
+                                                                className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                                              />
+                                                            </div>
+                                                          </div>
+                                                          <div className="flex items-center">
+                                                            <div className="w-12 text-right opacity-0 group-hover/sq:opacity-100 transition-opacity no-print">
+                                                              <Input
+                                                                type="number"
+                                                                value={sq.marks}
+                                                                onChange={(e) => {
+                                                                  const newMarks = parseInt(e.target.value, 10) || 0;
+                                                                  const newSqs = q.subQuestions?.map((s) =>
+                                                                    s.id === sq.id ? { ...s, marks: newMarks } : s
+                                                                  );
+                                                                  setQuestions((prev) =>
+                                                                    prev.map((question) =>
+                                                                      question.id === q.id
+                                                                        ? { ...question, subQuestions: newSqs }
+                                                                        : question
+                                                                    )
+                                                                  );
+                                                                }}
+                                                                className="h-6 w-12 text-right text-xs p-1 bg-white"
+                                                              />
+                                                            </div>
+                                                            <span className="hidden print:inline text-sm font-bold text-gray-600 ml-4">{sq.marks}</span>
+                                                          </div>
+                                                        </div>
+                                                      ))}
+                                                    </div>
+                                                  )}
+                                                </div>
+
+                                                {(q.type === 'cq' || q.type === 'writing') && (
+                                                  <div className="text-right w-8 font-bold text-sm text-gray-500 pt-1 print:text-black">
+                                                    {q.marks}
+                                                  </div>
+                                                )}
+                                              </div>
                                             </div>
-                                            <span className="hidden print:inline text-sm font-bold text-gray-600 ml-4">{sq.marks}</span>
-                                        </div>
-                                      </div>
-                                    ))}
+                                          )}
+                                        </Draggable>
+                                      );
+                                    })}
+                                    {pageIndex === pageCount - 1 && provided.placeholder}
                                   </div>
-                                )}
-                              </div>
-                              
-                              {/* Question Total Marks */}
-                              {(q.type === 'cq' || q.type === 'writing') && (
-                                <div className="text-right w-8 font-bold text-sm text-gray-500 pt-1 print:text-black">
-                                   {q.marks}
                                 </div>
-                              )}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
+                          </section>
+                        </Fragment>
+                      );
+                    })}
                   </div>
-                )}
-              </Droppable>
-            </DragDropContext>
-          </div>
+                );
+              }}
+            </Droppable>
+          </DragDropContext>
         </main>
       </div>
 

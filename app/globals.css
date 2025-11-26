@@ -339,4 +339,62 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
+  /* Page break rules - prevent questions from splitting across pages */
+  /* Avoid breaks inside these elements */
+  .print-container > div > div > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Individual question wrapper should not break */
+  [id^="q-"] {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: block !important;
+  }
+
+  /* MCQ options grid should stay together */
+  [id^="q-"] .grid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Sub-questions container should not break */
+  [id^="q-"] .space-y-1 {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* If a question is too large and must break, do it gracefully */
+  [id^="q-"] .space-y-1 > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Ensure proper spacing between questions */
+  [id^="q-"] {
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Orphan and widow control */
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Ensure header stays on first page */
+  .print-container > div:first-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
 }
+
+/* Editor view helpers */
+@media screen {
+  [data-question-index] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
