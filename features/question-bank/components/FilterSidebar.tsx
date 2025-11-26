@@ -1,32 +1,82 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Filter, RotateCcw, ChevronDown } from 'lucide-react';
-import { BOARDS_LIST, SUBJECTS_LIST } from '../constants';
+import { Filter, RotateCcw, ChevronDown, Maximize2, ChevronRight } from 'lucide-react';
+import { BOARDS_LIST, SUBJECTS_WITH_TOPICS } from '../constants';
 import { useState } from 'react';
+import { YearSelectModal } from './YearSelectModal';
+import type { FilterState } from '../types';
 
-const YEARS = ['২০২৩', '২০২২', '২০২১', '২০২০', '২০১৯', '২০১৮'];
 const QUESTION_TYPES = [
-  { value: 'mcq', label: 'MCQ', count: 45 },
-  { value: 'cq', label: 'সৃজনশীল', count: 28 },
-  { value: 'writing', label: 'লিখিত', count: 12 }
+  { value: 'mcq', label: 'MCQ' },
+  { value: 'cq', label: 'সৃজনশীল' },
+  { value: 'writing', label: 'লিখিত' }
 ];
 
 interface Props {
   isOpen?: boolean;
   onClose?: () => void;
+  filters: FilterState;
+  onFiltersChange: (filters: FilterState) => void;
 }
 
-export function FilterSidebar({ isOpen, onClose }: Props = {}) {
+export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Props) {
   const [expandedSections, setExpandedSections] = useState({
     type: true,
     board: true,
-    year: true,
-    subject: false
+    subject: true
   });
+  const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>({});
+  const [isYearModalOpen, setIsYearModalOpen] = useState(false);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const toggleSubject = (subject: string) => {
+    setExpandedSubjects(prev => ({ ...prev, [subject]: !prev[subject] }));
+  };
+
+  const handleToggleType = (type: string) => {
+    const newTypes = filters.types.includes(type)
+      ? filters.types.filter(t => t !== type)
+      : [...filters.types, type];
+    onFiltersChange({ ...filters, types: newTypes });
+  };
+
+  const handleToggleBoard = (board: string) => {
+    const newBoards = filters.boards.includes(board)
+      ? filters.boards.filter(b => b !== board)
+      : [...filters.boards, board];
+    onFiltersChange({ ...filters, boards: newBoards });
+  };
+
+  const handleToggleSubject = (subject: string) => {
+    const newSubjects = filters.subjects.includes(subject)
+      ? filters.subjects.filter(s => s !== subject)
+      : [...filters.subjects, subject];
+    onFiltersChange({ ...filters, subjects: newSubjects });
+  };
+
+  const handleToggleTopic = (topic: string) => {
+    const newTopics = filters.topics.includes(topic)
+      ? filters.topics.filter(t => t !== topic)
+      : [...filters.topics, topic];
+    onFiltersChange({ ...filters, topics: newTopics });
+  };
+
+  const handleYearsChange = (years: string[]) => {
+    onFiltersChange({ ...filters, years });
+  };
+
+  const handleReset = () => {
+    onFiltersChange({
+      types: [],
+      boards: [],
+      years: [],
+      subjects: [],
+      topics: []
+    });
   };
 
   const FilterContent = () => (
@@ -43,6 +93,7 @@ export function FilterSidebar({ isOpen, onClose }: Props = {}) {
           <Button 
             variant="ghost" 
             size="sm" 
+            onClick={handleReset}
             className="text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-100"
           >
             <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
@@ -67,7 +118,12 @@ export function FilterSidebar({ isOpen, onClose }: Props = {}) {
               {QUESTION_TYPES.map(type => (
                 <div key={type.value} className="flex items-center justify-between group">
                   <div className="flex items-center gap-3">
-                    <Checkbox id={`type-${type.value}`} className="border-gray-300" /> 
+                    <Checkbox 
+                      id={`type-${type.value}`} 
+                      checked={filters.types.includes(type.value)}
+                      onCheckedChange={() => handleToggleType(type.value)}
+                      className="border-gray-300" 
+                    /> 
                     <label 
                       htmlFor={`type-${type.value}`} 
                       className="text-sm text-gray-700 cursor-pointer group-hover:text-gray-900"
@@ -75,7 +131,6 @@ export function FilterSidebar({ isOpen, onClose }: Props = {}) {
                       {type.label}
                     </label>
                   </div>
-                  <span className="text-xs text-gray-400 font-medium">{type.count}</span>
                 </div>
               ))}
             </div>
@@ -93,9 +148,40 @@ export function FilterSidebar({ isOpen, onClose }: Props = {}) {
           </button>
           {expandedSections.board && (
             <div className="px-6 pb-4 space-y-3">
+              {/* Year under Board - First */}
+              <div className="pb-3 border-b border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsYearModalOpen(true)}
+                  className="w-full justify-between"
+                >
+                  <span className="text-sm">
+                    {filters.years.length > 0 
+                      ? `${filters.years.length} টি বছর নির্বাচিত` 
+                      : 'বছর নির্বাচন করুন'}
+                  </span>
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+                {filters.years.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {filters.years.map(year => (
+                      <span key={year} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {year}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Board Checkboxes */}
               {BOARDS_LIST.map(board => (
                 <div key={board} className="flex items-center gap-3 group">
-                  <Checkbox id={`board-${board}`} className="border-gray-300" /> 
+                  <Checkbox 
+                    id={`board-${board}`} 
+                    checked={filters.boards.includes(board)}
+                    onCheckedChange={() => handleToggleBoard(board)}
+                    className="border-gray-300" 
+                  /> 
                   <label 
                     htmlFor={`board-${board}`} 
                     className="text-sm text-gray-700 cursor-pointer group-hover:text-gray-900"
@@ -108,33 +194,7 @@ export function FilterSidebar({ isOpen, onClose }: Props = {}) {
           )}
         </div>
 
-        {/* Year Filter */}
-        <div className="border-b">
-          <button
-            onClick={() => toggleSection('year')}
-            className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-          >
-            <span className="font-semibold text-gray-800 text-sm">বছর</span>
-            <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${expandedSections.year ? 'rotate-180' : ''}`} />
-          </button>
-          {expandedSections.year && (
-            <div className="px-6 pb-4 grid grid-cols-2 gap-3">
-              {YEARS.map(year => (
-                <div key={year} className="flex items-center gap-2 group">
-                  <Checkbox id={`year-${year}`} className="border-gray-300" /> 
-                  <label 
-                    htmlFor={`year-${year}`} 
-                    className="text-sm text-gray-700 cursor-pointer group-hover:text-gray-900"
-                  >
-                    {year}
-                  </label>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Subject Filter */}
+        {/* Subject & Topic Filter */}
         <div className="border-b">
           <button
             onClick={() => toggleSection('subject')}
@@ -144,16 +204,58 @@ export function FilterSidebar({ isOpen, onClose }: Props = {}) {
             <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${expandedSections.subject ? 'rotate-180' : ''}`} />
           </button>
           {expandedSections.subject && (
-            <div className="px-6 pb-4 space-y-3 max-h-80 overflow-y-auto">
-              {SUBJECTS_LIST.map(subject => (
-                <div key={subject} className="flex items-center gap-3 group">
-                  <Checkbox id={`subject-${subject}`} className="border-gray-300" /> 
-                  <label 
-                    htmlFor={`subject-${subject}`} 
-                    className="text-sm text-gray-700 cursor-pointer group-hover:text-gray-900 leading-snug"
-                  >
-                    {subject}
-                  </label>
+            <div className="pb-4 max-h-[500px] overflow-y-auto">
+              {SUBJECTS_WITH_TOPICS.map((item) => (
+                <div key={item.subject} className="border-b last:border-b-0">
+                  {/* Subject Header */}
+                  <div className="px-6 py-3">
+                    <div className="flex items-center gap-3 group">
+                      <Checkbox 
+                        id={`subject-${item.subject}`} 
+                        checked={filters.subjects.includes(item.subject)}
+                        onCheckedChange={() => handleToggleSubject(item.subject)}
+                        className="border-gray-300" 
+                      /> 
+                      <label 
+                        htmlFor={`subject-${item.subject}`} 
+                        className="text-sm font-medium text-gray-800 cursor-pointer group-hover:text-gray-900 flex-1"
+                      >
+                        {item.subject}
+                      </label>
+                      <button
+                        onClick={() => toggleSubject(item.subject)}
+                        className="p-1 hover:bg-gray-100 rounded"
+                      >
+                        <ChevronRight 
+                          className={`h-4 w-4 text-gray-500 transition-transform ${
+                            expandedSubjects[item.subject] ? 'rotate-90' : ''
+                          }`} 
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Topics under Subject */}
+                  {expandedSubjects[item.subject] && (
+                    <div className="px-6 pb-3 space-y-2 bg-gray-50/50">
+                      {item.topics.map(topic => (
+                        <div key={topic} className="flex items-center gap-3 group pl-6">
+                          <Checkbox 
+                            id={`topic-${topic}`} 
+                            checked={filters.topics.includes(topic)}
+                            onCheckedChange={() => handleToggleTopic(topic)}
+                            className="border-gray-300" 
+                          /> 
+                          <label 
+                            htmlFor={`topic-${topic}`} 
+                            className="text-sm text-gray-600 cursor-pointer group-hover:text-gray-900 leading-snug"
+                          >
+                            {topic}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -165,6 +267,13 @@ export function FilterSidebar({ isOpen, onClose }: Props = {}) {
 
   return (
     <>
+      <YearSelectModal
+        isOpen={isYearModalOpen}
+        onClose={() => setIsYearModalOpen(false)}
+        selectedYears={filters.years}
+        onYearsChange={handleYearsChange}
+      />
+      
       {/* Desktop Sidebar - Always visible on xl screens */}
       <aside className="w-80 bg-white border-l overflow-y-auto hidden xl:block">
         <FilterContent />

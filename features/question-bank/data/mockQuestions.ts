@@ -13,7 +13,8 @@ export const mockQuestions: Question[] = [
       { id: 'o4', text: 'গলগি বডি', isCorrect: false },
     ],
     board: 'ঢাকা বোর্ড',
-    year: '২০২৩'
+    year: '২০২৩',
+    topic: 'কোষ ও কোষের গঠন'
   },
   {
     id: '2',
@@ -27,7 +28,8 @@ export const mockQuestions: Question[] = [
       { id: 'o4', text: 'কোষ বিভাজন মাইটোসিস প্রক্রিয়ায় হয়', isCorrect: false },
     ],
     board: 'রাজশাহী বোর্ড',
-    year: '২০২২'
+    year: '২০২২',
+    topic: 'কোষ ও কোষের গঠন'
   },
   {
     id: '3',
@@ -48,7 +50,8 @@ export const mockQuestions: Question[] = [
       { id: 'c4', text: 'i, ii ও iii', isCorrect: false },
     ],
     board: 'যশোর বোর্ড',
-    year: '২০২১'
+    year: '২০২১',
+    topic: 'কোষ রসায়ন'
   },
   {
     id: '4',
@@ -62,7 +65,8 @@ export const mockQuestions: Question[] = [
       { id: 'sq4', label: 'ঘ', text: 'উক্ত বিভাজন না থাকলে জীবজগতে কী সমস্যা হতো? বিশ্লেষণ কর।', marks: 4 },
     ],
     board: 'সিলেট বোর্ড',
-    year: '২০২০'
+    year: '২০২০',
+    topic: 'কোষ বিভাজন'
   },
   {
     id: '5',
@@ -75,6 +79,7 @@ export const mockQuestions: Question[] = [
       { id: 'w3', label: '3', text: 'প্লাস্টিডের প্রকারভেদ আলোচনা কর।', marks: 5 },
     ],
     board: 'বরিশাল বোর্ড',
-    year: '২০১৯'
+    year: '২০১৯',
+    topic: 'কোষ ও কোষের গঠন'
   }
 ];

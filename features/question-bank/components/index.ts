@@ -5,4 +5,5 @@ export { QuestionListItem } from './QuestionListItem';
 export { QuestionBrowseView } from './QuestionBrowseView';
 export { FilterSidebar } from './FilterSidebar';
 export { MultiSelectModal } from './MultiSelectModal';
+export { YearSelectModal } from './YearSelectModal';
 export { SetupView } from './SetupView';

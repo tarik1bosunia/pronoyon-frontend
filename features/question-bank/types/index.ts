@@ -5,3 +5,11 @@ export interface QuestionBankState {
   selectedIds: string[];
   isSidebarOpen: boolean;
 }
+
+export interface FilterState {
+  types: string[];
+  boards: string[];
+  years: string[];
+  subjects: string[];
+  topics: string[];
+}
