@@ -52,10 +52,10 @@ const CombinedQuestionEditor = ({
   return (
     <div className="space-y-2">
       <div className="mb-2">
-        <InlineEditor 
-          content={stem} 
-          onChange={updateStem} 
-          placeholder="উদ্দীপক..."
+        <InlineEditor
+          content={stem ?? ''}
+          onChange={updateStem}
+          placeholder="উদ্দীপক যোগ করুন (ঐচ্ছিক)"
           className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
           density="compact"
         />
@@ -348,6 +348,7 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
       id: 'temp',
       type: 'mcq',
       text: '',
+      stem: '',
       marks: 1,
       options: [
         { id: uuidv4(), text: '', isCorrect: false },
@@ -506,7 +507,18 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
 
                                                 <div className="flex-1 space-y-1">
                                                   <div className="text-gray-900 font-serif text-lg leading-snug">
-                                                    {q.romanStatements ? (
+                                                    {(!q.romanStatements || q.romanStatements.length === 0) && (
+                                                      <div className="mb-2">
+                                                        <InlineEditor
+                                                          content={q.stem ?? ''}
+                                                          onChange={(val) => updateQuestion(q.id, { stem: val })}
+                                                          placeholder="উদ্দীপক যোগ করুন (ঐচ্ছিক)"
+                                                          className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                                          density="compact"
+                                                        />
+                                                      </div>
+                                                    )}
+                                                    {q.romanStatements && q.romanStatements.length > 0 ? (
                                                       <CombinedQuestionEditor
                                                         question={q}
                                                         onUpdate={(updates) => updateQuestion(q.id, updates)}

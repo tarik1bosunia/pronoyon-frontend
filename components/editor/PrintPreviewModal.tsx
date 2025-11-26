@@ -304,8 +304,17 @@ export function PrintPreviewModal({
                     <div className="flex gap-2 items-baseline">
                       <span className="font-bold min-w-[24px] text-[17px]">{index + 1}.</span>
                       <div className="flex-1 font-serif text-[17px] leading-snug">
+                        {(!q.romanStatements || q.romanStatements.length === 0) && q.stem && (
+                          <div className="mb-2">
+                            <MarkdownRenderer content={q.stem} compact />
+                          </div>
+                        )}
                         {/* Auto-detects and formats combined questions horizontally */}
-                        {renderCombinedText(q.text)}
+                        {q.romanStatements && q.romanStatements.length > 0
+                          ? renderCombinedText(q.text)
+                          : (
+                            <MarkdownRenderer content={q.text} compact />
+                          )}
 
                         {/* MCQ Options */}
                         {q.type === 'mcq' && q.options && (

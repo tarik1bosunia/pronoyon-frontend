@@ -15,6 +15,7 @@ interface Props {
 
 export function UnifiedQuestionForm({ question, onSave }: Props) {
   const [text, setText] = useState(question.text || '');
+  const [stem, setStem] = useState(question.stem || '');
   const [marks, setMarks] = useState(question.marks);
   
   // MCQ State
@@ -48,6 +49,7 @@ export function UnifiedQuestionForm({ question, onSave }: Props) {
     onSave({
       ...question,
       text,
+      stem: stem?.trim() ? stem : undefined,
       marks,
       options: question.type === 'mcq' ? options : undefined,
       subQuestions: (question.type === 'cq' || question.type === 'writing') ? subQuestions : undefined,
@@ -56,9 +58,34 @@ export function UnifiedQuestionForm({ question, onSave }: Props) {
 
   return (
     <div className="space-y-8 pb-20">
+      {/* Optional Stem / Uddipok */}
+      {question.type === 'mcq' && (!question.romanStatements || question.romanStatements.length === 0) && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-base font-semibold text-gray-700">উদ্দীপক (ঐচ্ছিক)</Label>
+            {stem?.trim() && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-xs text-red-500 hover:text-red-600"
+                onClick={() => setStem('')}
+              >
+                মুছে ফেলুন
+              </Button>
+            )}
+          </div>
+          <RichTextEditor
+            content={stem}
+            onChange={setStem}
+            placeholder="উদ্দীপক লিখুন (যদি প্রযোজ্য হয়)"
+            className="min-h-[120px]"
+          />
+        </div>
+      )}
+
       {/* 1. Main Question Text */}
       <div className="space-y-3">
-        <Label className="text-base font-semibold text-gray-700">প্রশ্ন / উদ্দীপক</Label>
+        <Label className="text-base font-semibold text-gray-700">প্রশ্ন</Label>
         <RichTextEditor 
           content={text} 
           onChange={setText} 
