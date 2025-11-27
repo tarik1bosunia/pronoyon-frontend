@@ -25,6 +25,7 @@ export default function EditorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeSection, setActiveSection] = useState<ExamSection>('questions');
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const idsParam = searchParams.get('ids') ?? '';
 
@@ -52,6 +53,11 @@ export default function EditorPage() {
     router.push('/questions');
   };
 
+  const handleSectionChange = (section: ExamSection) => {
+    setActiveSection(section);
+    setSidebarOpen(false);
+  };
+
   if (!initialQuestions.length) {
     return (
       <div className="flex h-screen flex-col items-center justify-center bg-white text-center">
@@ -73,12 +79,28 @@ export default function EditorPage() {
         initialQuestions={initialQuestions}
         onBack={handleBackToBrowse}
         sidebarTop={
-          <ExamNav
-            activeSection={activeSection}
-            onSectionChange={setActiveSection}
-            onBackToList={handleBackToBrowse}
-          />
+          <div>
+            <div className="flex items-center justify-between px-4 py-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSidebarOpen(false);
+                  handleBackToBrowse();
+                }}
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600"
+              >
+                <ChevronLeft className="h-4 w-4" /> All Exams
+              </button>
+            </div>
+            <div className="px-4 pb-4">
+              <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Exam Sections</p>
+              <ExamNav activeSection={activeSection} onSectionChange={handleSectionChange} />
+            </div>
+          </div>
         }
+        onOpenMobileSidebar={() => setSidebarOpen(true)}
+        isMobileSidebarOpen={isSidebarOpen}
+        onCloseMobileSidebar={() => setSidebarOpen(false)}
       />
     );
   }
@@ -86,12 +108,19 @@ export default function EditorPage() {
   return (
     <div className="flex min-h-screen bg-[#edf2f9]">
       <aside className="hidden lg:flex w-72 flex-col bg-white border-r shadow-sm">
-        <ExamNav
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-          onBackToList={handleBackToBrowse}
-          fullHeight
-        />
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <button
+            type="button"
+            onClick={handleBackToBrowse}
+            className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-blue-600"
+          >
+            <ChevronLeft className="h-4 w-4" /> All Exams
+          </button>
+        </div>
+        <div className="px-4 py-4">
+          <p className="pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Exam Sections</p>
+          <ExamNav activeSection={activeSection} onSectionChange={handleSectionChange} />
+        </div>
       </aside>
       <div className="flex-1 overflow-hidden">
         {activeSection === 'settings' ? (
@@ -114,39 +143,31 @@ const sidebarNavItems: Array<{ id: ExamSection; label: string; icon: LucideIcon 
 interface ExamNavProps {
   activeSection: ExamSection;
   onSectionChange: (section: ExamSection) => void;
-  onBackToList: () => void;
-  fullHeight?: boolean;
 }
 
-const ExamNav = ({ activeSection, onSectionChange, onBackToList, fullHeight = false }: ExamNavProps) => {
+const ExamNav = ({ activeSection, onSectionChange }: ExamNavProps) => {
   return (
-    <div className={cn('flex flex-col', fullHeight && 'h-full')}>
-
-      <nav className="px-4 py-4">
-        <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Exam Sections</p>
-        <div className="space-y-1">
-          {sidebarNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeSection === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onSectionChange(item.id)}
-                className={cn(
-                  'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {item.label}
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+    <div className="space-y-1">
+      {sidebarNavItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = activeSection === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onSectionChange(item.id)}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+              isActive
+                ? 'bg-blue-600 text-white shadow'
+                : 'text-gray-600 hover:bg-blue-50 hover:text-blue-600'
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {item.label}
+          </button>
+        );
+      })}
     </div>
   );
 };

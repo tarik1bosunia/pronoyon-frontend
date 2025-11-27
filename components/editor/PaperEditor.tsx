@@ -8,8 +8,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { 
   ArrowLeft, Save, Printer, Trash2, 
-  GripVertical, Plus, FileText, BookOpen, Settings, MoreVertical, 
-  ListChecks, FilePlus, PenTool
+  GripVertical, Plus, FileText, BookOpen, Settings, 
+  ListChecks, PenTool, Menu, X
 } from 'lucide-react';
 import { InlineEditor } from './InlineEditor';
 import { UnifiedQuestionForm } from './QuestionForms';
@@ -27,6 +27,10 @@ interface PaperEditorProps {
   initialQuestions: Question[];
   onBack: () => void;
   sidebarTop?: ReactNode;
+  onOpenMobileSidebar?: () => void;
+  mobileSidebarContent?: ReactNode;
+  isMobileSidebarOpen?: boolean;
+  onCloseMobileSidebar?: () => void;
 }
 
 // --- HELPER: Combined Question Component ---
@@ -91,7 +95,15 @@ const CombinedQuestionEditor = ({
 };
 
 
-export function PaperEditor({ initialQuestions, onBack, sidebarTop }: PaperEditorProps) {
+export function PaperEditor({
+  initialQuestions,
+  onBack,
+  sidebarTop,
+  onOpenMobileSidebar,
+  mobileSidebarContent,
+  isMobileSidebarOpen,
+  onCloseMobileSidebar
+}: PaperEditorProps) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
@@ -360,6 +372,72 @@ export function PaperEditor({ initialQuestions, onBack, sidebarTop }: PaperEdito
     } as Question;
   };
 
+  const sidebarContent = (
+    <div className="flex h-full flex-col">
+      {sidebarTop && (
+        <div className="border-b bg-white">{sidebarTop}</div>
+      )}
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="px-4 pb-3 pt-4 border-b font-medium text-gray-700">Outline</div>
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="space-y-1 p-2">
+            {questions.map((q, idx) => (
+              <div 
+                key={q.id} 
+                onClick={() => {
+                  document.getElementById(`q-${q.id}`)?.scrollIntoView({ behavior: 'smooth' });
+                  onCloseMobileSidebar?.();
+                }}
+                className="p-2 text-sm text-gray-600 hover:bg-gray-100 rounded cursor-pointer truncate flex gap-2"
+              >
+                <span className="font-bold text-gray-400">{idx + 1}.</span>
+                {(q.stem || q.text).split('\n')[0].substring(0, 30)}...
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+
+      <div className="p-4 border-t space-y-3 bg-gray-50/50">
+        <Button 
+          variant="outline" 
+          className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+          onClick={() => handleAddNew('mcq')}
+        >
+          <Plus className="h-4 w-4 mr-3 text-gray-500" /> 
+          Add MCQ
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+          onClick={() => handleAddNew('combined')}
+        >
+          <ListChecks className="h-4 w-4 mr-3 text-gray-500" /> 
+          Add Combined MCQ
+        </Button>
+
+        <Button 
+          variant="outline" 
+          className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+          onClick={() => handleAddNew('cq')}
+        >
+          <div className="h-5 w-5 mr-2.5 rounded-full bg-gray-800 text-white flex items-center justify-center text-[10px] font-bold">N</div>
+          Add Creative
+        </Button>
+
+        <Button 
+          variant="outline" 
+          className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
+          onClick={() => handleAddNew('writing')}
+        >
+          <PenTool className="h-4 w-4 mr-3 text-gray-500" />
+          Add Writing
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex flex-col h-screen bg-[#F0F2F5]">
       {/* Header Toolbar */}
@@ -368,6 +446,16 @@ export function PaperEditor({ initialQuestions, onBack, sidebarTop }: PaperEdito
           <Button variant="ghost" size="icon" onClick={onBack}>
             <ArrowLeft className="h-5 w-5 text-gray-600" />
           </Button>
+          {onOpenMobileSidebar && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="lg:hidden"
+              onClick={onOpenMobileSidebar}
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+          )}
           <div>
             <h1 className="font-bold text-gray-800">প্রশ্ন এডিটর</h1>
             <p className="text-xs text-gray-500">
@@ -385,64 +473,10 @@ export function PaperEditor({ initialQuestions, onBack, sidebarTop }: PaperEdito
         </div>
       </header>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Left Sidebar */}
-        <aside className="w-72 bg-white border-r hidden lg:flex flex-col no-print">
-          {sidebarTop && (
-            <div className="border-b bg-white">{sidebarTop}</div>
-          )}
-          <div className="px-4 pb-3 pt-4 border-b font-medium text-gray-700">Outline</div>
-          <ScrollArea className="flex-1 p-2">
-            {questions.map((q, idx) => (
-              <div 
-                key={q.id} 
-                onClick={() => document.getElementById(`q-${q.id}`)?.scrollIntoView({ behavior: 'smooth' })}
-                className="p-2 text-sm text-gray-600 hover:bg-gray-100 rounded cursor-pointer truncate flex gap-2"
-              >
-                <span className="font-bold text-gray-400">{idx + 1}.</span>
-                {(q.stem || q.text).split('\n')[0].substring(0, 30)}...
-              </div>
-            ))}
-          </ScrollArea>
-          
-          {/* Add Buttons Section */}
-          <div className="p-4 border-t space-y-3 bg-gray-50/50">
-            <Button 
-              variant="outline" 
-              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
-              onClick={() => handleAddNew('mcq')}
-            >
-              <Plus className="h-4 w-4 mr-3 text-gray-500" /> 
-              Add MCQ
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
-              onClick={() => handleAddNew('combined')}
-            >
-              <ListChecks className="h-4 w-4 mr-3 text-gray-500" /> 
-              Add Combined MCQ
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
-              onClick={() => handleAddNew('cq')}
-            >
-              <div className="h-5 w-5 mr-2.5 rounded-full bg-gray-800 text-white flex items-center justify-center text-[10px] font-bold">N</div>
-              Add Creative
-            </Button>
-
-            <Button 
-              variant="outline" 
-              className="w-full justify-start h-11 bg-white hover:bg-gray-50 border-gray-200 shadow-sm" 
-              onClick={() => handleAddNew('writing')}
-            >
-              <PenTool className="h-4 w-4 mr-3 text-gray-500" />
-              Add Writing
-            </Button>
-          </div>
+        <aside className="w-72 bg-white border-r hidden lg:flex flex-col no-print h-full min-h-0">
+          {sidebarContent}
         </aside>
 
         {/* Center: Paper Preview */}
@@ -688,6 +722,43 @@ export function PaperEditor({ initialQuestions, onBack, sidebarTop }: PaperEdito
         paperTitle={paperTitle}
         examDuration={examDuration}
       />
+
+      {typeof isMobileSidebarOpen === 'boolean' && (
+        <div
+          className={cn(
+            "fixed inset-0 z-50 lg:hidden transition-opacity duration-200",
+            isMobileSidebarOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          )}
+        >
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={onCloseMobileSidebar}
+            role="presentation"
+          />
+          <div
+            className={cn(
+              "absolute left-0 top-0 bottom-0 h-full w-72 max-w-[80vw] bg-white shadow-xl transition-transform duration-200",
+              isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            )}
+          >
+            <div className="flex h-full flex-col">
+              <div className="flex items-center justify-between px-4 py-3 border-b bg-white">
+                <span className="text-sm font-semibold text-gray-700">Sections</span>
+                <Button variant="ghost" size="icon" onClick={() => onCloseMobileSidebar?.()}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                {mobileSidebarContent ? (
+                  <ScrollArea className="h-full">{mobileSidebarContent}</ScrollArea>
+                ) : (
+                  sidebarContent
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
