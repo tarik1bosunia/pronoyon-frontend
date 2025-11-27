@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Question } from '@/types/question';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ const PAGE_PADDING_PX = 56.7; // 15mm padding inside each page
 interface PaperEditorProps {
   initialQuestions: Question[];
   onBack: () => void;
+  sidebarTop?: ReactNode;
 }
 
 // --- HELPER: Combined Question Component ---
@@ -90,7 +91,7 @@ const CombinedQuestionEditor = ({
 };
 
 
-export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
+export function PaperEditor({ initialQuestions, onBack, sidebarTop }: PaperEditorProps) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
@@ -386,8 +387,11 @@ export function PaperEditor({ initialQuestions, onBack }: PaperEditorProps) {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar */}
-        <aside className="w-64 bg-white border-r hidden lg:flex flex-col no-print">
-          <div className="p-4 border-b font-medium text-gray-700">Outline</div>
+        <aside className="w-72 bg-white border-r hidden lg:flex flex-col no-print">
+          {sidebarTop && (
+            <div className="border-b bg-white">{sidebarTop}</div>
+          )}
+          <div className="px-4 pb-3 pt-4 border-b font-medium text-gray-700">Outline</div>
           <ScrollArea className="flex-1 p-2">
             {questions.map((q, idx) => (
               <div 

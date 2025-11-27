@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PaperEditor } from '@/components/editor/PaperEditor';
+import { ExamSettingsPanel } from '@/components/editor/ExamSettingsPanel';
 import { mockQuestions } from '@/features/question-bank';
 import { cn } from '@/lib/utils';
 import {
@@ -17,8 +18,8 @@ import type { LucideIcon } from 'lucide-react';
 
 const FALLBACK_COUNT = 5;
 
-type NonQuestionSection = 'grade' | 'settings' | 'leaderboard' | 'share';
-type ExamSection = 'questions' | NonQuestionSection;
+type PlaceholderSection = 'grade' | 'leaderboard' | 'share';
+type ExamSection = 'questions' | 'settings' | PlaceholderSection;
 
 export default function EditorPage() {
   const router = useRouter();
@@ -66,33 +67,42 @@ export default function EditorPage() {
     );
   }
 
+  if (activeSection === 'questions') {
+    return (
+      <PaperEditor
+        initialQuestions={initialQuestions}
+        onBack={handleBackToBrowse}
+        sidebarTop={
+          <ExamNav
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            onBackToList={handleBackToBrowse}
+          />
+        }
+      />
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-[#edf2f9]">
-      <ExamSidebar
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        onBackToList={handleBackToBrowse}
-      />
-
+      <aside className="hidden lg:flex w-72 flex-col bg-white border-r shadow-sm">
+        <ExamNav
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+          onBackToList={handleBackToBrowse}
+          fullHeight
+        />
+      </aside>
       <div className="flex-1 overflow-hidden">
-        <div className={cn('h-full', activeSection === 'questions' ? 'block' : 'hidden')}>
-          <PaperEditor initialQuestions={initialQuestions} onBack={handleBackToBrowse} />
-        </div>
-
-        {activeSection !== 'questions' && (
-          <SectionPlaceholder section={activeSection as NonQuestionSection} />
+        {activeSection === 'settings' ? (
+          <ExamSettingsPanel onBack={() => setActiveSection('questions')} />
+        ) : (
+          <SectionPlaceholder section={activeSection as PlaceholderSection} />
         )}
       </div>
     </div>
   );
 }
-
-interface ExamSidebarProps {
-  activeSection: ExamSection;
-  onSectionChange: (section: ExamSection) => void;
-  onBackToList: () => void;
-}
-
 const sidebarNavItems: Array<{ id: ExamSection; label: string; icon: LucideIcon }> = [
   { id: 'questions', label: 'Questions', icon: FileText },
   { id: 'grade', label: 'Grade', icon: ListChecks },
@@ -101,48 +111,20 @@ const sidebarNavItems: Array<{ id: ExamSection; label: string; icon: LucideIcon 
   { id: 'share', label: 'Share Exam Link', icon: Share2 }
 ];
 
-const ExamSidebar = ({ activeSection, onSectionChange, onBackToList }: ExamSidebarProps) => {
+interface ExamNavProps {
+  activeSection: ExamSection;
+  onSectionChange: (section: ExamSection) => void;
+  onBackToList: () => void;
+  fullHeight?: boolean;
+}
+
+const ExamNav = ({ activeSection, onSectionChange, onBackToList, fullHeight = false }: ExamNavProps) => {
   return (
-    <aside className="hidden lg:flex w-72 flex-col bg-white border-r shadow-sm">
-      <div className="px-6 pt-6 pb-4 border-b">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-blue-100 text-blue-600 font-semibold flex items-center justify-center">
-            PB
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-900">Porikkhok Builder</p>
-            <p className="text-xs text-gray-500">Manage your exam flow</p>
-          </div>
-        </div>
-      </div>
+    <div className={cn('flex flex-col', fullHeight && 'h-full')}>
 
-      <div className="px-6 py-4 border-b space-y-3">
-        <button
-          type="button"
-          onClick={onBackToList}
-          className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          All Exams
-        </button>
-
-        <div className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-3 shadow-sm">
-          <div className="h-14 w-14 rounded-lg bg-gradient-to-br from-purple-500 to-fuchsia-600" />
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-gray-900">English</p>
-            <div className="flex items-center gap-2 text-[11px] font-medium">
-              <span className="rounded-full bg-red-100 px-2 py-0.5 text-red-600">Ongoing</span>
-              <span className="rounded-full bg-gray-200 px-2 py-0.5 text-gray-600">Private</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <nav className="flex-1 overflow-y-auto py-4">
-        <p className="px-6 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
-          Exam Sections
-        </p>
-        <div className="space-y-1 px-3">
+      <nav className="px-4 py-4">
+        <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Exam Sections</p>
+        <div className="space-y-1">
           {sidebarNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -165,22 +147,14 @@ const ExamSidebar = ({ activeSection, onSectionChange, onBackToList }: ExamSideb
           })}
         </div>
       </nav>
-
-      <div className="px-6 py-4 border-t text-xs text-gray-400">
-        Need help? <span className="text-blue-600">Contact support</span>
-      </div>
-    </aside>
+    </div>
   );
 };
 
-const sectionCopy: Record<NonQuestionSection, { title: string; description: string }> = {
+const sectionCopy: Record<PlaceholderSection, { title: string; description: string }> = {
   grade: {
     title: 'Grade Analytics Coming Soon',
     description: 'Track marks, insights, and student progress once grading tools are ready.'
-  },
-  settings: {
-    title: 'Exam Settings Panel',
-    description: 'Configure timing, availability, and visibility for the exam from this panel soon.'
   },
   leaderboard: {
     title: 'Leaderboard Preview',
@@ -192,7 +166,7 @@ const sectionCopy: Record<NonQuestionSection, { title: string; description: stri
   }
 };
 
-const SectionPlaceholder = ({ section }: { section: NonQuestionSection }) => {
+const SectionPlaceholder = ({ section }: { section: PlaceholderSection }) => {
   const copy = sectionCopy[section];
   return (
     <div className="flex h-full flex-col items-center justify-center bg-white">
