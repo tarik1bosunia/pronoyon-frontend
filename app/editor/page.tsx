@@ -48,7 +48,7 @@ export default function EditorPage() {
   }, [selectedIds]);
 
   const handleBackToBrowse = () => {
-    router.push('/');
+    router.push('/questions');
   };
 
   if (!initialQuestions.length) {
