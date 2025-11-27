@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { 
   ArrowLeft, Save, Printer, Trash2, 
   GripVertical, Plus, FileText, BookOpen, Settings, 
@@ -19,6 +26,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { RichTextEditor } from './RichTextEditor';
 import { v4 as uuidv4 } from 'uuid';
+import { useToast } from '@/components/ui/use-toast';
 
 const PAGE_HEIGHT_PX = 1122; // 297mm at ~96dpi
 const PAGE_PADDING_PX = 56.7; // 15mm padding inside each page
@@ -114,7 +122,9 @@ export function PaperEditor({
   const [optionBlockGap, setOptionBlockGap] = useState(8);
   const [optionPadding, setOptionPadding] = useState(2);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
+  const [activeSet, setActiveSet] = useState<string>('default');
   const pageContainerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   // Determine page breaks by measuring rendered question heights
   useEffect(() => {
@@ -242,6 +252,13 @@ export function PaperEditor({
     setSheetOpen(true);
   };
 
+  const handleAddFromDatabase = () => {
+    toast({
+      title: 'Coming soon',
+      description: 'Importing questions from the database will arrive in a future update.'
+    });
+  };
+
   const handleDelete = (id: string) => {
     setQuestions(questions.filter(q => q.id !== id));
   };
@@ -280,6 +297,15 @@ export function PaperEditor({
   }, [pageBreaks, questions.length]);
 
   const pageCount = pageBoundaries.length;
+
+  const questionSetOptions = useMemo(
+    () => [
+      { value: 'default', label: 'Default Set' },
+      { value: 'set-a', label: 'Set A' },
+      { value: 'set-b', label: 'Set B' }
+    ],
+    []
+  );
 
   const pageHeader = (
     <div
@@ -690,6 +716,99 @@ export function PaperEditor({
             </Droppable>
           </DragDropContext>
         </main>
+      </div>
+
+      <div className="no-print fixed bottom-4 left-4 right-4 z-40 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-2xl lg:left-[19rem] lg:right-6">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-300">Set</span>
+          <Select value={activeSet} onValueChange={setActiveSet}>
+            <SelectTrigger className="h-9 w-40 border-slate-700 bg-slate-800 text-left text-white">
+              <SelectValue placeholder="Select Set" />
+            </SelectTrigger>
+            <SelectContent>
+              {questionSetOptions.map((set) => (
+                <SelectItem key={set.value} value={set.value}>
+                  {set.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('combined')}
+          >
+            + Set
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('mcq')}
+          >
+            + MCQ
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('mcq')}
+          >
+            + MCQ 5
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('cq')}
+          >
+            + CQ 3
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('cq')}
+          >
+            + CQ 4
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('cq')}
+          >
+            + CQ N
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('combined')}
+          >
+            + MCQ N
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
+            onClick={() => handleAddNew('writing')}
+          >
+            + Written
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-teal-500 text-xs uppercase tracking-wide text-white hover:bg-teal-400"
+            onClick={handleAddFromDatabase}
+          >
+            Add from DB
+          </Button>
+        </div>
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
