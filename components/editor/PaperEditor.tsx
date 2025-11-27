@@ -37,6 +37,7 @@ const QUESTION_SET_OPTIONS = [
   { value: 'set-c', label: 'Set C' }
 ] as const;
 const MAX_QUESTION_SETS = QUESTION_SET_OPTIONS.length;
+const MCQ_OPTION_LABELS = ['ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ', 'ছ', 'জ', 'ঝ', 'ঞ', 'ট', 'ঠ', 'ড', 'ঢ', 'ণ', 'ত'];
 
 const cloneQuestions = (items: Question[]): Question[] =>
   items.map((question) => ({
@@ -356,6 +357,20 @@ export function PaperEditor({
     setSheetOpen(false);
   };
 
+  const handleQuickAddQuestion = (
+    type: 'mcq' | 'cq' | 'combined' | 'writing',
+    count = 1,
+    optionsPerQuestion?: number
+  ) => {
+    const newQuestions: Question[] = Array.from({ length: Math.max(count, 1) }, () =>
+      buildQuestion(type, optionsPerQuestion)
+    );
+    const primaryId = newQuestions[0].id;
+    updateCurrentSet((prev) => [...prev, ...newQuestions]);
+    setEditingId(primaryId);
+    setSheetOpen(true);
+  };
+
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
     updateCurrentSet((prev) => {
@@ -478,6 +493,32 @@ export function PaperEditor({
         { id: uuidv4(), text: '', isCorrect: false },
       ]
     } as Question;
+  };
+
+  const buildQuestion = (
+    type: 'mcq' | 'cq' | 'combined' | 'writing',
+    optionsPerQuestion?: number
+  ): Question => {
+    const template = getNewQuestionDefaults(`new-${type}`);
+
+    if (
+      type === 'mcq' &&
+      template.options &&
+      typeof optionsPerQuestion === 'number' &&
+      optionsPerQuestion > template.options.length
+    ) {
+      const additions = Array.from({ length: optionsPerQuestion - template.options.length }, () => ({
+        id: uuidv4(),
+        text: '',
+        isCorrect: false
+      }));
+      template.options = [...template.options, ...additions];
+    }
+
+    return {
+      ...template,
+      id: uuidv4()
+    };
   };
 
   const sidebarContent = (
@@ -723,7 +764,7 @@ export function PaperEditor({
                                                             )}
                                                             title={opt.isCorrect ? "Correct Answer" : "Mark as Correct"}
                                                           >
-                                                            {['ক', 'খ', 'গ', 'ঘ'][i]}
+                                                            {MCQ_OPTION_LABELS[i] ?? String.fromCharCode(65 + i)}
                                                           </div>
 
                                                           <div className="flex-1">
@@ -846,7 +887,7 @@ export function PaperEditor({
             size="sm"
             variant="secondary"
             className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
-            onClick={() => handleAddNew('mcq')}
+            onClick={() => handleQuickAddQuestion('mcq')}
           >
             + MCQ
           </Button>
@@ -854,7 +895,7 @@ export function PaperEditor({
             size="sm"
             variant="secondary"
             className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
-            onClick={() => handleAddNew('mcq')}
+            onClick={() => handleQuickAddQuestion('mcq', 1, 5)}
           >
             + MCQ 5
           </Button>
@@ -862,9 +903,9 @@ export function PaperEditor({
             size="sm"
             variant="secondary"
             className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
-            onClick={() => handleAddNew('cq')}
+            onClick={() => handleQuickAddQuestion('cq')}
           >
-            + CQ 3
+            + CQ
           </Button>
           <Button
             size="sm"
