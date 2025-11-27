@@ -80,3 +80,10 @@ export const SUBJECTS_WITH_TOPICS = [
 ];
 
 export const BOARDS_LIST = ['ঢাকা', 'রাজশাহী', 'যশোর', 'সিলেট', 'কুমিল্লা'];
+
+export const SPECIAL_FILTERS = [
+  { value: 'board_standard', label: 'স্ট্যান্ডার্ড বোর্ড সেট' },
+  { value: 'model_test', label: 'মডেল টেস্ট সংগ্রহ' },
+  { value: 'creative_focus', label: 'সৃজনশীল ফোকাস' },
+  { value: 'quick_revision', label: 'দ্রুত পুনরাবৃত্তি' }
+];

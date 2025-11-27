@@ -21,7 +21,8 @@ export default function QuestionsBrowsePage() {
     boards: [],
     years: [],
     subjects: [],
-    topics: []
+    topics: [],
+    specialFilters: []
   });
 
   useEffect(() => {
@@ -67,6 +68,13 @@ export default function QuestionsBrowsePage() {
         return false;
       }
 
+      if (filters.specialFilters.length > 0) {
+        const questionTags = q.specialTags ?? [];
+        if (!questionTags.some((tag) => filters.specialFilters.includes(tag))) {
+          return false;
+        }
+      }
+
       return true;
     });
   }, [filters]);
@@ -100,6 +108,18 @@ export default function QuestionsBrowsePage() {
             onToggleSelection={toggleSelection}
             onSubmit={handleSubmitQuestions}
             onOpenFilters={() => setFilterOpen(true)}
+            activeSpecialFilters={filters.specialFilters}
+            onToggleSpecialFilter={(value: string) =>
+              setFilters((prev) => {
+                const exists = prev.specialFilters.includes(value);
+                return {
+                  ...prev,
+                  specialFilters: exists
+                    ? prev.specialFilters.filter((tag) => tag !== value)
+                    : [...prev.specialFilters, value]
+                };
+              })
+            }
           />
 
           <FilterSidebar

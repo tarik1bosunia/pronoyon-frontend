@@ -12,4 +12,5 @@ export interface FilterState {
   years: string[];
   subjects: string[];
   topics: string[];
+  specialFilters: string[];
 }

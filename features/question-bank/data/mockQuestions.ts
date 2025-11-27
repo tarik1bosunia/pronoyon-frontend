@@ -14,7 +14,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'ঢাকা বোর্ড',
     year: '২০২৩',
-    topic: 'কোষ ও কোষের গঠন'
+    topic: 'কোষ ও কোষের গঠন',
+    specialTags: ['quick_revision']
   },
   {
     id: '2',
@@ -29,7 +30,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'রাজশাহী বোর্ড',
     year: '২০২২',
-    topic: 'কোষ ও কোষের গঠন'
+    topic: 'কোষ ও কোষের গঠন',
+    specialTags: ['board_standard']
   },
   {
     id: '3',
@@ -51,7 +53,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'যশোর বোর্ড',
     year: '২০২১',
-    topic: 'কোষ রসায়ন'
+    topic: 'কোষ রসায়ন',
+    specialTags: ['creative_focus']
   },
   {
     id: '4',
@@ -66,7 +69,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'সিলেট বোর্ড',
     year: '২০২০',
-    topic: 'কোষ বিভাজন'
+    topic: 'কোষ বিভাজন',
+    specialTags: ['creative_focus', 'model_test']
   },
   {
     id: '5',
@@ -80,7 +84,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'বরিশাল বোর্ড',
     year: '২০১৯',
-    topic: 'কোষ ও কোষের গঠন'
+    topic: 'কোষ ও কোষের গঠন',
+    specialTags: ['model_test']
   },
   {
     id: '6',
@@ -95,7 +100,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'ঢাকা বোর্ড',
     year: '২০২৩',
-    topic: 'প্রকাশ সংশ্লেষণ'
+    topic: 'প্রকাশ সংশ্লেষণ',
+    specialTags: ['quick_revision']
   },
   {
     id: '7',
@@ -110,7 +116,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'রাজশাহী বোর্ড',
     year: '২০২২',
-    topic: 'স্থিতিশীলতা'
+    topic: 'স্থিতিশীলতা',
+    specialTags: ['board_standard']
   },
   {
     id: '8',
@@ -125,7 +132,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'চট্টগ্রাম বোর্ড',
     year: '২০২১',
-    topic: 'রক্ত ও সঞ্চালন'
+    topic: 'রক্ত ও সঞ্চালন',
+    specialTags: ['board_standard']
   },
   {
     id: '9',
@@ -140,7 +148,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'যশোর বোর্ড',
     year: '২০২০',
-    topic: 'জিনতত্ত্ব'
+    topic: 'জিনতত্ত্ব',
+    specialTags: ['creative_focus']
   },
   {
     id: '10',
@@ -155,7 +164,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'সিলেট বোর্ড',
     year: '২০১৯',
-    topic: 'অন্ত:স্রাব গ্রন্থি'
+    topic: 'অন্ত:স্রাব গ্রন্থি',
+    specialTags: ['quick_revision']
   },
   {
     id: '11',
@@ -170,7 +180,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'বরিশাল বোর্ড',
     year: '২০১৮',
-    topic: 'কোষ অঙ্গাণু'
+    topic: 'কোষ অঙ্গাণু',
+    specialTags: ['board_standard', 'quick_revision']
   },
   {
     id: '12',
@@ -185,7 +196,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'দিনাজপুর বোর্ড',
     year: '২০২১',
-    topic: 'ভ্রূণবিদ্যা'
+    topic: 'ভ্রূণবিদ্যা',
+    specialTags: ['model_test']
   },
   {
     id: '13',
@@ -200,7 +212,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'কুমিল্লা বোর্ড',
     year: '২০২২',
-    topic: 'পুষ্টি ও খাদ্য'
+    topic: 'পুষ্টি ও খাদ্য',
+    specialTags: ['quick_revision']
   },
   {
     id: '14',
@@ -215,7 +228,8 @@ export const mockQuestions: Question[] = [
     ],
     board: 'ময়মনসিংহ বোর্ড',
     year: '২০২০',
-    topic: 'পরিবেশবিদ্যা'
+    topic: 'পরিবেশবিদ্যা',
+    specialTags: ['creative_focus']
   },
   {
     id: '15',
@@ -230,6 +244,7 @@ export const mockQuestions: Question[] = [
     ],
     board: 'রংপুর বোর্ড',
     year: '২০২৩',
-    topic: 'জিনতত্ত্ব'
+    topic: 'জিনতত্ত্ব',
+    specialTags: ['board_standard']
   }
 ];

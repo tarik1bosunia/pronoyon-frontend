@@ -2,7 +2,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Filter, RotateCcw, ChevronDown, Maximize2, ChevronRight } from 'lucide-react';
-import { BOARDS_LIST, SUBJECTS_WITH_TOPICS } from '../constants';
+import { BOARDS_LIST, SUBJECTS_WITH_TOPICS, SPECIAL_FILTERS } from '../constants';
 import { useState } from 'react';
 import { YearSelectModal } from './YearSelectModal';
 import type { FilterState } from '../types';
@@ -22,6 +22,7 @@ interface Props {
 
 export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Props) {
   const [expandedSections, setExpandedSections] = useState({
+    special: true,
     type: true,
     board: true,
     subject: true
@@ -65,6 +66,13 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
     onFiltersChange({ ...filters, topics: newTopics });
   };
 
+  const handleToggleSpecialFilter = (value: string) => {
+    const newSpecialFilters = filters.specialFilters.includes(value)
+      ? filters.specialFilters.filter(tag => tag !== value)
+      : [...filters.specialFilters, value];
+    onFiltersChange({ ...filters, specialFilters: newSpecialFilters });
+  };
+
   const handleYearsChange = (years: string[]) => {
     onFiltersChange({ ...filters, years });
   };
@@ -75,7 +83,8 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
       boards: [],
       years: [],
       subjects: [],
-      topics: []
+      topics: [],
+      specialFilters: []
     });
   };
 
@@ -104,6 +113,37 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
 
       {/* Filters Content */}
       <div className="pb-6">
+        {/* Special Filters */}
+        <div className="border-b">
+          <button
+            onClick={() => toggleSection('special')}
+            className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <span className="font-semibold text-gray-800 text-sm">বিশেষ ফিল্টার</span>
+            <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${expandedSections.special ? 'rotate-180' : ''}`} />
+          </button>
+          {expandedSections.special && (
+            <div className="px-6 pb-4 flex flex-wrap gap-2">
+              {SPECIAL_FILTERS.map((filter) => {
+                const isActive = filters.specialFilters.includes(filter.value);
+                return (
+                  <button
+                    key={filter.value}
+                    onClick={() => handleToggleSpecialFilter(filter.value)}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-colors ${
+                      isActive
+                        ? 'border-blue-500 bg-blue-50 text-blue-600 shadow-sm'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Question Type Filter */}
         <div className="border-b">
           <button

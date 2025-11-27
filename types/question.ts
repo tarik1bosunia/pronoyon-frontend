@@ -36,4 +36,5 @@ export interface Question {
   topic?: string;
   board?: string;
   year?: string;
+  specialTags?: string[];
 }

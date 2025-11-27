@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Question } from '@/types/question';
 import { QuestionListItem } from './QuestionListItem';
 import { Filter } from 'lucide-react';
-import { useState } from 'react';
+import { SPECIAL_FILTERS } from '../constants';
 
 interface Props {
   questions: Question[];
@@ -10,29 +10,88 @@ interface Props {
   onToggleSelection: (id: string) => void;
   onSubmit: () => void;
   onOpenFilters: () => void;
+  activeSpecialFilters: string[];
+  onToggleSpecialFilter: (value: string) => void;
 }
 
-export function QuestionBrowseView({ questions, selectedIds, onToggleSelection, onSubmit, onOpenFilters }: Props) {
+const SpecialFilterPill = ({
+  value,
+  label,
+  isActive,
+  onToggle
+}: {
+  value: string;
+  label: string;
+  isActive: boolean;
+  onToggle: (value: string) => void;
+}) => (
+  <button
+    onClick={() => onToggle(value)}
+    className={`px-3 py-1.5 rounded-full border text-xs font-medium transition-colors whitespace-nowrap ${
+      isActive
+        ? 'border-blue-500 bg-blue-50 text-blue-600 shadow-sm'
+        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+    }`}
+  >
+    {label}
+  </button>
+);
+
+export function QuestionBrowseView({
+  questions,
+  selectedIds,
+  onToggleSelection,
+  onSubmit,
+  onOpenFilters,
+  activeSpecialFilters,
+  onToggleSpecialFilter
+}: Props) {
   return (
     <main className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
               <div className="text-center flex-1">
                 <h2 className="text-2xl font-bold text-gray-800">প্রশ্ন সিলেক্ট করুন</h2>
                 <p className="text-gray-500 mt-1">প্রশ্নগুলো সিলেক্ট করে সাবমিট করলেই প্রশ্ন তৈরি হয়ে যাবে!</p>
               </div>
-              
-              {/* Filter Button - Only on small/medium screens */}
-              <Button
-                onClick={onOpenFilters}
-                variant="outline"
-                size="sm"
-                className="xl:hidden flex items-center gap-2 shrink-0"
-              >
-                <Filter className="h-4 w-4" />
-                <span className="hidden sm:inline">ফিল্টার</span>
-              </Button>
+              <div className="flex items-center gap-3">
+                <div className="hidden md:flex flex-wrap gap-2 justify-end">
+                  {SPECIAL_FILTERS.map((filter) => (
+                    <SpecialFilterPill
+                      key={filter.value}
+                      value={filter.value}
+                      label={filter.label}
+                      isActive={activeSpecialFilters.includes(filter.value)}
+                      onToggle={onToggleSpecialFilter}
+                    />
+                  ))}
+                </div>
+
+                {/* Filter Button - Only on small/medium screens */}
+                <Button
+                  onClick={onOpenFilters}
+                  variant="outline"
+                  size="sm"
+                  className="xl:hidden flex items-center gap-2 shrink-0"
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="hidden sm:inline">ফিল্টার</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Mobile Special Filters */}
+            <div className="flex md:hidden flex-wrap gap-2 justify-center">
+              {SPECIAL_FILTERS.map((filter) => (
+                <SpecialFilterPill
+                  key={filter.value}
+                  value={filter.value}
+                  label={filter.label}
+                  isActive={activeSpecialFilters.includes(filter.value)}
+                  onToggle={onToggleSpecialFilter}
+                />
+              ))}
             </div>
           </div>
 
