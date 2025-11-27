@@ -31,6 +31,21 @@ import { useToast } from '@/components/ui/use-toast';
 const PAGE_HEIGHT_PX = 1122; // 297mm at ~96dpi
 const PAGE_PADDING_PX = 56.7; // 15mm padding inside each page
 
+const QUESTION_SET_OPTIONS = [
+  { value: 'set-a', label: 'Set A' },
+  { value: 'set-b', label: 'Set B' },
+  { value: 'set-c', label: 'Set C' }
+] as const;
+const MAX_QUESTION_SETS = QUESTION_SET_OPTIONS.length;
+
+const cloneQuestions = (items: Question[]): Question[] =>
+  items.map((question) => ({
+    ...question,
+    options: question.options?.map((opt) => ({ ...opt })),
+    subQuestions: question.subQuestions?.map((sq) => ({ ...sq })),
+    romanStatements: question.romanStatements ? [...question.romanStatements] : undefined
+  }));
+
 interface PaperEditorProps {
   initialQuestions: Question[];
   onBack: () => void;
@@ -112,7 +127,14 @@ export function PaperEditor({
   isMobileSidebarOpen,
   onCloseMobileSidebar
 }: PaperEditorProps) {
-  const [questions, setQuestions] = useState<Question[]>(initialQuestions);
+  const [activeSet, setActiveSet] = useState<(typeof QUESTION_SET_OPTIONS)[number]['value']>('set-a');
+  const [availableSets, setAvailableSets] = useState<Array<(typeof QUESTION_SET_OPTIONS)[number]>>(() => [
+    QUESTION_SET_OPTIONS[0]
+  ]);
+  const [questionSets, setQuestionSets] = useState<Record<string, Question[]>>(() => ({
+    [QUESTION_SET_OPTIONS[0].value]: cloneQuestions(initialQuestions)
+  }));
+  const questions = questionSets[activeSet] ?? [];
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [isPrintModalOpen, setPrintModalOpen] = useState(false);
@@ -122,9 +144,18 @@ export function PaperEditor({
   const [optionBlockGap, setOptionBlockGap] = useState(8);
   const [optionPadding, setOptionPadding] = useState(2);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
-  const [activeSet, setActiveSet] = useState<string>('default');
   const pageContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const updateCurrentSet = (updater: (list: Question[]) => Question[]) => {
+    setQuestionSets((prev) => ({
+      ...prev,
+      [activeSet]: updater(prev[activeSet] ?? [])
+    }));
+  };
+
+  const activeSetLabel = availableSets.find((option) => option.value === activeSet)?.label ?? '';
+  const isAtSetLimit = availableSets.length >= MAX_QUESTION_SETS;
 
   // Determine page breaks by measuring rendered question heights
   useEffect(() => {
@@ -204,40 +235,46 @@ export function PaperEditor({
 
   // --- Update Handlers ---
   const updateQuestion = (id: string, updates: Partial<Question>) => {
-    setQuestions(questions.map(q => q.id === id ? { ...q, ...updates } : q));
+    updateCurrentSet((prev) => prev.map((q) => (q.id === id ? { ...q, ...updates } : q)));
   };
 
   const updateOptionText = (qId: string, optId: string, newText: string) => {
-    setQuestions(questions.map(q => {
-      if (q.id !== qId) return q;
-      return {
-        ...q,
-        options: q.options?.map(opt => opt.id === optId ? { ...opt, text: newText } : opt)
-      };
-    }));
+    updateCurrentSet((prev) =>
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        return {
+          ...q,
+          options: q.options?.map((opt) => (opt.id === optId ? { ...opt, text: newText } : opt))
+        };
+      })
+    );
   };
 
   const toggleOptionCorrectness = (qId: string, optId: string) => {
-    setQuestions(questions.map(q => {
-      if (q.id !== qId) return q;
-      return {
-        ...q,
-        options: q.options?.map(opt => ({
-          ...opt,
-          isCorrect: opt.id === optId 
-        }))
-      };
-    }));
+    updateCurrentSet((prev) =>
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        return {
+          ...q,
+          options: q.options?.map((opt) => ({
+            ...opt,
+            isCorrect: opt.id === optId
+          }))
+        };
+      })
+    );
   };
 
   const updateSubQuestionText = (qId: string, sqId: string, newText: string) => {
-    setQuestions(questions.map(q => {
-      if (q.id !== qId) return q;
-      return {
-        ...q,
-        subQuestions: q.subQuestions?.map(sq => sq.id === sqId ? { ...sq, text: newText } : sq)
-      };
-    }));
+    updateCurrentSet((prev) =>
+      prev.map((q) => {
+        if (q.id !== qId) return q;
+        return {
+          ...q,
+          subQuestions: q.subQuestions?.map((sq) => (sq.id === sqId ? { ...sq, text: newText } : sq))
+        };
+      })
+    );
   };
 
   const handlePrintClick = () => setPrintModalOpen(true);
@@ -245,6 +282,53 @@ export function PaperEditor({
   const handleSettings = (id: string) => {
     setEditingId(id);
     setSheetOpen(true);
+  };
+
+  const handleActiveSetChange = (value: string) => {
+    const typedValue = value as (typeof QUESTION_SET_OPTIONS)[number]['value'];
+    if (!availableSets.some((set) => set.value === typedValue)) {
+      return;
+    }
+
+    if (!questionSets[typedValue]) {
+      setQuestionSets((prev) => ({
+        ...prev,
+        [typedValue]: cloneQuestions(initialQuestions)
+      }));
+    }
+
+    setActiveSet(typedValue);
+    setEditingId(null);
+    setSheetOpen(false);
+    setPageBreaks([]);
+  };
+
+  const handleCreateSet = () => {
+    if (isAtSetLimit) {
+      toast({
+        title: 'Maximum sets reached',
+        description: 'Only three sets (A, B, C) are supported right now.'
+      });
+      return;
+    }
+
+    const nextDefinition = QUESTION_SET_OPTIONS.find(
+      (definition) => !availableSets.some((set) => set.value === definition.value)
+    );
+
+    if (!nextDefinition) {
+      return;
+    }
+
+    setAvailableSets((prev) => [...prev, nextDefinition]);
+    setQuestionSets((prev) => ({
+      ...prev,
+      [nextDefinition.value]: cloneQuestions(initialQuestions)
+    }));
+    setActiveSet(nextDefinition.value);
+    setEditingId(null);
+    setSheetOpen(false);
+    setPageBreaks([]);
   };
 
   const handleAddNew = (type: 'mcq' | 'cq' | 'combined' | 'writing') => {
@@ -260,24 +344,26 @@ export function PaperEditor({
   };
 
   const handleDelete = (id: string) => {
-    setQuestions(questions.filter(q => q.id !== id));
+    updateCurrentSet((prev) => prev.filter((q) => q.id !== id));
   };
 
   const handleSaveForm = (updatedQuestion: Question) => {
     if (editingId?.startsWith('new')) {
-      setQuestions([...questions, { ...updatedQuestion, id: uuidv4() }]);
+      updateCurrentSet((prev) => [...prev, { ...updatedQuestion, id: uuidv4() }]);
     } else {
-      setQuestions(questions.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
+      updateCurrentSet((prev) => prev.map((q) => (q.id === updatedQuestion.id ? updatedQuestion : q)));
     }
     setSheetOpen(false);
   };
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
-    const items = Array.from(questions);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-    setQuestions(items);
+    updateCurrentSet((prev) => {
+      const items = Array.from(prev);
+      const [reorderedItem] = items.splice(result.source.index, 1);
+      items.splice(result.destination.index, 0, reorderedItem);
+      return items;
+    });
   };
 
   const pageBoundaries = useMemo(() => {
@@ -297,15 +383,6 @@ export function PaperEditor({
   }, [pageBreaks, questions.length]);
 
   const pageCount = pageBoundaries.length;
-
-  const questionSetOptions = useMemo(
-    () => [
-      { value: 'default', label: 'Default Set' },
-      { value: 'set-a', label: 'Set A' },
-      { value: 'set-b', label: 'Set B' }
-    ],
-    []
-  );
 
   const pageHeader = (
     <div
@@ -330,6 +407,11 @@ export function PaperEditor({
         </label>
         <span>পূর্ণমান: ১০০</span>
       </div>
+      {activeSetLabel && (
+        <div className="mt-2 text-sm font-semibold uppercase tracking-wide text-gray-500">
+          {activeSetLabel}
+        </div>
+      )}
     </div>
   );
 
@@ -485,8 +567,23 @@ export function PaperEditor({
           <div>
             <h1 className="font-bold text-gray-800">প্রশ্ন এডিটর</h1>
             <p className="text-xs text-gray-500">
-              Total: {questions.length} | Marks: {questions.reduce((sum, q) => sum + q.marks, 0)} | Pages: {pageCount}
+              Total: {questions.length} | Marks: {questions.reduce((sum, q) => sum + q.marks, 0)} | Pages: {pageCount} | Current Set: {activeSetLabel || 'N/A'}
             </p>
+          </div>
+          <div className="hidden md:flex items-center gap-2 rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
+            <span>Set</span>
+            <Select value={activeSet} onValueChange={handleActiveSetChange}>
+              <SelectTrigger className="h-7 w-28 border-0 bg-transparent p-0 text-xs font-medium text-gray-700 focus-visible:ring-0">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSets.map((set) => (
+                  <SelectItem key={set.value} value={set.value}>
+                    {set.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -671,7 +768,7 @@ export function PaperEditor({
                                                                   const newSqs = q.subQuestions?.map((s) =>
                                                                     s.id === sq.id ? { ...s, marks: newMarks } : s
                                                                   );
-                                                                  setQuestions((prev) =>
+                                                                  updateCurrentSet((prev) =>
                                                                     prev.map((question) =>
                                                                       question.id === q.id
                                                                         ? { ...question, subQuestions: newSqs }
@@ -721,12 +818,12 @@ export function PaperEditor({
       <div className="no-print fixed bottom-4 left-4 right-4 z-40 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3 text-xs font-semibold text-white shadow-2xl lg:left-[19rem] lg:right-6">
         <div className="flex items-center gap-2">
           <span className="text-slate-300">Set</span>
-          <Select value={activeSet} onValueChange={setActiveSet}>
+          <Select value={activeSet} onValueChange={handleActiveSetChange}>
             <SelectTrigger className="h-9 w-40 border-slate-700 bg-slate-800 text-left text-white">
               <SelectValue placeholder="Select Set" />
             </SelectTrigger>
             <SelectContent>
-              {questionSetOptions.map((set) => (
+              {availableSets.map((set) => (
                 <SelectItem key={set.value} value={set.value}>
                   {set.label}
                 </SelectItem>
@@ -739,10 +836,11 @@ export function PaperEditor({
           <Button
             size="sm"
             variant="secondary"
-            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700"
-            onClick={() => handleAddNew('combined')}
+            className="h-9 rounded-full border border-slate-700 bg-slate-800 text-xs uppercase tracking-wide text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={handleCreateSet}
+            disabled={isAtSetLimit}
           >
-            + Set
+            + New Set
           </Button>
           <Button
             size="sm"
