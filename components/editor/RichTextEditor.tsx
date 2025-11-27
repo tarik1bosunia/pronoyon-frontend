@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useEditor, EditorContent, type Editor } from '@tiptap/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Underline } from '@tiptap/extension-underline';
 import { Link } from '@tiptap/extension-link';
@@ -37,6 +37,7 @@ export const RichTextEditor = ({
   const [isFocused, setIsFocused] = useState(false);
   const [equationEditorOpen, setEquationEditorOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -96,9 +97,26 @@ export const RichTextEditor = ({
     if (url) editor.chain().focus().setLink({ href: url }).run();
   };
 
-  const addImage = () => {
-    const url = window.prompt('Enter image URL:');
-    if (url) editor.chain().focus().setImage({ src: url }).run();
+  const handleImageButton = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    fileInputRef.current?.click();
+  };
+
+  const handleImageSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const src = typeof reader.result === 'string' ? reader.result : '';
+      if (src) {
+        editor.chain().focus().setImage({ src }).run();
+      }
+    };
+    reader.readAsDataURL(file);
+
+    // reset input so same file can be uploaded again later
+    event.target.value = '';
   };
 
   const insertEquation = (latex: string) => {
@@ -107,10 +125,16 @@ export const RichTextEditor = ({
 
   return (
     // USE cn() HERE: This allows 'border-none' from the parent to actually remove the border
-    <div className={cn("border border-input rounded-lg overflow-hidden bg-background shadow-sm transition-all focus-within:ring-2 ring-[#009d6e]/20", className)}>
+    <div
+      className={cn(
+        "border border-input rounded-lg bg-white shadow-sm transition-all focus-within:ring-2 ring-[#009d6e]/20",
+        "grid grid-rows-[auto_minmax(120px,1fr)]",
+        className
+      )}
+    >
       {/* Toolbar - Only show when focused */}
       {isFocused && (
-        <div className="flex flex-wrap items-center gap-1 p-1 border-b bg-gray-50/50 animate-in slide-in-from-top-1 duration-200">
+        <div className="flex items-center flex-wrap gap-1 px-2 py-1 border-b bg-blue-50/80 animate-in slide-in-from-top-1 duration-200">
         <Button
           type="button"
           variant="ghost"
@@ -261,10 +285,7 @@ export const RichTextEditor = ({
           type="button"
           variant="ghost"
           size="sm"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            addImage();
-          }}
+          onMouseDown={handleImageButton}
           className="h-7 w-7 p-0"
           title="Image"
         >
@@ -334,7 +355,17 @@ export const RichTextEditor = ({
       )}
 
       {/* Editor Content */}
-      <EditorContent editor={editor} />
+      <div className="bg-[#dbeafe]">
+        <EditorContent editor={editor} className="p-3" />
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageSelection}
+      />
 
       {/* Equation Editor Sheet */}
       <EquationEditor
