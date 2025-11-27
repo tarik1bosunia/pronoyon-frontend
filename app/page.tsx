@@ -1,19 +1,20 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react';
-import { PaperEditor } from '@/components/editor/PaperEditor';
+import { useRouter } from 'next/navigation';
 import { 
   DashboardSidebar, 
   DashboardHeader, 
-  SetupView, 
   QuestionBrowseView,
   FilterSidebar,
+  SetupView,
   mockQuestions,
-  type ViewMode,
-  type FilterState
+  type FilterState,
+  type ViewMode
 } from '@/features/question-bank';
 
 export default function QuestionBankUI() {
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>('setup');
   const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4', '5']); 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -81,27 +82,19 @@ export default function QuestionBankUI() {
     );
   };
 
-  const handleSetupComplete = () => {
-    setViewMode('browse');
-  };
-
   const handleSubmitQuestions = () => {
     if (selectedIds.length === 0) {
       alert("অনুগ্রহ করে অন্তত একটি প্রশ্ন সিলেক্ট করুন");
       return;
     }
-    setViewMode('editor');
+    const params = new URLSearchParams();
+    params.set('ids', selectedIds.join(','));
+    router.push(`/editor?${params.toString()}`);
   };
 
-  if (viewMode === 'editor') {
-    const selectedQuestions = filteredQuestions.filter(q => selectedIds.includes(q.id));
-    return (
-      <PaperEditor 
-        initialQuestions={selectedQuestions} 
-        onBack={() => setViewMode('browse')} 
-      />
-    );
-  }
+  const handleSetupComplete = () => {
+    setViewMode('browse');
+  };
 
   if (viewMode === 'setup') {
     return <SetupView onStart={handleSetupComplete} />;
