@@ -80,6 +80,13 @@ export const RichTextEditor = ({
     onBlur: () => setIsFocused(false),
   });
 
+  useEffect(() => {
+    if (!isMounted || !editor) return;
+    if (!editor.isFocused) {
+      editor.chain().focus('end').run();
+    }
+  }, [editor, isMounted]);
+
   if (!isMounted || !editor) {
     return null;
   }
