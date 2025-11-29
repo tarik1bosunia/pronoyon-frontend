@@ -21,6 +21,7 @@ import {
 import { InlineEditor } from './InlineEditor';
 import { UnifiedQuestionForm } from './QuestionForms';
 import { PrintPreviewModal } from './PrintPreviewModal';
+import { AddFromDBModal } from './AddFromDBModal';
 import { cn } from '@/lib/utils';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -139,6 +140,7 @@ export function PaperEditor({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSheetOpen, setSheetOpen] = useState(false);
   const [isPrintModalOpen, setPrintModalOpen] = useState(false);
+  const [isAddFromDBOpen, setIsAddFromDBOpen] = useState(false);
   const [paperTitle, setPaperTitle] = useState("জীববিজ্ঞান ১ম পত্র - মডেল টেস্ট");
   const [examDuration, setExamDuration] = useState("২ ঘন্টা ৩০ মিনিট");
   const [optionGap, setOptionGap] = useState(4);
@@ -338,9 +340,14 @@ export function PaperEditor({
   };
 
   const handleAddFromDatabase = () => {
+    setIsAddFromDBOpen(true);
+  };
+
+  const handleAddQuestionsFromDB = (questions: Question[]) => {
+    updateCurrentSet((prev) => [...prev, ...questions]);
     toast({
-      title: 'Coming soon',
-      description: 'Importing questions from the database will arrive in a future update.'
+      title: 'সফল',
+      description: `${questions.length} টি প্রশ্ন যোগ করা হয়েছে`
     });
   };
 
@@ -979,6 +986,13 @@ export function PaperEditor({
         questions={questions}
         paperTitle={paperTitle}
         examDuration={examDuration}
+      />
+
+      <AddFromDBModal
+        isOpen={isAddFromDBOpen}
+        onClose={() => setIsAddFromDBOpen(false)}
+        onAddQuestions={handleAddQuestionsFromDB}
+        existingQuestionIds={questions.map(q => q.id)}
       />
 
       {typeof isMobileSidebarOpen === 'boolean' && (
