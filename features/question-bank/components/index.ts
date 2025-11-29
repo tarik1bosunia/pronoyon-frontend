@@ -7,4 +7,6 @@ export { FilterSidebar } from './FilterSidebar';
 export { MultiSelectModal } from './MultiSelectModal';
 export { YearSelectModal } from './YearSelectModal';
 export { BoardSelectModal } from './BoardSelectModal';
+export { SchoolSelectModal } from './SchoolSelectModal';
+export { SchoolYearSelectModal } from './SchoolYearSelectModal';
 export { SetupView } from './SetupView';

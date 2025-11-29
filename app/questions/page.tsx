@@ -20,6 +20,8 @@ export default function QuestionsBrowsePage() {
     types: [],
     boards: [],
     years: [],
+    schools: [],
+    schoolYears: [],
     subjects: [],
     chapters: [],
     topics: [],
@@ -54,6 +56,14 @@ export default function QuestionsBrowsePage() {
       }
 
       if (filters.years.length > 0 && q.year && !filters.years.includes(q.year)) {
+        return false;
+      }
+
+      if (filters.schools.length > 0 && q.school && !filters.schools.includes(q.school)) {
+        return false;
+      }
+
+      if (filters.schoolYears.length > 0 && q.schoolYear && !filters.schoolYears.includes(q.schoolYear)) {
         return false;
       }
 

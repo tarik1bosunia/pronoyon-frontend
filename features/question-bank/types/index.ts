@@ -10,6 +10,8 @@ export interface FilterState {
   types: string[];
   boards: string[];
   years: string[];
+  schools: string[];
+  schoolYears: string[];
   subjects: string[];
   chapters: string[];
   topics: string[];

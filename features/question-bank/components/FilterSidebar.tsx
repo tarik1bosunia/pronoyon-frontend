@@ -6,6 +6,8 @@ import { BOARDS_LIST, SUBJECTS_WITH_CHAPTERS, SPECIAL_FILTERS } from '../constan
 import { useState } from 'react';
 import { YearSelectModal } from './YearSelectModal';
 import { BoardSelectModal } from './BoardSelectModal';
+import { SchoolSelectModal } from './SchoolSelectModal';
+import { SchoolYearSelectModal } from './SchoolYearSelectModal';
 import type { FilterState } from '../types';
 
 const QUESTION_TYPES = [
@@ -26,12 +28,15 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
     special: true,
     type: true,
     board: true,
+    school: true,
     subject: true
   });
   const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>({});
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [isYearModalOpen, setIsYearModalOpen] = useState(false);
   const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
+  const [isSchoolModalOpen, setIsSchoolModalOpen] = useState(false);
+  const [isSchoolYearModalOpen, setIsSchoolYearModalOpen] = useState(false);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -95,11 +100,21 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
     onFiltersChange({ ...filters, boards });
   };
 
+  const handleSchoolsChange = (schools: string[]) => {
+    onFiltersChange({ ...filters, schools });
+  };
+
+  const handleSchoolYearsChange = (schoolYears: string[]) => {
+    onFiltersChange({ ...filters, schoolYears });
+  };
+
   const handleReset = () => {
     onFiltersChange({
       types: [],
       boards: [],
       years: [],
+      schools: [],
+      schoolYears: [],
       subjects: [],
       chapters: [],
       topics: [],
@@ -260,6 +275,70 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
           )}
         </div>
 
+        {/* School/College Filter */}
+        <div className="border-b">
+          <button
+            onClick={() => toggleSection('school')}
+            className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <span className="font-semibold text-gray-800 text-sm">স্কুল/কলেজ</span>
+            <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${expandedSections.school ? 'rotate-180' : ''}`} />
+          </button>
+          {expandedSections.school && (
+            <div className="px-6 pb-4 space-y-3">
+              {/* School Year Selection */}
+              <div className="pb-3 border-b border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsSchoolYearModalOpen(true)}
+                  className="w-full justify-between"
+                >
+                  <span className="text-sm">
+                    {filters.schoolYears.length > 0 
+                      ? `${filters.schoolYears.length} টি বছর নির্বাচিত` 
+                      : 'বছর নির্বাচন করুন'}
+                  </span>
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+                {filters.schoolYears.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {filters.schoolYears.map(year => (
+                      <span key={year} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {year}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* School/College Selection */}
+              <div>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsSchoolModalOpen(true)}
+                  className="w-full justify-between"
+                >
+                  <span className="text-sm">
+                    {filters.schools.length > 0 
+                      ? `${filters.schools.length} টি স্কুল/কলেজ নির্বাচিত` 
+                      : 'স্কুল/কলেজ নির্বাচন করুন'}
+                  </span>
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+                {filters.schools.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {filters.schools.map(school => (
+                      <span key={school} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {school}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Subject, Chapter & Topic Filter */}
         <div className="border-b">
           <button
@@ -381,6 +460,18 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
         onClose={() => setIsBoardModalOpen(false)}
         selectedBoards={filters.boards}
         onBoardsChange={handleBoardsChange}
+      />
+      <SchoolYearSelectModal
+        isOpen={isSchoolYearModalOpen}
+        onClose={() => setIsSchoolYearModalOpen(false)}
+        selectedYears={filters.schoolYears}
+        onYearsChange={handleSchoolYearsChange}
+      />
+      <SchoolSelectModal
+        isOpen={isSchoolModalOpen}
+        onClose={() => setIsSchoolModalOpen(false)}
+        selectedSchools={filters.schools}
+        onSchoolsChange={handleSchoolsChange}
       />
       
       {/* Desktop Sidebar - Always visible on xl screens */}
