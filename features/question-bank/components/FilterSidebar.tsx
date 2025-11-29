@@ -5,6 +5,7 @@ import { Filter, RotateCcw, ChevronDown, Maximize2, ChevronRight } from 'lucide-
 import { BOARDS_LIST, SUBJECTS_WITH_CHAPTERS, SPECIAL_FILTERS } from '../constants';
 import { useState } from 'react';
 import { YearSelectModal } from './YearSelectModal';
+import { BoardSelectModal } from './BoardSelectModal';
 import type { FilterState } from '../types';
 
 const QUESTION_TYPES = [
@@ -30,6 +31,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
   const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>({});
   const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [isYearModalOpen, setIsYearModalOpen] = useState(false);
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -87,6 +89,10 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
 
   const handleYearsChange = (years: string[]) => {
     onFiltersChange({ ...filters, years });
+  };
+
+  const handleBoardsChange = (boards: string[]) => {
+    onFiltersChange({ ...filters, boards });
   };
 
   const handleReset = () => {
@@ -201,7 +207,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
           </button>
           {expandedSections.board && (
             <div className="px-6 pb-4 space-y-3">
-              {/* Year under Board - First */}
+              {/* Year Selection */}
               <div className="pb-3 border-b border-gray-200">
                 <Button
                   variant="outline"
@@ -226,23 +232,30 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
                 )}
               </div>
 
-              {/* Board Checkboxes */}
-              {BOARDS_LIST.map(board => (
-                <div key={board} className="flex items-center gap-3 group">
-                  <Checkbox 
-                    id={`board-${board}`} 
-                    checked={filters.boards.includes(board)}
-                    onCheckedChange={() => handleToggleBoard(board)}
-                    className="border-gray-300" 
-                  /> 
-                  <label 
-                    htmlFor={`board-${board}`} 
-                    className="text-sm text-gray-700 cursor-pointer group-hover:text-gray-900"
-                  >
-                    {board} বোর্ড
-                  </label>
-                </div>
-              ))}
+              {/* Board Selection */}
+              <div>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsBoardModalOpen(true)}
+                  className="w-full justify-between"
+                >
+                  <span className="text-sm">
+                    {filters.boards.length > 0 
+                      ? `${filters.boards.length} টি বোর্ড নির্বাচিত` 
+                      : 'বোর্ড নির্বাচন করুন'}
+                  </span>
+                  <Maximize2 className="h-4 w-4" />
+                </Button>
+                {filters.boards.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {filters.boards.map(board => (
+                      <span key={board} className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {board}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -362,6 +375,12 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
         onClose={() => setIsYearModalOpen(false)}
         selectedYears={filters.years}
         onYearsChange={handleYearsChange}
+      />
+      <BoardSelectModal
+        isOpen={isBoardModalOpen}
+        onClose={() => setIsBoardModalOpen(false)}
+        selectedBoards={filters.boards}
+        onBoardsChange={handleBoardsChange}
       />
       
       {/* Desktop Sidebar - Always visible on xl screens */}
