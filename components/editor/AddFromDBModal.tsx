@@ -144,7 +144,7 @@ export function AddFromDBModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-0">
+      <DialogContent className="max-w-7xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="text-xl font-semibold">ডাটাবেস থেকে প্রশ্ন যোগ করুন</DialogTitle>
         </DialogHeader>
@@ -307,52 +307,64 @@ export function AddFromDBModal({
                 <div
                   key={question.id}
                   className={cn(
-                    "p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer",
-                    selectedIds.includes(question.id) && "bg-blue-50 border-blue-300"
+                    "group relative rounded-xl border-2 bg-white p-5 transition-all duration-200 cursor-pointer",
+                    selectedIds.includes(question.id)
+                      ? "border-blue-500 bg-blue-50 shadow-md"
+                      : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
                   )}
                   onClick={() => handleToggleSelection(question.id)}
                 >
-                  <div className="flex gap-3">
-                    <Checkbox
-                      checked={selectedIds.includes(question.id)}
-                      onCheckedChange={() => handleToggleSelection(question.id)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
+                  <div className="flex gap-4">
+                    <div className="flex-shrink-0 pt-1">
+                      <Checkbox
+                        checked={selectedIds.includes(question.id)}
+                        onCheckedChange={() => handleToggleSelection(question.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-5 w-5"
+                      />
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                          <p className="text-base font-medium text-gray-900 leading-relaxed line-clamp-3">
                             {question.text}
                           </p>
                         </div>
-                        <span className={cn(
-                          "px-2 py-0.5 text-xs font-medium rounded",
-                          question.type === 'mcq' && "bg-green-100 text-green-700",
-                          question.type === 'cq' && "bg-blue-100 text-blue-700",
-                          question.type === 'writing' && "bg-purple-100 text-purple-700"
-                        )}>
-                          {question.type === 'mcq' ? 'MCQ' : question.type === 'cq' ? 'সৃজনশীল' : 'লিখিত'}
-                        </span>
+                        <div className="flex-shrink-0">
+                          <span className={cn(
+                            "inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold",
+                            question.type === 'mcq' && "bg-emerald-100 text-emerald-700",
+                            question.type === 'cq' && "bg-blue-100 text-blue-700",
+                            question.type === 'writing' && "bg-purple-100 text-purple-700"
+                          )}>
+                            {question.type === 'mcq' ? 'MCQ' : question.type === 'cq' ? 'সৃজনশীল' : 'লিখিত'}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                      <div className="flex flex-wrap gap-2">
                         {question.subject && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded">
-                            {question.subject}
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-xs font-medium">
+                            📚 {question.subject}
                           </span>
                         )}
                         {question.chapter && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded">
-                            {question.chapter}
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 text-xs font-medium">
+                            📖 {question.chapter}
+                          </span>
+                        )}
+                        {question.topic && (
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-pink-50 text-pink-700 text-xs font-medium">
+                            🎯 {question.topic}
                           </span>
                         )}
                         {question.board && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded">
-                            {question.board}
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-xs font-medium">
+                            🏛️ {question.board}
                           </span>
                         )}
                         {question.year && (
-                          <span className="px-2 py-0.5 bg-gray-100 rounded">
-                            {question.year}
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-teal-50 text-teal-700 text-xs font-medium">
+                            📅 {question.year}
                           </span>
                         )}
                       </div>
