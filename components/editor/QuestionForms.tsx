@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RichTextEditor } from './RichTextEditor';
-import { Plus, Trash2, CheckCircle, GripVertical, FileText, RefreshCw } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, GripVertical, FileText, RefreshCw, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,6 +17,7 @@ interface Props {
 export function UnifiedQuestionForm({ question, onSave, onExchange }: Props) {
   const [text, setText] = useState(question.text || '');
   const [stem, setStem] = useState(question.stem || '');
+  const [showStemField, setShowStemField] = useState(!!question.stem?.trim());
   const [marks, setMarks] = useState(question.marks);
   
   // MCQ State
@@ -59,28 +60,51 @@ export function UnifiedQuestionForm({ question, onSave, onExchange }: Props) {
 
   return (
     <div className="space-y-8 pb-20">
-      {/* Optional Stem / Uddipok */}
+      {/* Optional Stem / Uddipok with hover button */}
       {question.type === 'mcq' && (!question.romanStatements || question.romanStatements.length === 0) && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold text-gray-700">উদ্দীপক (ঐচ্ছিক)</Label>
-            {stem?.trim() && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-xs text-red-500 hover:text-red-600"
-                onClick={() => setStem('')}
-              >
-                মুছে ফেলুন
-              </Button>
-            )}
-          </div>
-          <RichTextEditor
-            content={stem}
-            onChange={setStem}
-            placeholder="উদ্দীপক লিখুন (যদি প্রযোজ্য হয়)"
-            className="min-h-[120px]"
-          />
+          {!showStemField && !stem?.trim() ? (
+            <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-400 hover:bg-blue-50/30 transition-all duration-200 group">
+              <div className="flex flex-col items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="default"
+                  className="text-sm text-blue-700 border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-500 shadow-sm hover:shadow-md transition-all font-medium"
+                  onClick={() => setShowStemField(true)}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  উদ্দীপক যুক্ত করুন
+                </Button>
+                <p className="text-xs text-gray-500 text-center">
+                  উদ্দীপক প্রশ্নের উপরে প্রদর্শিত হবে (ঐচ্ছিক)
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold text-gray-700">উদ্দীপক</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-red-500 hover:text-red-600"
+                  onClick={() => {
+                    setStem('');
+                    setShowStemField(false);
+                  }}
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  মুছে ফেলুন
+                </Button>
+              </div>
+              <RichTextEditor
+                content={stem}
+                onChange={setStem}
+                placeholder="উদ্দীপক লিখুন..."
+                className="min-h-[120px]"
+              />
+            </>
+          )}
         </div>
       )}
 

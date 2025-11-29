@@ -62,14 +62,19 @@ interface PaperEditorProps {
 // --- HELPER: Combined Question Component ---
 const CombinedQuestionEditor = ({ 
   question, 
-  onUpdate 
+  onUpdate,
+  showStem,
+  onToggleStem
 }: { 
   question: Question; 
-  onUpdate: (updates: Partial<Question>) => void; 
+  onUpdate: (updates: Partial<Question>) => void;
+  showStem: boolean;
+  onToggleStem: (show: boolean) => void;
 }) => {
   
   const statements = question.romanStatements || ["", "", ""];
-  const stem = question.stem || question.text || ""; 
+  const stem = question.stem ?? "";
+  const hasStem = stem.trim().length > 0;
   const footer = question.footer || "নিচের কোনটি সঠিক?";
 
   const updateStem = (val: string) => onUpdate({ stem: val });
@@ -82,15 +87,31 @@ const CombinedQuestionEditor = ({
 
   return (
     <div className="space-y-2">
-      <div className="mb-2">
-        <InlineEditor
-          content={stem ?? ''}
-          onChange={updateStem}
-          placeholder="উদ্দীপক যোগ করুন (ঐচ্ছিক)"
-          className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-          density="compact"
-        />
-      </div>
+      {/* Hover button for উদ্দীপক - shows when no stem */}
+      {/* Show stem editor only if toggled on or has content */}
+      {(showStem || hasStem) && (
+        <div className="mb-2 relative group/stem-content">
+          <InlineEditor
+            content={stem}
+            onChange={updateStem}
+            placeholder="উদ্দীপক লিখুন..."
+            className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+            density="compact"
+          />
+          {/* Remove button */}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="absolute -top-6 right-0 opacity-0 group-hover/stem-content:opacity-100 transition-opacity text-xs h-5 px-2 text-red-500 hover:text-red-600 hover:bg-red-50 no-print"
+            onClick={() => {
+              onUpdate({ stem: '' });
+              onToggleStem(false);
+            }}
+          >
+            <X className="h-3 w-3 mr-1" /> মুছুন
+          </Button>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
         {['i', 'ii', 'iii'].map((roman, idx) => (
@@ -148,6 +169,7 @@ export function PaperEditor({
   const [optionBlockGap, setOptionBlockGap] = useState(8);
   const [optionPadding, setOptionPadding] = useState(2);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
+  const [showStemForQuestion, setShowStemForQuestion] = useState<Record<string, boolean>>({});
   const pageContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -713,6 +735,11 @@ export function PaperEditor({
                                   <div className="space-y-3">
                                     {pageQuestions.map((q, localIdx) => {
                                       const questionIndex = span.start + localIdx;
+                                      const showStem = showStemForQuestion[q.id] || false;
+                                      const hasStem = Boolean(q.stem?.trim());
+                                      const shouldShowStemButton = q.type === 'mcq' && !showStem && !hasStem;
+                                      const isCombined = Boolean(q.romanStatements && q.romanStatements.length > 0);
+
                                       return (
                                         <Draggable key={q.id} draggableId={q.id} index={questionIndex}>
                                           {(dragProvided, snapshot) => (
@@ -748,22 +775,54 @@ export function PaperEditor({
                                                 </span>
 
                                                 <div className="flex-1 space-y-1">
+                                                  {/* Hover button for উদ্দীপক */}
+                                                  {shouldShowStemButton && (
+                                                    <div className="relative group/stem-trigger">
+                                                      <div className="absolute -top-3 left-0 right-0 h-3 bg-transparent"></div>
+                                                      <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="absolute -top-7 left-0 opacity-0 group-hover/stem-trigger:opacity-100 transition-all duration-200 text-xs h-7 px-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-400 text-blue-700 hover:from-blue-100 hover:to-indigo-100 hover:border-blue-500 shadow-sm hover:shadow-md z-20 no-print font-medium"
+                                                        onClick={() => setShowStemForQuestion(prev => ({ ...prev, [q.id]: true }))}
+                                                      >
+                                                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                                                        উদ্দীপক যুক্ত করুন
+                                                      </Button>
+                                                    </div>
+                                                  )}
+
+                                                  {/* Show উদ্দীপক editor if toggled on or if it has content - for non-combined questions */}
+                                                  {!isCombined && (showStem || hasStem) && (
+                                                    <div className="mb-2 relative group/stem-content">
+                                                      <InlineEditor
+                                                        content={q.stem ?? ''}
+                                                        onChange={(val) => updateQuestion(q.id, { stem: val })}
+                                                        placeholder="উদ্দীপক লিখুন..."
+                                                        className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                                        density="compact"
+                                                      />
+                                                      {/* Remove button */}
+                                                      <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="absolute -top-6 right-0 opacity-0 group-hover/stem-content:opacity-100 transition-opacity text-xs h-5 px-2 text-red-500 hover:text-red-600 hover:bg-red-50 no-print"
+                                                        onClick={() => {
+                                                          updateQuestion(q.id, { stem: '' });
+                                                          setShowStemForQuestion(prev => ({ ...prev, [q.id]: false }));
+                                                        }}
+                                                      >
+                                                        <X className="h-3 w-3 mr-1" /> মুছুন
+                                                      </Button>
+                                                    </div>
+                                                  )}
+
                                                   <div className="text-gray-900 font-serif text-lg leading-snug">
-                                                    {(!q.romanStatements || q.romanStatements.length === 0) && (
-                                                      <div className="mb-2">
-                                                        <InlineEditor
-                                                          content={q.stem ?? ''}
-                                                          onChange={(val) => updateQuestion(q.id, { stem: val })}
-                                                          placeholder="উদ্দীপক যোগ করুন (ঐচ্ছিক)"
-                                                          className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
-                                                          density="compact"
-                                                        />
-                                                      </div>
-                                                    )}
-                                                    {q.romanStatements && q.romanStatements.length > 0 ? (
+                                                    {isCombined ? (
                                                       <CombinedQuestionEditor
                                                         question={q}
                                                         onUpdate={(updates) => updateQuestion(q.id, updates)}
+                                                        showStem={showStem}
+                                                        onToggleStem={(show) => setShowStemForQuestion(prev => ({ ...prev, [q.id]: show }))}
                                                       />
                                                     ) : (
                                                       <InlineEditor
