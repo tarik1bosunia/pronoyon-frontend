@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Question } from '@/types/question';
+import { mockQuestions } from '@/features/question-bank/data/mockQuestions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -348,6 +349,38 @@ export function PaperEditor({
     toast({
       title: 'সফল',
       description: `${questions.length} টি প্রশ্ন যোগ করা হয়েছে`
+    });
+  };
+
+  const handleExchangeQuestion = (currentQuestion: Question) => {
+    // Find other questions from the same chapter, excluding the current question
+    const alternativeQuestions = mockQuestions.filter(q => 
+      q.chapter === currentQuestion.chapter &&
+      q.id !== currentQuestion.id &&
+      !questions.some(existing => existing.id === q.id) // Don't show questions already in the editor
+    );
+
+    if (alternativeQuestions.length === 0) {
+      toast({
+        title: 'কোন বিকল্প নেই',
+        description: 'এই অধ্যায়ে আর কোন প্রশ্ন পাওয়া যায়নি',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    // Pick a random question from alternatives
+    const randomQuestion = alternativeQuestions[Math.floor(Math.random() * alternativeQuestions.length)];
+    
+    // Replace the current question with the new one
+    updateCurrentSet((prev) => prev.map((q) => 
+      q.id === currentQuestion.id ? { ...randomQuestion, id: currentQuestion.id } : q
+    ));
+    
+    setSheetOpen(false);
+    toast({
+      title: 'প্রশ্ন পরিবর্তিত হয়েছে',
+      description: `${currentQuestion.chapter} থেকে নতুন প্রশ্ন যোগ করা হয়েছে`
     });
   };
 
@@ -975,6 +1008,7 @@ export function PaperEditor({
                 : questions.find(q => q.id === editingId)!
               }
               onSave={handleSaveForm}
+              onExchange={handleExchangeQuestion}
             />
           </div>
         </SheetContent>

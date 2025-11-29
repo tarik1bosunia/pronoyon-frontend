@@ -4,16 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RichTextEditor } from './RichTextEditor';
-import { Plus, Trash2, CheckCircle, GripVertical, FileText } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, GripVertical, FileText, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Props {
   question: Question;
   onSave: (q: Question) => void;
+  onExchange?: (currentQuestion: Question) => void;
 }
 
-export function UnifiedQuestionForm({ question, onSave }: Props) {
+export function UnifiedQuestionForm({ question, onSave, onExchange }: Props) {
   const [text, setText] = useState(question.text || '');
   const [stem, setStem] = useState(question.stem || '');
   const [marks, setMarks] = useState(question.marks);
@@ -230,6 +231,17 @@ export function UnifiedQuestionForm({ question, onSave }: Props) {
 
       {/* Footer Actions */}
       <div className="flex gap-4 pt-6 border-t mt-8 bg-white sticky bottom-0 z-10 p-4 -mx-6 -mb-6 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        {/* Question Exchange Button - Only show if question has chapter info and onExchange is provided */}
+        {onExchange && question.chapter && !question.id?.startsWith('new') && (
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2 h-11 text-base border-blue-500 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+            onClick={() => onExchange(question)}
+          >
+            <RefreshCw className="w-4 h-4" />
+            প্রশ্ন পরিবর্তন
+          </Button>
+        )}
         <Button className="flex-1 bg-[#009d6e] hover:bg-[#008a60] h-11 text-base font-medium" onClick={handleSave}>
           সংরক্ষণ করুন
         </Button>
