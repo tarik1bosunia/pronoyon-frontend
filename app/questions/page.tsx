@@ -21,6 +21,7 @@ export default function QuestionsBrowsePage() {
     boards: [],
     years: [],
     subjects: [],
+    chapters: [],
     topics: [],
     specialFilters: []
   });
@@ -56,21 +57,21 @@ export default function QuestionsBrowsePage() {
         return false;
       }
 
-      if (filters.topics.length > 0 && q.topic && !filters.topics.includes(q.topic)) {
+      if (filters.subjects.length > 0 && q.subject && !filters.subjects.includes(q.subject)) {
         return false;
       }
 
-      if (
-        filters.subjects.length > 0 &&
-        q.topic &&
-        !filters.subjects.some((subject) => q.topic?.includes(subject))
-      ) {
+      if (filters.chapters.length > 0 && q.chapter && !filters.chapters.includes(q.chapter)) {
+        return false;
+      }
+
+      if (filters.topics.length > 0 && q.topic && !filters.topics.includes(q.topic)) {
         return false;
       }
 
       if (filters.specialFilters.length > 0) {
         const questionTags = q.specialTags ?? [];
-        if (!questionTags.some((tag) => filters.specialFilters.includes(tag))) {
+        if (!questionTags.some((tag: string) => filters.specialFilters.includes(tag))) {
           return false;
         }
       }

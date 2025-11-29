@@ -33,6 +33,8 @@ export interface Question {
   // CQ & Writing Specifics
   subQuestions?: CQSubQuestion[];
   
+  subject?: string;
+  chapter?: string;
   topic?: string;
   board?: string;
   year?: string;

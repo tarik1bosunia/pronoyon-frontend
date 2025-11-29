@@ -2,7 +2,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Filter, RotateCcw, ChevronDown, Maximize2, ChevronRight } from 'lucide-react';
-import { BOARDS_LIST, SUBJECTS_WITH_TOPICS, SPECIAL_FILTERS } from '../constants';
+import { BOARDS_LIST, SUBJECTS_WITH_CHAPTERS, SPECIAL_FILTERS } from '../constants';
 import { useState } from 'react';
 import { YearSelectModal } from './YearSelectModal';
 import type { FilterState } from '../types';
@@ -28,6 +28,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
     subject: true
   });
   const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>({});
+  const [expandedChapters, setExpandedChapters] = useState<Record<string, boolean>>({});
   const [isYearModalOpen, setIsYearModalOpen] = useState(false);
 
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -36,6 +37,10 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
 
   const toggleSubject = (subject: string) => {
     setExpandedSubjects(prev => ({ ...prev, [subject]: !prev[subject] }));
+  };
+
+  const toggleChapter = (chapter: string) => {
+    setExpandedChapters(prev => ({ ...prev, [chapter]: !prev[chapter] }));
   };
 
   const handleToggleType = (type: string) => {
@@ -66,6 +71,13 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
     onFiltersChange({ ...filters, topics: newTopics });
   };
 
+  const handleToggleChapter = (chapter: string) => {
+    const newChapters = filters.chapters.includes(chapter)
+      ? filters.chapters.filter(c => c !== chapter)
+      : [...filters.chapters, chapter];
+    onFiltersChange({ ...filters, chapters: newChapters });
+  };
+
   const handleToggleSpecialFilter = (value: string) => {
     const newSpecialFilters = filters.specialFilters.includes(value)
       ? filters.specialFilters.filter(tag => tag !== value)
@@ -83,6 +95,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
       boards: [],
       years: [],
       subjects: [],
+      chapters: [],
       topics: [],
       specialFilters: []
     });
@@ -234,7 +247,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
           )}
         </div>
 
-        {/* Subject & Topic Filter */}
+        {/* Subject, Chapter & Topic Filter */}
         <div className="border-b">
           <button
             onClick={() => toggleSection('subject')}
@@ -245,7 +258,7 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
           </button>
           {expandedSections.subject && (
             <div className="pb-4 max-h-[500px] overflow-y-auto">
-              {SUBJECTS_WITH_TOPICS.map((item) => (
+              {SUBJECTS_WITH_CHAPTERS.map((item) => (
                 <div key={item.subject} className="border-b last:border-b-0">
                   {/* Subject Header */}
                   <div className="px-6 py-3">
@@ -275,23 +288,60 @@ export function FilterSidebar({ isOpen, onClose, filters, onFiltersChange }: Pro
                     </div>
                   </div>
 
-                  {/* Topics under Subject */}
+                  {/* Chapters under Subject */}
                   {expandedSubjects[item.subject] && (
-                    <div className="px-6 pb-3 space-y-2 bg-gray-50/50">
-                      {item.topics.map(topic => (
-                        <div key={topic} className="flex items-center gap-3 group pl-6">
-                          <Checkbox 
-                            id={`topic-${topic}`} 
-                            checked={filters.topics.includes(topic)}
-                            onCheckedChange={() => handleToggleTopic(topic)}
-                            className="border-gray-300" 
-                          /> 
-                          <label 
-                            htmlFor={`topic-${topic}`} 
-                            className="text-sm text-gray-600 cursor-pointer group-hover:text-gray-900 leading-snug"
-                          >
-                            {topic}
-                          </label>
+                    <div className="bg-gray-50/50">
+                      {item.chapters.map((chapterItem) => (
+                        <div key={chapterItem.chapter} className="border-t">
+                          {/* Chapter Header */}
+                          <div className="px-6 py-2 pl-10">
+                            <div className="flex items-center gap-3 group">
+                              <Checkbox 
+                                id={`chapter-${chapterItem.chapter}`} 
+                                checked={filters.chapters.includes(chapterItem.chapter)}
+                                onCheckedChange={() => handleToggleChapter(chapterItem.chapter)}
+                                className="border-gray-300" 
+                              /> 
+                              <label 
+                                htmlFor={`chapter-${chapterItem.chapter}`} 
+                                className="text-sm font-medium text-gray-700 cursor-pointer group-hover:text-gray-900 flex-1"
+                              >
+                                {chapterItem.chapter}
+                              </label>
+                              <button
+                                onClick={() => toggleChapter(chapterItem.chapter)}
+                                className="p-1 hover:bg-gray-100 rounded"
+                              >
+                                <ChevronRight 
+                                  className={`h-4 w-4 text-gray-500 transition-transform ${
+                                    expandedChapters[chapterItem.chapter] ? 'rotate-90' : ''
+                                  }`} 
+                                />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Topics under Chapter */}
+                          {expandedChapters[chapterItem.chapter] && (
+                            <div className="pb-3 bg-gray-100/50">
+                              {chapterItem.topics.map((topic) => (
+                                <div key={topic} className="flex items-center gap-3 group pl-16 py-1">
+                                  <Checkbox 
+                                    id={`topic-${topic}`} 
+                                    checked={filters.topics.includes(topic)}
+                                    onCheckedChange={() => handleToggleTopic(topic)}
+                                    className="border-gray-300" 
+                                  /> 
+                                  <label 
+                                    htmlFor={`topic-${topic}`} 
+                                    className="text-sm text-gray-600 cursor-pointer group-hover:text-gray-900 leading-snug"
+                                  >
+                                    {topic}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

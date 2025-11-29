@@ -11,6 +11,7 @@ export interface FilterState {
   boards: string[];
   years: string[];
   subjects: string[];
+  chapters: string[];
   topics: string[];
   specialFilters: string[];
 }

@@ -14,7 +14,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'ঢাকা বোর্ড',
     year: '২০২৩',
-    topic: 'কোষ ও কোষের গঠন',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'কোষ ও কোষের গঠন',
+    topic: 'মাইটোকন্ড্রিয়া',
     specialTags: ['quick_revision']
   },
   {
@@ -30,7 +32,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'রাজশাহী বোর্ড',
     year: '২০২২',
-    topic: 'কোষ ও কোষের গঠন',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'কোষ ও কোষের গঠন',
+    topic: 'কোষ তত্ত্ব',
     specialTags: ['board_standard']
   },
   {
@@ -53,7 +57,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'যশোর বোর্ড',
     year: '২০২১',
-    topic: 'কোষ রসায়ন',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'কোষ রসায়ন',
+    topic: 'নিউক্লিক এসিড',
     specialTags: ['creative_focus']
   },
   {
@@ -69,7 +75,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'সিলেট বোর্ড',
     year: '২০২০',
-    topic: 'কোষ বিভাজন',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'কোষ বিভাজন',
+    topic: 'মিয়োসিস',
     specialTags: ['creative_focus', 'model_test']
   },
   {
@@ -84,7 +92,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'বরিশাল বোর্ড',
     year: '২০১৯',
-    topic: 'কোষ ও কোষের গঠন',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'কোষ ও কোষের গঠন',
+    topic: 'নিউক্লিয়াস',
     specialTags: ['model_test']
   },
   {
@@ -100,7 +110,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'ঢাকা বোর্ড',
     year: '২০২৩',
-    topic: 'প্রকাশ সংশ্লেষণ',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'উদ্ভিদ শারীরতত্ত্ব',
+    topic: 'সালোকসংশ্লেষণ',
     specialTags: ['quick_revision']
   },
   {
@@ -116,7 +128,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'রাজশাহী বোর্ড',
     year: '২০২২',
-    topic: 'স্থিতিশীলতা',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'উদ্ভিদ শারীরতত্ত্ব',
+    topic: 'প্রস্বেদন',
     specialTags: ['board_standard']
   },
   {
@@ -132,7 +146,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'চট্টগ্রাম বোর্ড',
     year: '২০২১',
-    topic: 'রক্ত ও সঞ্চালন',
+    subject: 'জীববিজ্ঞান ২য় পত্র',
+    chapter: 'মানব শারীরতত্ত্ব',
+    topic: 'রক্ত সঞ্চালন',
     specialTags: ['board_standard']
   },
   {
@@ -148,7 +164,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'যশোর বোর্ড',
     year: '২০২০',
-    topic: 'জিনতত্ত্ব',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'জীবপ্রযুক্তি',
+    topic: 'জেনেটিক ইঞ্জিনিয়ারিং',
     specialTags: ['creative_focus']
   },
   {
@@ -164,7 +182,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'সিলেট বোর্ড',
     year: '২০১৯',
-    topic: 'অন্ত:স্রাব গ্রন্থি',
+    subject: 'জীববিজ্ঞান ২য় পত্র',
+    chapter: 'মানব শারীরতত্ত্ব',
+    topic: 'স্নায়ুতন্ত্র',
     specialTags: ['quick_revision']
   },
   {
@@ -180,7 +200,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'বরিশাল বোর্ড',
     year: '২০১৮',
-    topic: 'কোষ অঙ্গাণু',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'কোষ ও কোষের গঠন',
+    topic: 'নিউক্লিয়াস',
     specialTags: ['board_standard', 'quick_revision']
   },
   {
@@ -196,7 +218,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'দিনাজপুর বোর্ড',
     year: '২০২১',
-    topic: 'ভ্রূণবিদ্যা',
+    subject: 'জীববিজ্ঞান ২য় পত্র',
+    chapter: 'মানব শারীরতত্ত্ব',
+    topic: 'রক্ত সঞ্চালন',
     specialTags: ['model_test']
   },
   {
@@ -212,7 +236,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'কুমিল্লা বোর্ড',
     year: '২০২২',
-    topic: 'পুষ্টি ও খাদ্য',
+    subject: 'জীববিজ্ঞান ২য় পত্র',
+    chapter: 'মানব শারীরতত্ত্ব',
+    topic: 'পরিপাক',
     specialTags: ['quick_revision']
   },
   {
@@ -228,7 +254,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'ময়মনসিংহ বোর্ড',
     year: '২০২০',
-    topic: 'পরিবেশবিদ্যা',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'জীবের পরিবেশ, বিস্তার ও সংরক্ষণ',
+    topic: 'ইকোসিস্টেম',
     specialTags: ['creative_focus']
   },
   {
@@ -244,7 +272,9 @@ export const mockQuestions: Question[] = [
     ],
     board: 'রংপুর বোর্ড',
     year: '২০২৩',
-    topic: 'জিনতত্ত্ব',
+    subject: 'জীববিজ্ঞান ১ম পত্র',
+    chapter: 'কোষ বিভাজন',
+    topic: 'কোষচক্র',
     specialTags: ['board_standard']
   }
 ];
