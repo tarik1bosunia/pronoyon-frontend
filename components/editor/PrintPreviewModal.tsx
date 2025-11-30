@@ -37,7 +37,7 @@ export function PrintPreviewModal({
   paperTitle,
   examDuration
 }: PrintPreviewModalProps) {
-  const [columns, setColumns] = useState<1 | 2 | 3>(1);
+  const [columns, setColumns] = useState<1 | 2>(1);
   const [textSize, setTextSize] = useState<'medium' | 'large' | 'big'>('large');
   // Added '4' for full horizontal inline options
   const [optionLayout, setOptionLayout] = useState<'1' | '2' | '4'>('4'); 
@@ -163,16 +163,16 @@ export function PrintPreviewModal({
               <h3 className="font-bold text-gray-800 text-lg">Number of Columns</h3>
               <RadioGroup 
                 value={columns.toString()} 
-                onValueChange={(v) => setColumns(parseInt(v) as 1|2|3)}
+                onValueChange={(v) => setColumns(parseInt(v) as 1|2)}
                 className="flex gap-4"
               >
-                {[1, 2, 3].map((num) => (
+                {[1, 2].map((num) => (
                   <div key={num} className="flex flex-col items-center gap-2">
                     <div className={cn(
                       "w-16 h-20 border-2 rounded-lg flex gap-1 p-1 cursor-pointer transition-all",
                       columns === num ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
                     )}
-                    onClick={() => setColumns(num as 1|2|3)}
+                    onClick={() => setColumns(num as 1|2)}
                     >
                       {Array.from({ length: num }).map((_, i) => (
                         <div key={i} className="flex-1 bg-gray-200 rounded-sm" />
