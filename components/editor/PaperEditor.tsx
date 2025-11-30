@@ -17,7 +17,7 @@ import {
 import { 
   ArrowLeft, Save, Printer, Trash2, 
   GripVertical, Plus, FileText, BookOpen, Settings, 
-  ListChecks, PenTool, Menu, X
+  ListChecks, PenTool, Menu, X, Shuffle
 } from 'lucide-react';
 import { InlineEditor } from './InlineEditor';
 import { UnifiedQuestionForm } from './QuestionForms';
@@ -355,6 +355,45 @@ export function PaperEditor({
     setEditingId(null);
     setSheetOpen(false);
     setPageBreaks([]);
+  };
+
+  const handleShuffleAndCreateSet = () => {
+    if (isAtSetLimit) {
+      toast({
+        title: 'Maximum sets reached',
+        description: 'Only three sets (A, B, C) are supported right now.'
+      });
+      return;
+    }
+
+    const nextDefinition = QUESTION_SET_OPTIONS.find(
+      (definition) => !availableSets.some((set) => set.value === definition.value)
+    );
+
+    if (!nextDefinition) {
+      return;
+    }
+
+    // Shuffle current set questions
+    const shuffledQuestions = [...questions]
+      .map((q) => ({ q, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ q }) => ({ ...q }));
+
+    setAvailableSets((prev) => [...prev, nextDefinition]);
+    setQuestionSets((prev) => ({
+      ...prev,
+      [nextDefinition.value]: shuffledQuestions
+    }));
+    setActiveSet(nextDefinition.value);
+    setEditingId(null);
+    setSheetOpen(false);
+    setPageBreaks([]);
+    
+    toast({
+      title: 'Set created',
+      description: `${nextDefinition.label} created with shuffled questions from current set`
+    });
   };
 
   const handleAddNew = (type: 'mcq' | 'cq' | 'combined' | 'writing') => {
@@ -981,6 +1020,15 @@ export function PaperEditor({
             disabled={isAtSetLimit}
           >
             + New Set
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-9 rounded-full border border-slate-700 bg-purple-600 text-xs uppercase tracking-wide text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={handleShuffleAndCreateSet}
+            disabled={isAtSetLimit}
+          >
+            <Shuffle className="h-3.5 w-3.5 mr-1.5" /> Shuffle Set
           </Button>
           <Button
             size="sm"
