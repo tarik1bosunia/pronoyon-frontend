@@ -42,10 +42,29 @@ export function PrintPreviewModal({
   // Added '4' for full horizontal inline options
   const [optionLayout, setOptionLayout] = useState<'1' | '2' | '4'>('4'); 
   const [printMode, setPrintMode] = useState<'question' | 'solution' | 'both'>('question');
+  const [numberingStyle, setNumberingStyle] = useState<'english' | 'bangla'>('bangla');
   const [showAnswer, setShowAnswer] = useState(false);
 
   const handleSystemPrint = () => {
     window.print();
+  };
+
+  const getQuestionNumber = (index: number) => {
+    if (numberingStyle === 'english') {
+      return (index + 1).toString();
+    } else {
+      const banglaNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+      return (index + 1).toString().split('').map(d => banglaNumbers[parseInt(d)]).join('');
+    }
+  };
+
+  const getOptionLabel = (index: number) => {
+    if (numberingStyle === 'english') {
+      return String.fromCharCode(97 + index); // a, b, c, d, e, f...
+    } else {
+      const banglaOptions = ['ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ', 'ছ', 'জ', 'ঝ', 'ঞ'];
+      return banglaOptions[index] || String.fromCharCode(0x0995 + index); // ক, খ, গ, ঘ, ঙ...
+    }
   };
 
   const getTextSizeClass = () => {
@@ -214,6 +233,27 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
+            {/* Numbering Style */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-gray-800 text-lg">নাম্বারিং স্টাইল</h3>
+              <RadioGroup 
+                value={numberingStyle} 
+                onValueChange={(v: any) => setNumberingStyle(v)}
+                className="flex flex-col gap-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="english" id="num-english" />
+                  <Label htmlFor="num-english" className="cursor-pointer">English (1, 2, 3... / a, b, c, d...)</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="bangla" id="num-bangla" />
+                  <Label htmlFor="num-bangla" className="cursor-pointer">বাংলা (১, ২, ৩... / ক, খ, গ, ঘ...)</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
             {/* Option Layout */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Option Per Row</h3>
@@ -316,7 +356,7 @@ export function PrintPreviewModal({
                     {/* Question Section */}
                     {(printMode === 'question' || printMode === 'both') && (
                       <div className="flex gap-2 items-baseline">
-                        <span className="font-bold min-w-[24px] text-[17px]">{index + 1}.</span>
+                        <span className="font-bold min-w-[24px] text-[17px]">{getQuestionNumber(index)}.</span>
                         <div className="flex-1 font-serif text-[17px] leading-snug">
                         {(!q.romanStatements || q.romanStatements.length === 0) && q.stem && (
                           <div className="mb-2">
@@ -343,7 +383,7 @@ export function PrintPreviewModal({
                             {q.options.map((opt, i) => (
                               <div key={opt.id} className="flex gap-2 items-baseline">
                                 <span className="font-medium min-w-[20px]">
-                                  {['ক','খ','গ','ঘ'][i]}.
+                                  {getOptionLabel(i)}.
                                 </span>
                                 <MarkdownRenderer content={opt.text} className="leading-tight" compact />
                               </div>
@@ -382,7 +422,7 @@ export function PrintPreviewModal({
                     {(printMode === 'solution' || printMode === 'both') && q.solutionParagraphs && q.solutionParagraphs.length > 0 && (
                       <div className={cn("mt-3", printMode === 'solution' && "flex gap-2 items-baseline")}>
                         {printMode === 'solution' && (
-                          <span className="font-bold min-w-[24px] text-[17px]">{index + 1}.</span>
+                          <span className="font-bold min-w-[24px] text-[17px]">{getQuestionNumber(index)}.</span>
                         )}
                         <div className="bg-green-50/40 rounded-lg p-3 space-y-2 flex-1">
                           {q.solutionParagraphs.map((para, pIndex) => (
