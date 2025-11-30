@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Slider } from '@/components/ui/slider';
 import {
   Select,
   SelectContent,
@@ -43,6 +44,9 @@ export function PrintPreviewModal({
   const [optionLayout, setOptionLayout] = useState<'1' | '2' | '4'>('4'); 
   const [printMode, setPrintMode] = useState<'question' | 'solution' | 'both'>('question');
   const [numberingStyle, setNumberingStyle] = useState<'english' | 'bangla'>('bangla');
+  const [optionStyle, setOptionStyle] = useState<'none' | 'dot' | 'parenthesis' | 'rightParen'>('dot');
+  const [questionGap, setQuestionGap] = useState(12);
+  const [columnGap, setColumnGap] = useState(32);
   const [showAnswer, setShowAnswer] = useState(false);
 
   const handleSystemPrint = () => {
@@ -64,6 +68,23 @@ export function PrintPreviewModal({
     } else {
       const banglaOptions = ['ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ', 'ছ', 'জ', 'ঝ', 'ঞ'];
       return banglaOptions[index] || String.fromCharCode(0x0995 + index); // ক, খ, গ, ঘ, ঙ...
+    }
+  };
+
+
+  const formatOptionLabel = (index: number) => {
+    const label = getOptionLabel(index);
+    switch (optionStyle) {
+      case 'none':
+        return label;
+      case 'dot':
+        return `${label}.`;
+      case 'parenthesis':
+        return `(${label})`;
+      case 'rightParen':
+        return `${label})`;
+      default:
+        return `${label}.`;
     }
   };
 
@@ -254,6 +275,83 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
+            {/* Option Style */}
+            <div className="space-y-4">
+              <h3 className="font-bold text-gray-800 text-lg">অপশন স্টাইল</h3>
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  variant={optionStyle === 'none' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setOptionStyle('none')}
+                  className="h-10 px-4"
+                >
+                  ক
+                </Button>
+                <Button
+                  variant={optionStyle === 'dot' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setOptionStyle('dot')}
+                  className="h-10 px-4"
+                >
+                  ক.
+                </Button>
+                <Button
+                  variant={optionStyle === 'parenthesis' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setOptionStyle('parenthesis')}
+                  className="h-10 px-4"
+                >
+                  (ক)
+                </Button>
+                <Button
+                  variant={optionStyle === 'rightParen' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setOptionStyle('rightParen')}
+                  className="h-10 px-4"
+                >
+                  ক)
+                </Button>
+              </div>
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
+            {/* Question Gap */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-gray-800 text-lg">প্রশ্নের গ্যাপ</h3>
+                <span className="text-sm text-gray-600 font-medium">{questionGap}px</span>
+              </div>
+              <Slider
+                value={[questionGap]}
+                onValueChange={(value) => setQuestionGap(value[0])}
+                min={0}
+                max={48}
+                step={4}
+                className="w-full"
+              />
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
+            {/* Column Gap */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-gray-800 text-lg">কলাম গ্যাপ</h3>
+                <span className="text-sm text-gray-600 font-medium">{columnGap}px</span>
+              </div>
+              <Slider
+                value={[columnGap]}
+                onValueChange={(value) => setColumnGap(value[0])}
+                min={8}
+                max={64}
+                step={4}
+                className="w-full"
+              />
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
             {/* Option Layout */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Option Per Row</h3>
@@ -344,14 +442,15 @@ export function PrintPreviewModal({
                 className={getTextSizeClass()}
                 style={{ 
                   columnCount: columns,
-                  columnGap: '2rem',
-                  columnRule: columns > 1 ? '1px solid #e5e7eb' : 'none'
+                  columnGap: `${columnGap}px`,
+                  columnRule: columns > 1 && columnGap > 0 ? '1px solid #e5e7eb' : 'none'
                 }}
               >
                 {questions.map((q, index) => (
                   <div 
                     key={q.id} 
-                    className="mb-3 break-inside-avoid-column print:break-inside-avoid print:page-break-inside-avoid"
+                    className="break-inside-avoid-column print:break-inside-avoid print:page-break-inside-avoid"
+                    style={{ marginBottom: `${questionGap}px` }}
                   >
                     {/* Question Section */}
                     {(printMode === 'question' || printMode === 'both') && (
@@ -383,7 +482,7 @@ export function PrintPreviewModal({
                             {q.options.map((opt, i) => (
                               <div key={opt.id} className="flex gap-2 items-baseline">
                                 <span className="font-medium min-w-[20px]">
-                                  {getOptionLabel(i)}.
+                                  {formatOptionLabel(i)}
                                 </span>
                                 <MarkdownRenderer content={opt.text} className="leading-tight" compact />
                               </div>
