@@ -17,7 +17,7 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { 
-  Printer, FileText, X 
+  Printer, FileText, X, Settings 
 } from 'lucide-react';
 import { Question } from '@/types/question';
 import { MarkdownRenderer } from './MarkdownRenderer';
@@ -48,6 +48,10 @@ export function PrintPreviewModal({
   const [questionGap, setQuestionGap] = useState(12);
   const [columnGap, setColumnGap] = useState(32);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [showPageNumber, setShowPageNumber] = useState(true);
+  const [pageNumberLanguage, setPageNumberLanguage] = useState<'english' | 'bangla' | 'uppercase' | 'roman' | 'none'>('bangla');
+  const [pageNumberSettingsOpen, setPageNumberSettingsOpen] = useState(false);
+  const [pageNumberAdditionalText, setPageNumberAdditionalText] = useState('');
 
   const handleSystemPrint = () => {
     window.print();
@@ -60,6 +64,24 @@ export function PrintPreviewModal({
       const banglaNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
       return (index + 1).toString().split('').map(d => banglaNumbers[parseInt(d)]).join('');
     }
+  };
+
+  const getPageNumber = (pageNum: number) => {
+    if (pageNumberLanguage === 'none') {
+      return '';
+    }
+    if (pageNumberLanguage === 'english') {
+      return pageNum.toString();
+    } else if (pageNumberLanguage === 'bangla') {
+      const banglaNumbers = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+      return pageNum.toString().split('').map(d => banglaNumbers[parseInt(d)]).join('');
+    } else if (pageNumberLanguage === 'uppercase') {
+      return String.fromCharCode(64 + pageNum); // A, B, C, D...
+    } else if (pageNumberLanguage === 'roman') {
+      const romanNumerals = ['', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x'];
+      return romanNumerals[pageNum] || pageNum.toString();
+    }
+    return pageNum.toString();
   };
 
   const getOptionLabel = (index: number) => {
@@ -352,6 +374,29 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
+            {/* Page Number */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-800 text-lg">পেজ নম্বর</h3>
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={showPageNumber} 
+                    onCheckedChange={setShowPageNumber}
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setPageNumberSettingsOpen(true)}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
             {/* Option Layout */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Option Per Row</h3>
@@ -539,10 +584,105 @@ export function PrintPreviewModal({
                   </div>
                 ))}
               </div>
+
+              {/* Page Number at Bottom */}
+              {showPageNumber && (
+                <div className="text-center mt-8 pt-4 border-t border-gray-300 [column-span:all]">
+                  <span className="text-sm font-medium text-gray-700">
+                    {pageNumberAdditionalText && `${pageNumberAdditionalText} `}
+                    {getPageNumber(1)}
+                  </span>
+                </div>
+              )}
             </div>
           </main>
         </div>
       </DialogContent>
+
+      {/* Page Number Settings Modal */}
+      <Dialog open={pageNumberSettingsOpen} onOpenChange={setPageNumberSettingsOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">পেজ নম্বর সেটিংস</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-2">
+            {/* Page Number Style */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-base">পেজ নাম্বারিং স্টাইল</h3>
+              <div className="flex gap-3">
+                <Button
+                  variant={pageNumberLanguage === 'english' ? 'default' : 'outline'}
+                  onClick={() => setPageNumberLanguage('english')}
+                  className="flex-1 h-auto py-3"
+                >
+                  1,2..
+                </Button>
+                <Button
+                  variant={pageNumberLanguage === 'bangla' ? 'default' : 'outline'}
+                  onClick={() => setPageNumberLanguage('bangla')}
+                  className="flex-1 h-auto py-3"
+                >
+                  ১,২..
+                </Button>
+                <Button
+                  variant={pageNumberLanguage === 'uppercase' ? 'default' : 'outline'}
+                  onClick={() => setPageNumberLanguage('uppercase')}
+                  className="flex-1 h-auto py-3"
+                >
+                  A,B..
+                </Button>
+                <Button
+                  variant={pageNumberLanguage === 'roman' ? 'default' : 'outline'}
+                  onClick={() => setPageNumberLanguage('roman')}
+                  className="flex-1 h-auto py-3"
+                >
+                  i,ii..
+                </Button>
+                <Button
+                  variant={pageNumberLanguage === 'none' ? 'default' : 'outline'}
+                  onClick={() => setPageNumberLanguage('none')}
+                  className={cn(
+                    "flex-1 h-auto py-3",
+                    pageNumberLanguage === 'none' && "bg-green-600 hover:bg-green-700 text-white"
+                  )}
+                >
+                  none
+                </Button>
+              </div>
+            </div>
+
+            {/* Additional Settings Input */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-base">পেজ নাম্বারের সাথে কোনো শব্দ যুক্ত করতে এখানে লিখুন</h3>
+              <input
+                type="text"
+                value={pageNumberAdditionalText}
+                onChange={(e) => setPageNumberAdditionalText(e.target.value)}
+                placeholder="Enter additional settings"
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setPageNumberSettingsOpen(false)}
+                className="px-8 py-2 bg-red-500 text-white hover:bg-red-600 border-red-500"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => setPageNumberSettingsOpen(false)}
+                className="px-8 py-2 bg-green-600 hover:bg-green-700"
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
