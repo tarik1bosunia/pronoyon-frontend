@@ -52,6 +52,7 @@ export function PrintPreviewModal({
   const [pageNumberLanguage, setPageNumberLanguage] = useState<'english' | 'bangla' | 'uppercase' | 'roman' | 'none'>('bangla');
   const [pageNumberSettingsOpen, setPageNumberSettingsOpen] = useState(false);
   const [pageNumberAdditionalText, setPageNumberAdditionalText] = useState('');
+  const [showColumnDivider, setShowColumnDivider] = useState(true);
 
   const handleSystemPrint = () => {
     window.print();
@@ -397,6 +398,19 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
+            {/* Column Divider */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-800 text-lg">কলাম ডিভাইডার</h3>
+                <Switch 
+                  checked={showColumnDivider} 
+                  onCheckedChange={setShowColumnDivider}
+                />
+              </div>
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
             {/* Option Layout */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Option Per Row</h3>
@@ -488,7 +502,7 @@ export function PrintPreviewModal({
                 style={{ 
                   columnCount: columns,
                   columnGap: `${columnGap}px`,
-                  columnRule: columns > 1 && columnGap > 0 ? '1px solid #e5e7eb' : 'none'
+                  columnRule: columns > 1 && showColumnDivider ? '1px solid #e5e7eb' : 'none'
                 }}
               >
                 {questions.map((q, index) => (
