@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { 
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription 
 } from "@/components/ui/dialog";
@@ -61,9 +61,33 @@ export function PrintPreviewModal({
   const [watermarkOpacity, setWatermarkOpacity] = useState(16);
   const [watermarkOrientation, setWatermarkOrientation] = useState<'horizontal' | 'vertical' | 'diagonal'>('diagonal');
   const [watermarkPosition, setWatermarkPosition] = useState('center');
+  const [showNirdesika, setShowNirdesika] = useState(false);
+  const [nirdesikaSettingsOpen, setNirdesikaSettingsOpen] = useState(false);
+  const [nirdesikaText, setNirdesikaText] = useState('দ্রষ্টব্যঃ সর্বডানস্থিত বহুনির্বাচনি অভীক্ষার উত্তরপত্রে প্রশ্নের ক্রমিক নম্বরের বিপরীতে প্রদত্ত বর্ণসম্বলিত বৃত্ত ●  বল পয়েন্ট কলম দ্বারা সম্পূর্ণ ভরাট করে। প্রতিটি প্রশ্নের মান ১।\n\nপ্রশ্নপত্রে কোনো প্রকার দাগ/চিহ্ন দেয়া যাবেনা।');
+  const nirdesikaTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSystemPrint = () => {
     window.print();
+  };
+
+  const insertFilledCircle = () => {
+    const textarea = nirdesikaTextareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = nirdesikaText;
+    const before = text.substring(0, start);
+    const after = text.substring(end);
+    const newText = before + '●' + after;
+    
+    setNirdesikaText(newText);
+    
+    // Set cursor position after the inserted circle
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + 1, start + 1);
+    }, 0);
   };
 
   const getQuestionNumber = (index: number) => {
@@ -446,6 +470,33 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
+            {/* Nirdesika */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-800 text-lg">নির্দেশিকা</h3>
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={showNirdesika} 
+                    onCheckedChange={setShowNirdesika}
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      if (showNirdesika) {
+                        setNirdesikaSettingsOpen(true);
+                      }
+                    }}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
             {/* Option Layout */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Option Per Row</h3>
@@ -594,6 +645,27 @@ export function PrintPreviewModal({
                   <span>পূর্ণমান: ১০০</span>
                 </div>
               </div>
+
+              {/* Nirdesika Section */}
+              {showNirdesika && nirdesikaText && (
+                <div className="mb-6 px-4 [column-span:all]">
+                  <div 
+                    className="text-sm leading-relaxed text-gray-800 whitespace-pre-line"
+                    style={{
+                      fontSize: '14px',
+                      lineHeight: '1.8'
+                    }}
+                  >
+                    {nirdesikaText.split('').map((char, idx) => 
+                      char === '●' ? (
+                        <span key={idx} className="inline-flex items-center justify-center" style={{ fontSize: '40px', height: '1.8em', verticalAlign: 'baseline' }}>●</span>
+                      ) : (
+                        <span key={idx}>{char}</span>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Questions Container */}
               <div 
@@ -920,6 +992,63 @@ export function PrintPreviewModal({
                 className="px-8 py-2 bg-blue-600 hover:bg-blue-700"
               >
                 Apply Settings
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Nirdesika Settings Modal */}
+      <Dialog open={nirdesikaSettingsOpen} onOpenChange={setNirdesikaSettingsOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">নির্দেশিকা সেটিংস</DialogTitle>
+            <DialogDescription>
+              পরীক্ষার নির্দেশনা এডিট করুন
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Nirdesika Text Area */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">নির্দেশনা টেক্সট</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={insertFilledCircle}
+                  className="h-8 px-3 gap-2"
+                >
+                  <span className="text-3xl leading-none">●</span>
+                  <span className="text-xs">Insert Circle</span>
+                </Button>
+              </div>
+              <textarea
+                ref={nirdesikaTextareaRef}
+                value={nirdesikaText}
+                onChange={(e) => setNirdesikaText(e.target.value)}
+                rows={8}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                placeholder="নির্দেশনা লিখুন..."
+              />
+              <p className="text-xs text-gray-500">নতুন লাইনের জন্য Enter চাপুন</p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setNirdesikaSettingsOpen(false)}
+                className="px-8 py-2 bg-red-500 text-white hover:bg-red-600 border-red-500"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => setNirdesikaSettingsOpen(false)}
+                className="px-8 py-2 bg-green-600 hover:bg-green-700"
+              >
+                Save
               </Button>
             </div>
           </div>
