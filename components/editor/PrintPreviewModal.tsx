@@ -8,6 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { 
   Printer, FileText, X 
 } from 'lucide-react';
@@ -34,7 +41,7 @@ export function PrintPreviewModal({
   const [textSize, setTextSize] = useState<'medium' | 'large' | 'big'>('large');
   // Added '4' for full horizontal inline options
   const [optionLayout, setOptionLayout] = useState<'1' | '2' | '4'>('4'); 
-  const [showSolution, setShowSolution] = useState(false);
+  const [printMode, setPrintMode] = useState<'question' | 'solution' | 'both'>('question');
   const [showAnswer, setShowAnswer] = useState(false);
 
   const handleSystemPrint = () => {
@@ -122,12 +129,17 @@ export function PrintPreviewModal({
           
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <Label htmlFor="solution" className="font-medium text-gray-600">Solution</Label>
-              <Switch id="solution" checked={showSolution} onCheckedChange={setShowSolution} />
-            </div>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="answer" className="font-medium text-gray-600">Answer</Label>
-              <Switch id="answer" checked={showAnswer} onCheckedChange={setShowAnswer} />
+              <Label className="font-medium text-gray-600">Print Mode:</Label>
+              <Select value={printMode} onValueChange={(v: any) => setPrintMode(v)}>
+                <SelectTrigger className="w-[150px] h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="question">Question</SelectItem>
+                  <SelectItem value="solution">Solution</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="h-6 w-px bg-gray-300 mx-2" />
             <Button onClick={handleSystemPrint} className="bg-[#009d6e] hover:bg-[#008a60]">
@@ -301,9 +313,11 @@ export function PrintPreviewModal({
                     key={q.id} 
                     className="mb-3 break-inside-avoid-column print:break-inside-avoid print:page-break-inside-avoid"
                   >
-                    <div className="flex gap-2 items-baseline">
-                      <span className="font-bold min-w-[24px] text-[17px]">{index + 1}.</span>
-                      <div className="flex-1 font-serif text-[17px] leading-snug">
+                    {/* Question Section */}
+                    {(printMode === 'question' || printMode === 'both') && (
+                      <div className="flex gap-2 items-baseline">
+                        <span className="font-bold min-w-[24px] text-[17px]">{index + 1}.</span>
+                        <div className="flex-1 font-serif text-[17px] leading-snug">
                         {(!q.romanStatements || q.romanStatements.length === 0) && q.stem && (
                           <div className="mb-2">
                             <MarkdownRenderer content={q.stem} compact />
@@ -355,13 +369,34 @@ export function PrintPreviewModal({
                         )}
                       </div>
                       
-                      {/* Marks for Question */}
-                      {q.type === 'cq' && (
-                        <div className="font-bold text-gray-600 text-sm ml-2">
-                          {q.marks}
+                        {/* Marks for Question */}
+                        {q.type === 'cq' && (
+                          <div className="font-bold text-gray-600 text-sm ml-2">
+                            {q.marks}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Solution Section */}
+                    {(printMode === 'solution' || printMode === 'both') && q.solutionParagraphs && q.solutionParagraphs.length > 0 && (
+                      <div className={cn("mt-3", printMode === 'solution' && "flex gap-2 items-baseline")}>
+                        {printMode === 'solution' && (
+                          <span className="font-bold min-w-[24px] text-[17px]">{index + 1}.</span>
+                        )}
+                        <div className="bg-green-50/40 rounded-lg p-3 space-y-2 flex-1">
+                          {q.solutionParagraphs.map((para, pIndex) => (
+                            <div 
+                              key={para.id} 
+                              className="rounded p-2 text-[17px] leading-relaxed font-serif text-gray-900"
+                              style={{ backgroundColor: '#DCFCE7' }}
+                            >
+                              <MarkdownRenderer content={para.text} compact />
+                            </div>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
