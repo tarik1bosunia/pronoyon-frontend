@@ -17,6 +17,7 @@ interface Props {
 export const MCQForm = ({ onSubmit }: Props) => {
   const [questionText, setQuestionText] = useState('');
   const [marks, setMarks] = useState(1);
+  const [solutionParagraphs, setSolutionParagraphs] = useState<Array<{ id: string; text: string }>>([{ id: uuidv4(), text: '' }]);
   const [mcqType, setMcqType] = useState<'simple' | 'combined'>('simple');
   const [options, setOptions] = useState<MCQOption[]>([
     { id: uuidv4(), text: '', isCorrect: false },
@@ -101,6 +102,7 @@ export const MCQForm = ({ onSubmit }: Props) => {
     
     setQuestionText('');
     setMarks(1);
+    setSolutionParagraphs([{ id: uuidv4(), text: '' }]);
     setOptions([
       { id: uuidv4(), text: '', isCorrect: false },
       { id: uuidv4(), text: '', isCorrect: false },
@@ -141,6 +143,44 @@ export const MCQForm = ({ onSubmit }: Props) => {
               onChange={(e) => setMarks(parseInt(e.target.value) || 1)}
               className="mt-2"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="solution">Solution (Optional)</Label>
+            <div className="mt-2 space-y-2">
+              {solutionParagraphs.map((para, index) => (
+                <div key={para.id} className="relative group/para">
+                  <InlineEditor
+                    content={para.text}
+                    onChange={(text) => {
+                      const newParas = [...solutionParagraphs];
+                      newParas[index] = { ...para, text };
+                      setSolutionParagraphs(newParas);
+                    }}
+                    placeholder={`Paragraph ${index + 1}... Use **bold**, *italic*, or $E=mc^2$ for math`}
+                  />
+                  {solutionParagraphs.length > 1 && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="absolute -top-2 -right-2 opacity-0 group-hover/para:opacity-100 transition-opacity h-5 w-5 p-0 rounded-full bg-red-100 hover:bg-red-200 text-red-600"
+                      onClick={() => setSolutionParagraphs(solutionParagraphs.filter(p => p.id !== para.id))}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSolutionParagraphs([...solutionParagraphs, { id: uuidv4(), text: '' }])}
+                className="w-full border-dashed"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Add Paragraph
+              </Button>
+            </div>
           </div>
 
           <div>
@@ -338,6 +378,20 @@ export const MCQForm = ({ onSubmit }: Props) => {
                           </div>
                         ))}
                       </div>
+                    </div>
+                  </div>
+                )}
+                {solutionParagraphs.some(p => p.text.trim()) && (
+                  <div className="mt-6 pt-4 border-t">
+                    <div className="font-semibold text-sm text-muted-foreground mb-2">
+                      Solution:
+                    </div>
+                    <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-200 space-y-3">
+                      {solutionParagraphs.filter(p => p.text.trim()).map((para, index) => (
+                        <div key={para.id}>
+                          <MarkdownRenderer content={para.text} />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

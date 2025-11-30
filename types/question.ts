@@ -20,6 +20,9 @@ export interface Question {
   // Standard Text (used for Simple MCQ & CQ stem)
   text: string;
   
+  // Solution (rich text explanation) - array of paragraphs
+  solutionParagraphs?: Array<{ id: string; text: string }>;
+  
   // Combined MCQ Specifics
   stem?: string; 
   romanStatements?: string[]; 

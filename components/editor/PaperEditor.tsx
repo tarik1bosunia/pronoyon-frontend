@@ -170,6 +170,7 @@ export function PaperEditor({
   const [optionPadding, setOptionPadding] = useState(2);
   const [pageBreaks, setPageBreaks] = useState<number[]>([]);
   const [showStemForQuestion, setShowStemForQuestion] = useState<Record<string, boolean>>({});
+  const [showSolutionForQuestion, setShowSolutionForQuestion] = useState<Record<string, boolean>>({});
   const pageContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -970,6 +971,90 @@ export function PaperEditor({
                                                   <div className="text-right w-8 font-bold text-sm text-gray-500 pt-1 print:text-black">
                                                     {q.marks}
                                                   </div>
+                                                )}
+                                              </div>
+
+                                              {/* Solution Section */}
+                                              <div className="mt-3">
+                                                {(showSolutionForQuestion[q.id] || (q.solutionParagraphs && q.solutionParagraphs.length > 0)) ? (
+                                                  <div className="relative group/solution-content bg-green-50/40 rounded-lg p-4 pt-3">
+                                                    <div className="flex items-end justify-end mb-2">
+                                                      <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        className="opacity-0 group-hover/solution-content:opacity-100 transition-opacity text-xs h-5 px-2 text-red-500 hover:text-red-600 hover:bg-red-50 no-print shrink-0"
+                                                        onClick={() => {
+                                                          updateQuestion(q.id, { solutionParagraphs: [] });
+                                                          setShowSolutionForQuestion(prev => ({ ...prev, [q.id]: false }));
+                                                        }}
+                                                      >
+                                                        <X className="h-3 w-3 mr-1" /> সব মুছুন
+                                                      </Button>
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                      {(q.solutionParagraphs && q.solutionParagraphs.length > 0 ? q.solutionParagraphs : [{ id: uuidv4(), text: '' }]).map((para, paraIndex) => (
+                                                        <div key={para.id} className="relative group/para rounded p-2" style={{ backgroundColor: '#DCFCE7' }}>
+                                                          <div className="text-[17px] leading-relaxed font-serif text-gray-900">
+                                                            <InlineEditor
+                                                              content={para.text}
+                                                              onChange={(val) => {
+                                                                const currentParas = q.solutionParagraphs || [];
+                                                                const newParas = [...currentParas];
+                                                                if (paraIndex < newParas.length) {
+                                                                  newParas[paraIndex] = { ...newParas[paraIndex], text: val };
+                                                                } else {
+                                                                  newParas.push({ id: para.id, text: val });
+                                                                }
+                                                                updateQuestion(q.id, { solutionParagraphs: newParas });
+                                                              }}
+                                                              placeholder={`প্যারাগ্রাফ ${paraIndex + 1}...`}
+                                                              className="min-h-[auto] p-0 hover:bg-transparent hover:ring-0 border-none [&_.ProseMirror]:p-0"
+                                                              density="compact"
+                                                            />
+                                                          </div>
+                                                          {q.solutionParagraphs && q.solutionParagraphs.length > 1 && (
+                                                            <Button
+                                                              size="sm"
+                                                              variant="ghost"
+                                                              className="absolute -top-2 -right-2 opacity-0 group-hover/para:opacity-100 transition-opacity h-5 w-5 p-0 rounded-full bg-red-100 hover:bg-red-200 text-red-600 no-print"
+                                                              onClick={() => {
+                                                                const newParas = q.solutionParagraphs!.filter(p => p.id !== para.id);
+                                                                updateQuestion(q.id, { solutionParagraphs: newParas });
+                                                              }}
+                                                            >
+                                                              <X className="h-3 w-3" />
+                                                            </Button>
+                                                          )}
+                                                        </div>
+                                                      ))}
+                                                      <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="text-xs h-6 px-2 border-dashed border-green-400 text-green-700 hover:bg-green-100 hover:border-green-500 no-print bg-white"
+                                                        onClick={() => {
+                                                          const currentParas = q.solutionParagraphs || [];
+                                                          const newParas = [...currentParas, { id: uuidv4(), text: '' }];
+                                                          updateQuestion(q.id, { solutionParagraphs: newParas });
+                                                        }}
+                                                      >
+                                                        <Plus className="h-3 w-3 mr-1" />
+                                                        প্যারাগ্রাফ যোগ করুন
+                                                      </Button>
+                                                    </div>
+                                                  </div>
+                                                ) : (
+                                                  <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="text-xs h-7 px-3 bg-gradient-to-r from-green-50 to-emerald-50 border-green-400 text-green-700 hover:from-green-100 hover:to-emerald-100 hover:border-green-500 shadow-sm hover:shadow-md no-print font-medium"
+                                                    onClick={() => {
+                                                      setShowSolutionForQuestion(prev => ({ ...prev, [q.id]: true }));
+                                                      updateQuestion(q.id, { solutionParagraphs: [{ id: uuidv4(), text: '' }] });
+                                                    }}
+                                                  >
+                                                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                                                    সমাধান যুক্ত করুন
+                                                  </Button>
                                                 )}
                                               </div>
                                             </div>
