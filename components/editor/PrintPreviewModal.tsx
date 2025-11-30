@@ -53,6 +53,14 @@ export function PrintPreviewModal({
   const [pageNumberSettingsOpen, setPageNumberSettingsOpen] = useState(false);
   const [pageNumberAdditionalText, setPageNumberAdditionalText] = useState('');
   const [showColumnDivider, setShowColumnDivider] = useState(true);
+  const [showWatermark, setShowWatermark] = useState(false);
+  const [watermarkSettingsOpen, setWatermarkSettingsOpen] = useState(false);
+  const [watermarkText, setWatermarkText] = useState('pronoyon.com');
+  const [watermarkFontSize, setWatermarkFontSize] = useState('96');
+  const [watermarkFontFamily, setWatermarkFontFamily] = useState('kalpurush');
+  const [watermarkOpacity, setWatermarkOpacity] = useState(16);
+  const [watermarkOrientation, setWatermarkOrientation] = useState<'horizontal' | 'vertical' | 'diagonal'>('diagonal');
+  const [watermarkPosition, setWatermarkPosition] = useState('center');
 
   const handleSystemPrint = () => {
     window.print();
@@ -411,6 +419,33 @@ export function PrintPreviewModal({
 
             <div className="h-px bg-gray-100" />
 
+            {/* Watermark */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-gray-800 text-lg">ওয়াটার মার্ক</h3>
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={showWatermark} 
+                    onCheckedChange={setShowWatermark}
+                  />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      if (showWatermark) {
+                        setWatermarkSettingsOpen(true);
+                      }
+                    }}
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-px bg-gray-100" />
+
             {/* Option Layout */}
             <div className="space-y-4">
               <h3 className="font-bold text-gray-800 text-lg">Option Per Row</h3>
@@ -483,8 +518,72 @@ export function PrintPreviewModal({
           {/* Right Side: Live Preview */}
           <main className="flex-1 overflow-y-auto p-8 flex justify-center bg-gray-100 print:bg-white">
             <div 
-              className="bg-white shadow-lg p-[10mm] min-h-[297mm] w-full max-w-[210mm] print:shadow-none print:border print:border-transparent print:p-[15mm] print:w-full print:max-w-none block"
+              className="bg-white shadow-lg p-[10mm] min-h-[297mm] w-full max-w-[210mm] print:shadow-none print:border print:border-transparent print:p-[15mm] print:w-full print:max-w-none block relative"
             >
+              {/* Watermark */}
+              {showWatermark && watermarkText && (
+                <div 
+                  className="absolute inset-0 pointer-events-none overflow-hidden"
+                  style={{
+                    opacity: watermarkOpacity / 100,
+                  }}
+                >
+                  <div
+                    className="text-gray-400 whitespace-nowrap select-none absolute"
+                    style={{
+                      fontSize: `${watermarkFontSize}px`,
+                      fontFamily: watermarkFontFamily,
+                      ...(watermarkPosition === 'top-left' && {
+                        top: '10%',
+                        left: '10%',
+                        transform: watermarkOrientation === 'diagonal' ? 'rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'rotate(-90deg)' : 'none'
+                      }),
+                      ...(watermarkPosition === 'top' && {
+                        top: '10%',
+                        left: '50%',
+                        transform: watermarkOrientation === 'diagonal' ? 'translateX(-50%) rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'translateX(-50%) rotate(-90deg)' : 'translateX(-50%)'
+                      }),
+                      ...(watermarkPosition === 'top-right' && {
+                        top: '10%',
+                        right: '10%',
+                        transform: watermarkOrientation === 'diagonal' ? 'rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'rotate(-90deg)' : 'none'
+                      }),
+                      ...(watermarkPosition === 'left' && {
+                        top: '50%',
+                        left: '10%',
+                        transform: watermarkOrientation === 'diagonal' ? 'translateY(-50%) rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'translateY(-50%) rotate(-90deg)' : 'translateY(-50%)'
+                      }),
+                      ...(watermarkPosition === 'center' && {
+                        top: '50%',
+                        left: '50%',
+                        transform: watermarkOrientation === 'diagonal' ? 'translate(-50%, -50%) rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'translate(-50%, -50%) rotate(-90deg)' : 'translate(-50%, -50%)'
+                      }),
+                      ...(watermarkPosition === 'right' && {
+                        top: '50%',
+                        right: '10%',
+                        transform: watermarkOrientation === 'diagonal' ? 'translateY(-50%) rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'translateY(-50%) rotate(-90deg)' : 'translateY(-50%)'
+                      }),
+                      ...(watermarkPosition === 'bottom-left' && {
+                        bottom: '10%',
+                        left: '10%',
+                        transform: watermarkOrientation === 'diagonal' ? 'rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'rotate(-90deg)' : 'none'
+                      }),
+                      ...(watermarkPosition === 'bottom' && {
+                        bottom: '10%',
+                        left: '50%',
+                        transform: watermarkOrientation === 'diagonal' ? 'translateX(-50%) rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'translateX(-50%) rotate(-90deg)' : 'translateX(-50%)'
+                      }),
+                      ...(watermarkPosition === 'bottom-right' && {
+                        bottom: '10%',
+                        right: '10%',
+                        transform: watermarkOrientation === 'diagonal' ? 'rotate(-45deg)' : watermarkOrientation === 'vertical' ? 'rotate(-90deg)' : 'none'
+                      })
+                    }}
+                  >
+                    {watermarkText}
+                  </div>
+                </div>
+              )}
               {/* Paper Header - Forced Full Span */}
               <div className="text-center border-b-2 border-double border-gray-800 pb-4 mb-8 [column-span:all]">
                 <div className="text-2xl font-bold text-gray-900 font-serif">
@@ -692,6 +791,135 @@ export function PrintPreviewModal({
                 className="px-8 py-2 bg-green-600 hover:bg-green-700"
               >
                 Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Watermark Settings Modal */}
+      <Dialog open={watermarkSettingsOpen} onOpenChange={setWatermarkSettingsOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">ওয়াটার মার্ক সেটিংস</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-2">
+            {/* Watermark Text */}
+            <div className="space-y-2">
+              <Label className="text-base font-semibold">Watermark Text</Label>
+              <input
+                type="text"
+                value={watermarkText}
+                onChange={(e) => setWatermarkText(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Font Size and Font Family */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">Font Size</Label>
+                <Select value={watermarkFontSize} onValueChange={setWatermarkFontSize}>
+                  <SelectTrigger className="w-full h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="48">48px</SelectItem>
+                    <SelectItem value="64">64px</SelectItem>
+                    <SelectItem value="72">72px</SelectItem>
+                    <SelectItem value="96">96px</SelectItem>
+                    <SelectItem value="120">120px</SelectItem>
+                    <SelectItem value="144">144px</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-base font-semibold">Font Family</Label>
+                <Select value={watermarkFontFamily} onValueChange={setWatermarkFontFamily}>
+                  <SelectTrigger className="w-full h-12">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="kalpurush">kalpurush</SelectItem>
+                    <SelectItem value="Arial">Arial</SelectItem>
+                    <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                    <SelectItem value="Roboto">Roboto</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Opacity Slider */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">Opacity</Label>
+                <span className="text-sm text-gray-600 font-medium">{watermarkOpacity}%</span>
+              </div>
+              <Slider
+                value={[watermarkOpacity]}
+                onValueChange={(value) => setWatermarkOpacity(value[0])}
+                min={5}
+                max={100}
+                step={5}
+                className="w-full"
+              />
+            </div>
+
+            {/* Orientation */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Orientation</Label>
+              <RadioGroup 
+                value={watermarkOrientation} 
+                onValueChange={(v: any) => setWatermarkOrientation(v)}
+                className="flex gap-6"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="horizontal" id="orient-horizontal" />
+                  <Label htmlFor="orient-horizontal" className="cursor-pointer">Horizontal</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="vertical" id="orient-vertical" />
+                  <Label htmlFor="orient-vertical" className="cursor-pointer">Vertical</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="diagonal" id="orient-diagonal" />
+                  <Label htmlFor="orient-diagonal" className="cursor-pointer">Diagonal</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Position Grid */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold">Position</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {['top-left', 'top', 'top-right', 'left', 'center', 'right', 'bottom-left', 'bottom', 'bottom-right'].map((pos) => (
+                  <Button
+                    key={pos}
+                    variant={watermarkPosition === pos ? 'default' : 'outline'}
+                    onClick={() => setWatermarkPosition(pos)}
+                    className="h-12 capitalize"
+                  >
+                    {pos.split('-').join(' ')}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setWatermarkSettingsOpen(false)}
+                className="px-8 py-2"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => setWatermarkSettingsOpen(false)}
+                className="px-8 py-2 bg-blue-600 hover:bg-blue-700"
+              >
+                Apply Settings
               </Button>
             </div>
           </div>
