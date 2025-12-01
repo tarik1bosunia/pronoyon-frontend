@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/lib/redux/hooks';
 import type { RootState } from '@/lib/redux/store';
@@ -8,20 +8,30 @@ import type { RootState } from '@/lib/redux/store';
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
+
+const subscribeOnce = () => () => {};
+const getMountedSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const router = useRouter();
   const isAuthenticated = useAppSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
 
+  const isMounted = useSyncExternalStore(
+    subscribeOnce,
+    getMountedSnapshot,
+    getServerSnapshot
+  );
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isMounted && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, router]);
+  }, [isMounted, isAuthenticated, router]);
 
-  if (!isAuthenticated) {
+  if (!isMounted || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

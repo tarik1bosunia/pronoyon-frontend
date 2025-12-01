@@ -16,6 +16,7 @@ import {
 function QuestionsPageContent() {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4', '5']);
+  // Initialize based on a safe default that won't cause hydration issues
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isFilterOpen, setFilterOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
@@ -108,7 +109,7 @@ function QuestionsPageContent() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans">
+    <div className="flex min-h-screen bg-gray-50 font-sans" suppressHydrationWarning>
       <DashboardSidebar isSidebarOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex min-w-0 flex-1 flex-col">

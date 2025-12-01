@@ -23,37 +23,39 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col items-center font-sans">
       {/* Header with Auth Buttons */}
-      <header className="w-full bg-white border-b border-gray-200 shadow-sm">
+      <header className="w-full bg-white border-b border-gray-200 shadow-sm" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BookOpen className="h-8 w-8 text-[#009d6e]" />
             <h2 className="text-2xl font-bold text-gray-900">Pronoyon</h2>
           </div>
           
-          {!isAuthenticated ? (
-            <div className="flex items-center gap-3">
+          <div suppressHydrationWarning>
+            {!isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-700 hover:text-[#009d6e] hover:bg-gray-100"
+                  onClick={() => window.location.href = '/login'}
+                >
+                  লগইন
+                </Button>
+                <Button 
+                  className="bg-[#009d6e] hover:bg-[#008a60] text-white shadow-md"
+                  onClick={() => window.location.href = '/register'}
+                >
+                  রেজিস্টার করুন
+                </Button>
+              </div>
+            ) : (
               <Button 
-                variant="ghost" 
-                className="text-gray-700 hover:text-[#009d6e] hover:bg-gray-100"
-                onClick={() => window.location.href = '/login'}
+                className="bg-[#009d6e] hover:bg-[#008a60] text-white"
+                onClick={() => window.location.href = '/questions'}
               >
-                লগইন
+                ড্যাশবোর্ড
               </Button>
-              <Button 
-                className="bg-[#009d6e] hover:bg-[#008a60] text-white shadow-md"
-                onClick={() => window.location.href = '/register'}
-              >
-                রেজিস্টার করুন
-              </Button>
-            </div>
-          ) : (
-            <Button 
-              className="bg-[#009d6e] hover:bg-[#008a60] text-white"
-              onClick={() => window.location.href = '/questions'}
-            >
-              ড্যাশবোর্ড
-            </Button>
-          )}
+            )}
+          </div>
         </div>
       </header>
 

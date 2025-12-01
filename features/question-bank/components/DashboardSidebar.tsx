@@ -38,19 +38,29 @@ export function DashboardSidebar({ isSidebarOpen, onClose }: Props) {
       setIsMobile(window.innerWidth < 768);
     };
     
-    checkMobile();
+    // Use setTimeout to defer state update
+    const timeoutId = setTimeout(() => {
+      checkMobile();
+    }, 0);
+    
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <aside className={cn(
-        "bg-white border-r transition-all duration-300 flex flex-col",
-        "hidden md:flex",
-        isSidebarOpen ? "w-64" : "w-20"
-      )}>
+      {/* Desktop Sidebar - Always render with consistent initial state */}
+      <aside 
+        className={cn(
+          "bg-white border-r flex flex-col transition-[width] duration-300",
+          "hidden md:flex"
+        )}
+        style={{ width: isSidebarOpen ? '16rem' : '5rem' }}
+        suppressHydrationWarning
+      >
         <SidebarContent isOpen={isSidebarOpen} />
       </aside>
 
