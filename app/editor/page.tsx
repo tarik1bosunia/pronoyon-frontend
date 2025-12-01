@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PaperEditor } from '@/components/editor/PaperEditor';
+// import { PaperEditor } from '@/components/editor/PaperEditor';
+import { PaperEditor } from '@/components/editor/PaperEditor-new';
 import { ExamSettingsPanel } from '@/components/editor/ExamSettingsPanel';
 import { mockQuestions } from '@/features/question-bank';
 import { cn } from '@/lib/utils';
