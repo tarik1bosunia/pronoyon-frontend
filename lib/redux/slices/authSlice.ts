@@ -8,6 +8,13 @@ const initialState: AuthState = {
   isAuthenticated: false,
 };
 
+const buildCookie = (name: string, value: string, maxAgeSeconds: number) => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const secureFlag = isProduction ? '; Secure' : '';
+  const sameSite = '; SameSite=Lax';
+  return `${name}=${value}; path=/; max-age=${maxAgeSeconds}${secureFlag}${sameSite}`;
+};
+
 // Load auth state from localStorage on initialization (client-side only)
 const loadAuthState = (): AuthState => {
   if (typeof window === 'undefined') return initialState;
@@ -18,13 +25,8 @@ const loadAuthState = (): AuthState => {
     const userStr = localStorage.getItem('user');
     
     if (access && refresh && userStr) {
-      // Set cookies for middleware with security flags
-      const isProduction = process.env.NODE_ENV === 'production';
-      const secureFlag = isProduction ? '; Secure' : '';
-      const sameSite = '; SameSite=Lax';
-      
-      document.cookie = `access_token=${access}; path=/; max-age=${60 * 60}${secureFlag}${sameSite}; HttpOnly=false`;
-      document.cookie = `refresh_token=${refresh}; path=/; max-age=${60 * 60 * 24 * 7}${secureFlag}${sameSite}; HttpOnly=false`;
+      document.cookie = buildCookie('access_token', access, 60 * 60);
+      document.cookie = buildCookie('refresh_token', refresh, 60 * 60 * 24 * 7);
       
       return {
         user: JSON.parse(userStr),
@@ -59,14 +61,9 @@ const authSlice = createSlice({
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
         localStorage.setItem('user', JSON.stringify(user));
-        
-        // Set secure cookies for middleware
-        const isProduction = process.env.NODE_ENV === 'production';
-        const secureFlag = isProduction ? '; Secure' : '';
-        const sameSite = '; SameSite=Lax';
-        
-        document.cookie = `access_token=${access}; path=/; max-age=${60 * 60}${secureFlag}${sameSite}; HttpOnly=false`;
-        document.cookie = `refresh_token=${refresh}; path=/; max-age=${60 * 60 * 24 * 7}${secureFlag}${sameSite}; HttpOnly=false`;
+
+        document.cookie = buildCookie('access_token', access, 60 * 60);
+        document.cookie = buildCookie('refresh_token', refresh, 60 * 60 * 24 * 7);
       }
     },
     updateAccessToken: (state, action: PayloadAction<string>) => {
@@ -75,13 +72,8 @@ const authSlice = createSlice({
       // Save to localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('access_token', action.payload);
-        
-        // Update cookie for middleware with security flags
-        const isProduction = process.env.NODE_ENV === 'production';
-        const secureFlag = isProduction ? '; Secure' : '';
-        const sameSite = '; SameSite=Lax';
-        
-        document.cookie = `access_token=${action.payload}; path=/; max-age=${60 * 60}${secureFlag}${sameSite}; HttpOnly=false`;
+
+        document.cookie = buildCookie('access_token', action.payload, 60 * 60);
       }
     },
     updateUser: (state, action: PayloadAction<User>) => {
@@ -105,8 +97,8 @@ const authSlice = createSlice({
         localStorage.removeItem('user');
         
         // Clear cookies
-        document.cookie = 'access_token=; path=/; max-age=0';
-        document.cookie = 'refresh_token=; path=/; max-age=0';
+        document.cookie = buildCookie('access_token', '', 0);
+        document.cookie = buildCookie('refresh_token', '', 0);
       }
     },
   },

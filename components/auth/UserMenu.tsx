@@ -27,7 +27,13 @@ export function UserMenu() {
     try {
       await logout().unwrap();
     } catch (error) {
-      console.error('Logout error:', error);
+      const apiError = error as { data?: { detail?: string; message?: string }; message?: string };
+      const errorMessage =
+        apiError?.data?.detail ||
+        apiError?.data?.message ||
+        apiError?.message ||
+        'Failed to log out. Please try again.';
+      toast.error(errorMessage);
     } finally {
       // Clear local state regardless of API call result
       dispatch(logoutAction());

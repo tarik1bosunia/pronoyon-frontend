@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Menu, Users } from 'lucide-react';
+import { Search, Menu } from 'lucide-react';
+import { UserMenu } from '@/components/auth';
 
 interface Props {
   isSidebarOpen: boolean;
@@ -23,9 +24,7 @@ export function DashboardHeader({ isSidebarOpen, setSidebarOpen }: Props) {
            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
            <Input className="pl-9 w-40 sm:w-64 bg-gray-50 border-gray-200" placeholder="খুঁজুন..." />
          </div>
-         <Button className="rounded-full w-9 h-9 sm:w-10 sm:h-10 bg-gray-100 hover:bg-gray-200 text-gray-700 p-0">
-           <Users className="h-4 w-4 sm:h-5 sm:w-5" />
-         </Button>
+        <UserMenu />
       </div>
     </header>
   );
