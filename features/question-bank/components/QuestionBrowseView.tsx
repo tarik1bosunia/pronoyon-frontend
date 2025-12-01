@@ -56,17 +56,7 @@ export function QuestionBrowseView({
                 <p className="text-gray-500 mt-1">প্রশ্নগুলো সিলেক্ট করে সাবমিট করলেই প্রশ্ন তৈরি হয়ে যাবে!</p>
               </div>
               <div className="flex items-center gap-3">
-                <div className="hidden md:flex flex-wrap gap-2 justify-end">
-                  {SPECIAL_FILTERS.map((filter) => (
-                    <SpecialFilterPill
-                      key={filter.value}
-                      value={filter.value}
-                      label={filter.label}
-                      isActive={activeSpecialFilters.includes(filter.value)}
-                      onToggle={onToggleSpecialFilter}
-                    />
-                  ))}
-                </div>
+
 
                 {/* Filter Button - Only on small/medium screens */}
                 <Button
@@ -81,18 +71,6 @@ export function QuestionBrowseView({
               </div>
             </div>
 
-            {/* Mobile Special Filters */}
-            <div className="flex md:hidden flex-wrap gap-2 justify-center">
-              {SPECIAL_FILTERS.map((filter) => (
-                <SpecialFilterPill
-                  key={filter.value}
-                  value={filter.value}
-                  label={filter.label}
-                  isActive={activeSpecialFilters.includes(filter.value)}
-                  onToggle={onToggleSpecialFilter}
-                />
-              ))}
-            </div>
           </div>
 
           <div className="space-y-4">
