@@ -18,6 +18,14 @@ const loadAuthState = (): AuthState => {
     const userStr = localStorage.getItem('user');
     
     if (access && refresh && userStr) {
+      // Set cookies for middleware with security flags
+      const isProduction = process.env.NODE_ENV === 'production';
+      const secureFlag = isProduction ? '; Secure' : '';
+      const sameSite = '; SameSite=Lax';
+      
+      document.cookie = `access_token=${access}; path=/; max-age=${60 * 60}${secureFlag}${sameSite}; HttpOnly=false`;
+      document.cookie = `refresh_token=${refresh}; path=/; max-age=${60 * 60 * 24 * 7}${secureFlag}${sameSite}; HttpOnly=false`;
+      
       return {
         user: JSON.parse(userStr),
         access,
@@ -51,6 +59,14 @@ const authSlice = createSlice({
         localStorage.setItem('access_token', access);
         localStorage.setItem('refresh_token', refresh);
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // Set secure cookies for middleware
+        const isProduction = process.env.NODE_ENV === 'production';
+        const secureFlag = isProduction ? '; Secure' : '';
+        const sameSite = '; SameSite=Lax';
+        
+        document.cookie = `access_token=${access}; path=/; max-age=${60 * 60}${secureFlag}${sameSite}; HttpOnly=false`;
+        document.cookie = `refresh_token=${refresh}; path=/; max-age=${60 * 60 * 24 * 7}${secureFlag}${sameSite}; HttpOnly=false`;
       }
     },
     updateAccessToken: (state, action: PayloadAction<string>) => {
@@ -59,6 +75,13 @@ const authSlice = createSlice({
       // Save to localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('access_token', action.payload);
+        
+        // Update cookie for middleware with security flags
+        const isProduction = process.env.NODE_ENV === 'production';
+        const secureFlag = isProduction ? '; Secure' : '';
+        const sameSite = '; SameSite=Lax';
+        
+        document.cookie = `access_token=${action.payload}; path=/; max-age=${60 * 60}${secureFlag}${sameSite}; HttpOnly=false`;
       }
     },
     updateUser: (state, action: PayloadAction<User>) => {
@@ -80,6 +103,10 @@ const authSlice = createSlice({
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
+        
+        // Clear cookies
+        document.cookie = 'access_token=; path=/; max-age=0';
+        document.cookie = 'refresh_token=; path=/; max-age=0';
       }
     },
   },
