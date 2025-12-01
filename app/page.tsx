@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/lib/redux/hooks';
 import type { RootState } from '@/lib/redux/store';
@@ -12,14 +12,6 @@ export default function QuestionBankSetupPage() {
     (state: RootState) => state.auth.isAuthenticated
   );
 
-
-  useEffect(() => {
-    // Redirect authenticated users directly to questions page
-    if (isAuthenticated) {
-      router.push('/questions');
-    }
-  }, [isAuthenticated, router]);
-
   const handleStart = useCallback(() => {
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
@@ -29,5 +21,5 @@ export default function QuestionBankSetupPage() {
     }
   }, [router, isAuthenticated]);
 
-  return <SetupView onStart={handleStart} />;
+  return <SetupView onStart={handleStart} isAuthenticated={isAuthenticated} />;
 }
