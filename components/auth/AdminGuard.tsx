@@ -3,7 +3,7 @@
 import { ReactNode } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ShieldAlert } from 'lucide-react';
-import { useAuth, useIsAdmin } from '@/lib/rbac/hooks';
+import { useAuth, useIsAdmin, useUser } from '@/lib/rbac/hooks';
 
 interface AdminGuardProps {
   children: ReactNode;
@@ -12,6 +12,15 @@ interface AdminGuardProps {
 export function AdminGuard({ children }: AdminGuardProps) {
   const { isAuthenticated } = useAuth();
   const isAdmin = useIsAdmin();
+  const user = useUser();
+
+  // Debug logging
+  if (typeof window !== 'undefined') {
+    console.log('AdminGuard - isAuthenticated:', isAuthenticated);
+    console.log('AdminGuard - isAdmin:', isAdmin);
+    console.log('AdminGuard - user:', user);
+    console.log('AdminGuard - user.roles:', user?.roles);
+  }
 
   if (!isAuthenticated) {
     return (
@@ -35,6 +44,12 @@ export function AdminGuard({ children }: AdminGuardProps) {
           <AlertTitle>Administrator Access Required</AlertTitle>
           <AlertDescription>
             You do not have permission to view this section. Contact an administrator if you believe this is a mistake.
+            <div className="mt-2 text-xs font-mono">
+              <p>Debug Info:</p>
+              <p>User ID: {user?.id}</p>
+              <p>Email: {user?.email}</p>
+              <p>Roles: {JSON.stringify(user?.roles)}</p>
+            </div>
           </AlertDescription>
         </Alert>
       </div>
