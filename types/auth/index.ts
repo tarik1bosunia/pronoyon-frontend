@@ -1,8 +1,13 @@
+import type { UserRole, Permission, Role } from '../rbac';
+
 export interface User {
   id: number;
   email: string;
   first_name?: string;
   last_name?: string;
+  roles?: UserRole[];
+  permissions?: Permission[];
+  primary_role?: Role;
 }
 
 export interface AuthTokens {
@@ -10,8 +15,10 @@ export interface AuthTokens {
   refresh: string;
 }
 
-export interface AuthState extends AuthTokens {
+export interface AuthState {
   user: User | null;
+  access: string | null;
+  refresh: string | null;
   isAuthenticated: boolean;
 }
 
