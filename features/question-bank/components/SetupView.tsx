@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle, Maximize2, BookOpen, Zap, Shield, Users } from 'lucide-react';
 import { MultiSelectModal } from './MultiSelectModal';
 import { SUBJECTS_LIST, CHAPTERS_LIST } from '../constants';
-import Link from 'next/link';
 
 interface Props {
   onStart: () => void;
@@ -33,23 +32,27 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
           
           {!isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <Link href="/login">
-                <Button variant="ghost" className="text-gray-700 hover:text-[#009d6e] hover:bg-gray-100">
-                  লগইন
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button className="bg-[#009d6e] hover:bg-[#008a60] text-white shadow-md">
-                  রেজিস্টার করুন
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                className="text-gray-700 hover:text-[#009d6e] hover:bg-gray-100"
+                onClick={() => window.location.href = '/login'}
+              >
+                লগইন
+              </Button>
+              <Button 
+                className="bg-[#009d6e] hover:bg-[#008a60] text-white shadow-md"
+                onClick={() => window.location.href = '/register'}
+              >
+                রেজিস্টার করুন
+              </Button>
             </div>
           ) : (
-            <Link href="/questions">
-              <Button className="bg-[#009d6e] hover:bg-[#008a60] text-white">
-                ড্যাশবোর্ড
-              </Button>
-            </Link>
+            <Button 
+              className="bg-[#009d6e] hover:bg-[#008a60] text-white"
+              onClick={() => window.location.href = '/questions'}
+            >
+              ড্যাশবোর্ড
+            </Button>
           )}
         </div>
       </header>
@@ -182,13 +185,19 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
             {!isAuthenticated && (
               <p className="text-center text-sm text-gray-500 mt-3">
                 প্রশ্ন তৈরি করতে{' '}
-                <Link href="/login" className="text-[#009d6e] font-medium hover:underline">
+                <button 
+                  onClick={() => window.location.href = '/login'}
+                  className="text-[#009d6e] font-medium hover:underline cursor-pointer bg-transparent border-0"
+                >
                   লগইন
-                </Link>
+                </button>
                 {' '}করুন অথবা{' '}
-                <Link href="/register" className="text-[#009d6e] font-medium hover:underline">
+                <button 
+                  onClick={() => window.location.href = '/register'}
+                  className="text-[#009d6e] font-medium hover:underline cursor-pointer bg-transparent border-0"
+                >
                   রেজিস্টার
-                </Link>
+                </button>
                 {' '}করুন
               </p>
             )}
@@ -214,19 +223,28 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
               <h4 className="text-white font-semibold mb-3">দ্রুত লিংক</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <Link href="/about" className="hover:text-[#009d6e] transition-colors">
+                  <button 
+                    onClick={() => window.location.href = '/about'}
+                    className="hover:text-[#009d6e] transition-colors bg-transparent border-0 cursor-pointer p-0"
+                  >
                     আমাদের সম্পর্কে
-                  </Link>
+                  </button>
                 </li>
                 <li>
-                  <Link href="/features" className="hover:text-[#009d6e] transition-colors">
+                  <button 
+                    onClick={() => window.location.href = '/features'}
+                    className="hover:text-[#009d6e] transition-colors bg-transparent border-0 cursor-pointer p-0"
+                  >
                     ফিচার সমূহ
-                  </Link>
+                  </button>
                 </li>
                 <li>
-                  <Link href="/pricing" className="hover:text-[#009d6e] transition-colors">
+                  <button 
+                    onClick={() => window.location.href = '/pricing'}
+                    className="hover:text-[#009d6e] transition-colors bg-transparent border-0 cursor-pointer p-0"
+                  >
                     মূল্য
-                  </Link>
+                  </button>
                 </li>
               </ul>
             </div>
