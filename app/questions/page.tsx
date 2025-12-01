@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { UserMenu } from '@/components/auth/UserMenu';
 import {
   DashboardSidebar,
   DashboardHeader,
@@ -11,7 +13,7 @@ import {
   type FilterState
 } from '@/features/question-bank';
 
-export default function QuestionsBrowsePage() {
+function QuestionsPageContent() {
   const router = useRouter();
   const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4', '5']);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -142,5 +144,13 @@ export default function QuestionsBrowsePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function QuestionsBrowsePage() {
+  return (
+    <ProtectedRoute>
+      <QuestionsPageContent />
+    </ProtectedRoute>
   );
 }
