@@ -5,7 +5,8 @@ import type {
   AuthResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
-  GoogleLoginRequest 
+  GoogleLoginRequest,
+  LogoutRequest 
 } from '@/lib/types/auth'; // Ensure this path matches your structure
 import type { RootState } from '../store';
 
@@ -50,10 +51,11 @@ export const authApi = createApi({
       }),
       invalidatesTags: ['Auth'],
     }),
-    logout: builder.mutation<void, void>({
-      query: () => ({
+    logout: builder.mutation<void, LogoutRequest>({
+      query: (body) => ({
         url: '/auth/logout/',
         method: 'POST',
+        body,
       }),
       invalidatesTags: ['Auth'],
     }),

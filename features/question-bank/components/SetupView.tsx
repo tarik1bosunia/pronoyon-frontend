@@ -7,9 +7,10 @@ import { CheckCircle, Maximize2, BookOpen, Zap, Shield, Users, LogOut } from 'lu
 import { MultiSelectModal } from './MultiSelectModal';
 import { SUBJECTS_LIST, CHAPTERS_LIST } from '../constants';
 import { useLogoutMutation } from '@/lib/redux/services/authApi';
-import { useAppDispatch } from '@/lib/redux/hooks';
+import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { logout as logoutAction } from '@/lib/redux/slices/authSlice';
 import { toast } from 'sonner';
+import type { RootState } from '@/lib/redux/store';
 
 interface Props {
   onStart: () => void;
@@ -23,12 +24,15 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
   const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
   const dispatch = useAppDispatch();
+  const refreshToken = useAppSelector((state: RootState) => state.auth.refresh);
 
   const showChapterField = selectedSubjects.length <= 1;
 
   const handleLogout = async () => {
     try {
-      await logout().unwrap();
+      if (refreshToken) {
+        await logout({ refresh: refreshToken }).unwrap();
+      }
       dispatch(logoutAction());
       toast.success('লগআউট সফল হয়েছে');
       window.location.href = '/';

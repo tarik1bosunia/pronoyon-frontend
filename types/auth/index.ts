@@ -49,6 +49,10 @@ export interface RefreshTokenResponse {
   access: string;
 }
 
+export interface LogoutRequest {
+  refresh: string;
+}
+
 export interface GoogleLoginRequest {
   auth_token: string; // The ID Token from Google
 }
