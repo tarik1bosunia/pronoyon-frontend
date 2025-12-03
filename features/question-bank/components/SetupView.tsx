@@ -36,7 +36,7 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
       dispatch(logoutAction());
       toast.success('লগআউট সফল হয়েছে');
       window.location.href = '/';
-    } catch (error) {
+    } catch {
       // Even if the API call fails, logout locally
       dispatch(logoutAction());
       toast.success('লগআউট সফল হয়েছে');
@@ -45,7 +45,7 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col items-center font-sans">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100 flex flex-col items-center font-sans">
       {/* Header with Auth Buttons */}
       <header className="w-full bg-white border-b border-gray-200 shadow-sm" suppressHydrationWarning>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">

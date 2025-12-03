@@ -10,3 +10,5 @@ export { BoardSelectModal } from './BoardSelectModal';
 export { SchoolSelectModal } from './SchoolSelectModal';
 export { SchoolYearSelectModal } from './SchoolYearSelectModal';
 export { SetupView } from './SetupView';
+export { AdminDashboardView } from './AdminDashboardView';
+export { ManagerDashboardView } from './ManagerDashboardView';
