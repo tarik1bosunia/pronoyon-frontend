@@ -1,5 +1,6 @@
 'use client';
 
+import React, { type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Breadcrumb,
@@ -12,7 +13,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { UserMenu } from '@/components/auth';
 import { Menu, Search, Bell } from 'lucide-react';
-import type { ReactNode } from 'react';
 
 interface Crumb {
   label: string;
@@ -43,16 +43,16 @@ export function AdminHeader({ title, breadcrumbs, onOpenMobileNav, actions }: Ad
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>
               {breadcrumbs.map((crumb, index) => (
-                <BreadcrumbItem key={`${crumb.label}-${index}`}>
-                  {crumb.href && index < breadcrumbs.length - 1 ? (
-                    <>
+                <React.Fragment key={`${crumb.label}-${index}`}>
+                  <BreadcrumbItem>
+                    {crumb.href && index < breadcrumbs.length - 1 ? (
                       <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
-                      <BreadcrumbSeparator />
-                    </>
-                  ) : (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                  )}
-                </BreadcrumbItem>
+                    ) : (
+                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    )}
+                  </BreadcrumbItem>
+                  {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
+                </React.Fragment>
               ))}
             </BreadcrumbList>
           </Breadcrumb>
