@@ -33,8 +33,7 @@ export const adminNavItems: AdminNavItem[] = [
     title: 'Roles & Permissions',
     href: '/admin/roles',
     icon: ShieldCheck,
-    badge: 'Soon',
-    disabled: true,
+    description: 'Define roles and manage permissions.',
   },
   {
     title: 'Security',

@@ -9,6 +9,7 @@ import { AdminHeader } from './AdminHeader';
 const PAGE_TITLES: Record<string, string> = {
   '/admin': 'Admin Overview',
   '/admin/users': 'User Management',
+  '/admin/roles': 'Roles & Permissions',
 };
 
 const formatSegment = (segment: string) =>
