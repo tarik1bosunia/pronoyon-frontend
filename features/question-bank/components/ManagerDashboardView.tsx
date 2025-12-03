@@ -13,7 +13,6 @@ import {
   Plus,
   Search,
   Eye,
-  Edit,
   Flag,
   Award,
   Calendar
@@ -43,7 +42,7 @@ export function ManagerDashboardView({ userName }: Props) {
       dispatch(logoutAction());
       toast.success('লগআউট সফল হয়েছে');
       window.location.href = '/';
-    } catch (error) {
+    } catch {
       dispatch(logoutAction());
       toast.success('লগআউট সফল হয়েছে');
       window.location.href = '/';
@@ -176,7 +175,7 @@ export function ManagerDashboardView({ userName }: Props) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100">
       {/* Header */}
       <header className="w-full bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -213,7 +212,7 @@ export function ManagerDashboardView({ userName }: Props) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 mb-8 text-white shadow-lg">
+        <div className="bg-linear-to-r from-blue-600 to-blue-700 rounded-2xl p-8 mb-8 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold mb-2">
@@ -388,7 +387,7 @@ export function ManagerDashboardView({ userName }: Props) {
               <CardContent className="space-y-3">
                 {teamActivity.map((member, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-full h-10 w-10 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                    <div className="bg-linear-to-br from-blue-500 to-purple-600 rounded-full h-10 w-10 flex items-center justify-center text-white font-bold text-xs shrink-0">
                       {member.avatar}
                     </div>
                     <div className="flex-1 min-w-0">

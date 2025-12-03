@@ -20,7 +20,7 @@ const formatSegment = (segment: string) =>
 
 function buildBreadcrumbs(pathname: string) {
   const segments = pathname.split('/').filter(Boolean);
-  const crumbs = [{ label: 'Admin', href: '/admin' }];
+  const crumbs: { label: string; href?: string }[] = [{ label: 'Admin', href: '/admin' }];
 
   if (segments.length <= 1) {
     crumbs[0] = { label: 'Admin Overview', href: '/admin' };

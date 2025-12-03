@@ -4,15 +4,12 @@ import { Button } from '@/components/ui/button';
 import { 
   BookOpen, 
   Users, 
-  FileText, 
-  BarChart3, 
+  FileText,  
   Settings, 
   LogOut,
   TrendingUp,
-  Clock,
   CheckCircle,
   AlertCircle,
-  Plus,
   Search,
   Filter,
   Download,
@@ -47,7 +44,7 @@ export function AdminDashboardView({ isAdmin, userName }: Props) {
       dispatch(logoutAction());
       toast.success('লগআউট সফল হয়েছে');
       window.location.href = '/';
-    } catch (error) {
+    } catch {
       dispatch(logoutAction());
       toast.success('লগআউট সফল হয়েছে');
       window.location.href = '/';
@@ -156,7 +153,7 @@ export function AdminDashboardView({ isAdmin, userName }: Props) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-linear-to-b from-gray-50 to-gray-100">
       {/* Header */}
       <header className="w-full bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -195,7 +192,7 @@ export function AdminDashboardView({ isAdmin, userName }: Props) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-[#009d6e] to-[#00b87c] rounded-2xl p-8 mb-8 text-white shadow-lg">
+        <div className="bg-linear-to-r from-[#009d6e] to-[#00b87c] rounded-2xl p-8 mb-8 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold mb-2">
