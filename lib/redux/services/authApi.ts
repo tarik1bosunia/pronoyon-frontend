@@ -7,7 +7,7 @@ import type {
   RefreshTokenResponse,
   GoogleLoginRequest,
   LogoutRequest 
-} from '@/lib/types/auth'; // Ensure this path matches your structure
+} from '@/types/auth'; // Ensure this path matches your structure
 import type { RootState } from '../store';
 
 const baseQuery = fetchBaseQuery({
