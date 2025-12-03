@@ -3,9 +3,13 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle, Maximize2, BookOpen, Zap, Shield, Users } from 'lucide-react';
+import { CheckCircle, Maximize2, BookOpen, Zap, Shield, Users, LogOut } from 'lucide-react';
 import { MultiSelectModal } from './MultiSelectModal';
 import { SUBJECTS_LIST, CHAPTERS_LIST } from '../constants';
+import { useLogoutMutation } from '@/lib/redux/services/authApi';
+import { useAppDispatch } from '@/lib/redux/hooks';
+import { logout as logoutAction } from '@/lib/redux/slices/authSlice';
+import { toast } from 'sonner';
 
 interface Props {
   onStart: () => void;
@@ -17,8 +21,24 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
   const [selectedChapters, setSelectedChapters] = useState<string[]>([]);
   const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
   const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
+  const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const dispatch = useAppDispatch();
 
   const showChapterField = selectedSubjects.length <= 1;
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      dispatch(logoutAction());
+      toast.success('লগআউট সফল হয়েছে');
+      window.location.href = '/';
+    } catch (error) {
+      // Even if the API call fails, logout locally
+      dispatch(logoutAction());
+      toast.success('লগআউট সফল হয়েছে');
+      window.location.href = '/';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col items-center font-sans">
@@ -48,19 +68,30 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
                 </Button>
               </div>
             ) : (
-              <Button 
-                className="bg-[#009d6e] hover:bg-[#008a60] text-white"
-                onClick={() => window.location.href = '/questions'}
-              >
-                ড্যাশবোর্ড
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button 
+                  className="bg-[#009d6e] hover:bg-[#008a60] text-white"
+                  onClick={() => window.location.href = '/questions'}
+                >
+                  ড্যাশবোর্ড
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-400"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  {isLoggingOut ? 'লগআউট হচ্ছে...' : 'লগআউট'}
+                </Button>
+              </div>
             )}
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <div className="w-full bg-gradient-to-br from-[#082f49] via-[#0c4a6e] to-[#075985] text-white pt-20 pb-32 px-4">
+      <div className="w-full bg-linear-to-br from-[#082f49] via-[#0c4a6e] to-[#075985] text-white pt-20 pb-32 px-4">
         <div className="max-w-5xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-6">
             <Zap className="h-4 w-4 text-yellow-400" />
@@ -70,7 +101,7 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
             ১ ক্লিকে প্রশ্ন তৈরির
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-green-400 to-blue-400">
               সফটওয়্যার !
             </span>
           </h1>
@@ -78,12 +109,11 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             আপনার ক্লাসে প্রযুক্তির শাখা বাড়ান! হাজারো প্রশ্নের ব্যাংক থেকে সহজেই প্রশ্নপত্র তৈরি করুন
           </p>
-
           {/* Feature Pills */}
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
               <CheckCircle className="h-5 w-5 text-green-400" />
-              <span className="text-sm font-medium">১০,০০০+ প্রশ্ন</span>
+              <span className="text-sm font-medium">১০,০০০০+ প্রশ্ন</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
               <Shield className="h-5 w-5 text-blue-400" />
