@@ -4,6 +4,7 @@ import { authApi } from './services/authApi';
 import { usersApi } from './services/usersApi';
 import { rolesApi } from './services/rolesApi';
 import { paymentsApi } from './services/paymentsApi';
+import { adminApi } from './services/adminApi';
 import authReducer from './slices/authSlice';
 
 const rootReducer = combineReducers({
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   [usersApi.reducerPath]: usersApi.reducer,
   [rolesApi.reducerPath]: rolesApi.reducer,
   [paymentsApi.reducerPath]: paymentsApi.reducer,
+  [adminApi.reducerPath]: adminApi.reducer,
   auth: authReducer,
 });
 
@@ -21,7 +23,8 @@ export const store = configureStore({
       .concat(authApi.middleware)
       .concat(usersApi.middleware)
       .concat(rolesApi.middleware)
-      .concat(paymentsApi.middleware),
+      .concat(paymentsApi.middleware)
+      .concat(adminApi.middleware),
 });
 
 setupListeners(store.dispatch);

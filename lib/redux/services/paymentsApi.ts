@@ -100,6 +100,20 @@ export interface PaymentQueryResponse {
   amount: string;
 }
 
+export interface PaymentStats {
+  total_transactions: number;
+  total_revenue: string;
+  pending_transactions: number;
+  completed_transactions: number;
+  failed_transactions: number;
+  refunded_transactions: number;
+  revenue_this_week: string;
+  revenue_percentage_change: number;
+  average_transaction: string;
+  top_up_count: number;
+  debit_count: number;
+}
+
 export const paymentsApi = createApi({
   reducerPath: 'paymentsApi',
   baseQuery: fetchBaseQuery({
@@ -179,6 +193,12 @@ export const paymentsApi = createApi({
       }),
       invalidatesTags: ['Wallet', 'WalletTransactions'],
     }),
+
+    // Get payment statistics (admin only)
+    getPaymentStats: builder.query<PaymentStats, void>({
+      query: () => 'stats/',
+      providesTags: ['Payments'],
+    }),
   }),
 });
 
@@ -190,4 +210,5 @@ export const {
   useQueryPaymentMutation,
   useGetPaymentsQuery,
   useRefundTransactionMutation,
+  useGetPaymentStatsQuery,
 } = paymentsApi;
