@@ -3,7 +3,7 @@
 import type { ComponentType } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ShieldCheck, LockKeyhole, Activity, UserCog, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, LockKeyhole, Activity, UserCog, Settings, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -54,6 +54,12 @@ export const adminNavItems: AdminNavItem[] = [
     icon: Activity,
     badge: 'Soon',
     disabled: true,
+  },
+  {
+    title: 'Database',
+    href: '/admin/database',
+    icon: Database,
+    description: 'Database monitoring and backups.',
   },
   {
     title: 'Settings',

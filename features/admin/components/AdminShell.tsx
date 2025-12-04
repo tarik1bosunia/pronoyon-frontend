@@ -12,6 +12,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/managers': 'Manager Management',
   '/admin/roles': 'Roles & Permissions',
   '/admin/settings': 'Platform Settings',
+  '/admin/database': 'Database Management',
 };
 
 const formatSegment = (segment: string) =>
