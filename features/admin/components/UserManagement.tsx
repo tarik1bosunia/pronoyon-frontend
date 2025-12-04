@@ -39,6 +39,7 @@ import {
   useDeactivateUserMutation,
   type User
 } from '@/lib/redux/services/usersApi';
+import { useGetRolesQuery } from '@/lib/redux/services/rolesApi';
 
 type RoleType = 'admin' | 'manager' | 'user';
 type StatusType = 'active' | 'inactive' | 'pending';
@@ -71,12 +72,6 @@ const roleColors: Record<RoleType, string> = {
   user: 'bg-emerald-100 text-emerald-700',
 };
 
-const roleIdMap: Record<RoleType, number> = {
-  admin: 1, // Adjust these IDs based on your backend
-  manager: 2,
-  user: 3,
-};
-
 export function UserManagement() {
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<'all' | RoleType>('all');
@@ -93,7 +88,7 @@ export function UserManagement() {
     is_active: statusFilter === 'all' ? undefined : statusFilter === 'true',
   });
 
-  
+  const { data: rolesData } = useGetRolesQuery();
 
   const [createUser, { isLoading: isCreating }] = useCreateUserMutation();
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
@@ -102,6 +97,13 @@ export function UserManagement() {
   const [deactivateUser] = useDeactivateUserMutation();
 
   const users = usersData?.results || [];
+  const roles = rolesData || [];
+
+  // Create role map from fetched roles
+  const roleIdMap: Record<string, number> = roles.reduce((acc, role) => {
+    acc[role.slug] = role.id;
+    return acc;
+  }, {} as Record<string, number>);
 
   // Temporary debug
   console.log('Debug:', { 
