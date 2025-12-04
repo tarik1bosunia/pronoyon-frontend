@@ -3,7 +3,7 @@
 import type { ComponentType } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, ShieldCheck, LockKeyhole, Activity } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, LockKeyhole, Activity, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -28,6 +28,12 @@ export const adminNavItems: AdminNavItem[] = [
     href: '/admin/users',
     icon: Users,
     description: 'Invite, promote or deactivate accounts.',
+  },
+  {
+    title: 'Managers',
+    href: '/admin/managers',
+    icon: UserCog,
+    description: 'Manage platform managers.',
   },
   {
     title: 'Roles & Permissions',
