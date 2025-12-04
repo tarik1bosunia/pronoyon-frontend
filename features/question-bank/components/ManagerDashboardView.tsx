@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { 
   BookOpen, 
   Users, 
@@ -22,7 +24,7 @@ import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
 import { logout as logoutAction } from '@/lib/redux/slices/authSlice';
 import { toast } from 'sonner';
 import type { RootState } from '@/lib/redux/store';
-import { Input } from '@/components/ui/input';
+
 
 interface Props {
   userName?: string;
@@ -51,37 +53,37 @@ export function ManagerDashboardView({ userName }: Props) {
 
   const stats = [
     {
-      title: 'আমার প্রশ্নপত্র',
-      value: '৪৫',
-      change: '+৮',
+      title: 'আমার প্রশ্ন',
+      value: '২৪৫',
+      change: '+৩৮',
       icon: FileText,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       trend: 'up'
     },
     {
-      title: 'টিম সদস্য',
-      value: '১২',
-      change: '+২',
-      icon: Users,
+      title: 'এই সপ্তাহে যোগ',
+      value: '৫২',
+      change: '+১৫',
+      icon: Plus,
       color: 'text-green-600',
       bgColor: 'bg-green-50',
       trend: 'up'
     },
     {
-      title: 'রিভিউ প্রয়োজন',
-      value: '৮',
+      title: 'খসড়া প্রশ্ন',
+      value: '১৮',
       change: '0',
-      icon: Eye,
+      icon: Clock,
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
       trend: 'neutral'
     },
     {
-      title: 'সম্পন্ন এই মাসে',
-      value: '৩৮',
-      change: '+১২',
-      icon: CheckCircle,
+      title: 'মোট অবদান',
+      value: '৮৯২',
+      change: '+৫৮',
+      icon: Award,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
       trend: 'up'
@@ -90,88 +92,94 @@ export function ManagerDashboardView({ userName }: Props) {
 
   const quickActions = [
     {
-      title: 'নতুন প্রশ্নপত্র',
-      description: 'প্রশ্নপত্র তৈরি করুন',
+      title: 'নতুন প্রশ্ন যোগ করুন',
+      description: 'একটি নতুন প্রশ্ন তৈরি করুন',
       icon: Plus,
-      href: '/questions/create',
+      href: '/manager/create',
       color: 'bg-[#009d6e] hover:bg-[#008a60]',
     },
     {
-      title: 'প্রশ্ন রিভিউ',
-      description: 'মুলতুবি রিভিউ দেখুন',
-      icon: Eye,
-      href: '/manager/reviews',
+      title: 'খসড়া প্রশ্ন',
+      description: 'অসমাপ্ত প্রশ্ন সম্পাদনা করুন',
+      icon: FileText,
+      href: '/manager/drafts',
       color: 'bg-orange-600 hover:bg-orange-700',
     },
     {
-      title: 'টিম ব্যবস্থাপনা',
-      description: 'আপনার টিম পরিচালনা করুন',
-      icon: Users,
-      href: '/manager/team',
+      title: 'আমার প্রশ্ন',
+      description: 'সব প্রশ্ন দেখুন এবং পরিচালনা করুন',
+      icon: Eye,
+      href: '/manager/questions',
       color: 'bg-blue-600 hover:bg-blue-700',
     },
     {
-      title: 'রিপোর্ট দেখুন',
-      description: 'কর্মক্ষমতা রিপোর্ট',
+      title: 'পরিসংখ্যান',
+      description: 'আপনার অবদান দেখুন',
       icon: BarChart3,
-      href: '/manager/reports',
+      href: '/manager/stats',
       color: 'bg-purple-600 hover:bg-purple-700',
     },
   ];
 
-  const pendingReviews = [
+  const recentQuestions = [
     {
-      title: 'পদার্থবিজ্ঞান - অধ্যায় ৫',
-      author: 'রহিম আহমেদ',
-      questions: '১৫',
+      id: 1,
+      title: 'পদার্থবিজ্ঞান - নিউটনের গতিসূত্র',
+      subject: 'পদার্থবিজ্ঞান',
+      chapter: 'অধ্যায় ৩',
       time: '২ ঘণ্টা আগে',
-      priority: 'high'
+      status: 'published',
+      type: 'MCQ'
     },
     {
-      title: 'রসায়ন - জৈব যৌগ',
-      author: 'করিম হোসেন',
-      questions: '২০',
+      id: 2,
+      title: 'রসায়ন - জৈব যৌগের নামকরণ',
+      subject: 'রসায়ন',
+      chapter: 'অধ্যায় ৭',
       time: '৫ ঘণ্টা আগে',
-      priority: 'medium'
+      status: 'published',
+      type: 'CQ'
     },
     {
-      title: 'গণিত - সমাকলন',
-      author: 'সালমা খাতুন',
-      questions: '১২',
+      id: 3,
+      title: 'গণিত - সমাকলনের প্রয়োগ',
+      subject: 'গণিত',
+      chapter: 'অধ্যায় ৯',
       time: '১ দিন আগে',
-      priority: 'low'
-    },
+      status: 'published',
+      type: 'MCQ'
+    }
   ];
 
-  const teamActivity = [
+  const subjectProgress = [
     {
-      name: 'রহিম আহমেদ',
-      action: 'নতুন প্রশ্ন যোগ করেছেন',
-      count: '২৫ টি',
-      status: 'active',
-      avatar: 'RA'
+      subject: 'পদার্থবিজ্ঞান',
+      questions: 85,
+      target: 100,
+      percentage: 85,
+      color: 'blue'
     },
     {
-      name: 'করিম হোসেন',
-      action: 'প্রশ্নপত্র সম্পাদনা করেছেন',
-      count: '৮ টি',
-      status: 'active',
-      avatar: 'KH'
+      subject: 'রসায়ন',
+      questions: 72,
+      target: 100,
+      percentage: 72,
+      color: 'green'
     },
     {
-      name: 'সালমা খাতুন',
-      action: 'রিভিউ সম্পন্ন করেছেন',
-      count: '১৫ টি',
-      status: 'completed',
-      avatar: 'SK'
+      subject: 'গণিত',
+      questions: 68,
+      target: 100,
+      percentage: 68,
+      color: 'purple'
     },
     {
-      name: 'জামাল উদ্দিন',
-      action: 'নতুন অধ্যায় যোগ করেছেন',
-      count: '৩ টি',
-      status: 'active',
-      avatar: 'JU'
-    },
+      subject: 'জীববিজ্ঞান',
+      questions: 45,
+      target: 100,
+      percentage: 45,
+      color: 'orange'
+    }
   ];
 
   return (
@@ -212,15 +220,22 @@ export function ManagerDashboardView({ userName }: Props) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
-        <div className="bg-linear-to-r from-blue-600 to-blue-700 rounded-2xl p-8 mb-8 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-[#009d6e] to-[#007a54] rounded-2xl p-8 mb-8 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold mb-2">
                 আসসালামু আলাইকুম, {userName || 'ম্যানেজার'}! 👋
               </h2>
-              <p className="text-blue-50 text-lg">
-                আপনার টিম ভালো করছে। আজকের কাজের তালিকা দেখুন।
+              <p className="text-green-50 text-lg">
+                ডাটাবেস সমৃদ্ধ করতে আজ নতুন প্রশ্ন যোগ করুন।
               </p>
+              <Button 
+                className="mt-4 bg-white text-[#009d6e] hover:bg-gray-100 font-semibold"
+                onClick={() => window.location.href = '/manager/create'}
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                নতুন প্রশ্ন যোগ করুন
+              </Button>
             </div>
             <div className="hidden lg:block">
               <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 text-center">
@@ -290,19 +305,20 @@ export function ManagerDashboardView({ userName }: Props) {
           </CardContent>
         </Card>
 
+        {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Pending Reviews */}
+          {/* Recent Questions */}
           <Card className="lg:col-span-2">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-xl">রিভিউ প্রয়োজন</CardTitle>
-                  <CardDescription>মুলতুবি রিভিউ তালিকা</CardDescription>
+                  <CardTitle className="text-xl">সাম্প্রতিক প্রশ্ন</CardTitle>
+                  <CardDescription>আপনার সর্বশেষ যোগ করা প্রশ্ন</CardDescription>
                 </div>
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => window.location.href = '/manager/reviews'}
+                  onClick={() => window.location.href = '/manager/questions'}
                 >
                   সব দেখুন
                 </Button>
@@ -310,28 +326,40 @@ export function ManagerDashboardView({ userName }: Props) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {pendingReviews.map((review, index) => (
+                {recentQuestions.map((question) => (
                   <div 
-                    key={index}
+                    key={question.id}
                     className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 group cursor-pointer"
-                    onClick={() => window.location.href = `/manager/reviews/${index + 1}`}
+                    onClick={() => window.location.href = `/questions/${question.id}`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="text-sm font-semibold text-gray-900">
-                          {review.title}
+                          {question.title}
                         </h3>
-                        {review.priority === 'high' && (
-                          <Flag className="h-4 w-4 text-red-500" />
-                        )}
+                        <Badge variant="outline" className="text-xs">
+                          {question.type}
+                        </Badge>
                       </div>
-                      <p className="text-sm text-gray-600">লেখক: {review.author}</p>
+                      <p className="text-sm text-gray-600">{question.subject} • {question.chapter}</p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
-                        <span>{review.questions} প্রশ্ন</span>
+                        <span className="flex items-center gap-1">
+                          {question.status === 'published' ? (
+                            <>
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                              <span className="text-green-600">প্রকাশিত</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="h-3 w-3 text-orange-500" />
+                              <span className="text-orange-600">খসড়া</span>
+                            </>
+                          )}
+                        </span>
                         <span>•</span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {review.time}
+                          {question.time}
                         </span>
                       </div>
                     </div>
@@ -341,7 +369,7 @@ export function ManagerDashboardView({ userName }: Props) {
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      রিভিউ করুন
+                      দেখুন
                     </Button>
                   </div>
                 ))}
@@ -357,7 +385,7 @@ export function ManagerDashboardView({ userName }: Props) {
                 <CardTitle className="text-lg">দ্রুত অনুসন্ধান</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="relative mb-4">
+                <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input 
                     placeholder="প্রশ্ন খুঁজুন..."
@@ -366,55 +394,48 @@ export function ManagerDashboardView({ userName }: Props) {
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <Button 
-                  className="w-full bg-[#009d6e] hover:bg-[#008a60]"
-                  onClick={() => window.location.href = '/questions'}
-                >
-                  <Search className="h-4 w-4 mr-2" />
-                  অনুসন্ধান করুন
-                </Button>
               </CardContent>
             </Card>
 
-            {/* Team Performance */}
+            {/* Subject Progress */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Award className="h-5 w-5 text-yellow-500" />
-                  টিম কর্মক্ষমতা
+                  <BarChart3 className="h-5 w-5 text-blue-500" />
+                  বিষয়ভিত্তিক অগ্রগতি
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {teamActivity.map((member, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="bg-linear-to-br from-blue-500 to-purple-600 rounded-full h-10 w-10 flex items-center justify-center text-white font-bold text-xs shrink-0">
-                      {member.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {member.name}
-                      </p>
-                      <p className="text-xs text-gray-600">{member.action}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs font-semibold text-blue-600">
-                          {member.count}
-                        </span>
-                        {member.status === 'active' && (
-                          <span className="flex items-center gap-1 text-xs text-green-600">
-                            <div className="h-1.5 w-1.5 bg-green-500 rounded-full"></div>
-                            সক্রিয়
-                          </span>
-                        )}
+              <CardContent className="space-y-4">
+                {subjectProgress.map((subject, index) => (
+                  <div key={index}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{subject.subject}</p>
+                        <p className="text-xs text-gray-600">
+                          {subject.questions}/{subject.target} প্রশ্ন
+                        </p>
                       </div>
+                      <span className="text-sm font-bold text-gray-700">{subject.percentage}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full ${
+                          subject.color === 'blue' ? 'bg-blue-500' :
+                          subject.color === 'green' ? 'bg-green-500' :
+                          subject.color === 'purple' ? 'bg-purple-500' :
+                          'bg-orange-500'
+                        }`}
+                        style={{ width: `${subject.percentage}%` }}
+                      />
                     </div>
                   </div>
                 ))}
                 <Button 
                   variant="ghost" 
                   className="w-full mt-4 text-blue-600 hover:text-blue-700"
-                  onClick={() => window.location.href = '/manager/team'}
+                  onClick={() => window.location.href = '/manager/stats'}
                 >
-                  টিম বিস্তারিত দেখুন
+                  বিস্তারিত পরিসংখ্যান
                 </Button>
               </CardContent>
             </Card>

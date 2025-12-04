@@ -4,34 +4,32 @@ import { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ShieldAlert } from 'lucide-react';
-import { useAuth, useIsAdmin, useIsManager, useUser } from '@/lib/rbac/hooks';
+import { useAuth, useIsManager, useIsAdminOrManager, useUser } from '@/lib/rbac/hooks';
 
-interface AdminGuardProps {
+interface ManagerGuardProps {
   children: ReactNode;
 }
 
-export function AdminGuard({ children }: AdminGuardProps) {
+export function ManagerGuard({ children }: ManagerGuardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const isAdmin = useIsAdmin();
+  const isManagerOrAdmin = useIsAdminOrManager();
   const isManager = useIsManager();
   const user = useUser();
 
-  // Redirect managers to home page where they should see ManagerDashboardView
-  useEffect(() => {
-    if (isAuthenticated && isManager && !isAdmin) {
-      router.push('/');
-    }
-  }, [isAuthenticated, isManager, isAdmin, router]);
-
   // Debug logging
   if (typeof window !== 'undefined') {
-    console.log('AdminGuard - isAuthenticated:', isAuthenticated);
-    console.log('AdminGuard - isAdmin:', isAdmin);
-    console.log('AdminGuard - isManager:', isManager);
-    console.log('AdminGuard - user:', user);
-    console.log('AdminGuard - user.roles:', user?.roles);
+    console.log('ManagerGuard - isAuthenticated:', isAuthenticated);
+    console.log('ManagerGuard - isManagerOrAdmin:', isManagerOrAdmin);
+    console.log('ManagerGuard - isManager:', isManager);
+    console.log('ManagerGuard - user:', user);
   }
+
+  useEffect(() => {
+    if (isAuthenticated && !isManagerOrAdmin) {
+      router.push('/');
+    }
+  }, [isAuthenticated, isManagerOrAdmin, router]);
 
   if (!isAuthenticated) {
     return (
@@ -47,29 +45,14 @@ export function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  // If manager, show redirecting message while redirect happens
-  if (isManager && !isAdmin) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Alert className="max-w-lg">
-          <ShieldAlert className="h-4 w-4" />
-          <AlertTitle>Redirecting…</AlertTitle>
-          <AlertDescription>
-            Taking you to your manager dashboard.
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
+  if (!isManagerOrAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <Alert variant="destructive" className="max-w-xl">
           <ShieldAlert className="h-4 w-4" />
-          <AlertTitle>Administrator Access Required</AlertTitle>
+          <AlertTitle>Manager Access Required</AlertTitle>
           <AlertDescription>
-            You do not have permission to view this section. Contact an administrator if you believe this is a mistake.
+            You do not have permission to view this section. This area is for managers and administrators only.
             <div className="mt-2 text-xs font-mono">
               <p>Debug Info:</p>
               <p>User ID: {user?.id}</p>
