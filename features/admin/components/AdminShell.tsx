@@ -11,6 +11,8 @@ const PAGE_TITLES: Record<string, string> = {
   '/admin/users': 'User Management',
   '/admin/managers': 'Manager Management',
   '/admin/roles': 'Roles & Permissions',
+  '/admin/security': 'Security & Authentication',
+  '/admin/activity': 'Audit Trail',
   '/admin/settings': 'Platform Settings',
   '/admin/database': 'Database Management',
 };

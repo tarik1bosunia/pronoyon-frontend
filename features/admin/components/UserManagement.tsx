@@ -124,7 +124,7 @@ export function UserManagement() {
     setFormState({
       fullName: user.full_name,
       email: user.email,
-      role: (user.primary_role?.role_type || 'user') as RoleType,
+      role: (user.primary_role?.slug || 'user') as RoleType,
       status: user.is_active ? 'active' : 'inactive',
     });
     setIsSheetOpen(true);
@@ -285,7 +285,7 @@ export function UserManagement() {
                 <TableBody>
                   {users.map((user) => {
                     const status = getUserStatus(user);
-                    const roleType = (user.primary_role?.role_type || 'user') as RoleType;
+                    const roleType = (user.primary_role?.slug || 'user') as RoleType;
                     return (
                       <TableRow key={user.id}>
                         <TableCell>

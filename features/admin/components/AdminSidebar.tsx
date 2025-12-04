@@ -45,15 +45,13 @@ export const adminNavItems: AdminNavItem[] = [
     title: 'Security',
     href: '/admin/security',
     icon: LockKeyhole,
-    badge: 'Soon',
-    disabled: true,
+    description: 'Session management and security monitoring.',
   },
   {
     title: 'Audit Trail',
     href: '/admin/activity',
     icon: Activity,
-    badge: 'Soon',
-    disabled: true,
+    description: 'Track all system activities and user actions.',
   },
   {
     title: 'Database',
