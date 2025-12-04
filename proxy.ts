@@ -1,5 +1,5 @@
 /**
- * Next.js Middleware for Route Protection
+ * Next.js Proxy for Route Protection
  * Handles authentication and RBAC checks at the edge
  */
 
@@ -79,7 +79,7 @@ function getRequiredRole(pathname: string): string | null {
   return null;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Allow public routes
@@ -126,7 +126,7 @@ export function middleware(request: NextRequest) {
   }
 }
 
-// Configure which routes to run middleware on
+// Configure which routes to run proxy on
 export const config = {
   matcher: [
     /*
