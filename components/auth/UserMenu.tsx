@@ -25,7 +25,12 @@ export function UserMenu() {
 
   const handleLogout = async () => {
     try {
-      await logout().unwrap();
+      // Get refresh token from localStorage
+      const refreshToken = localStorage.getItem('refresh_token');
+      
+      if (refreshToken) {
+        await logout({ refresh: refreshToken }).unwrap();
+      }
     } catch (error) {
       const apiError = error as { data?: { detail?: string; message?: string }; message?: string };
       const errorMessage =
@@ -33,7 +38,8 @@ export function UserMenu() {
         apiError?.data?.message ||
         apiError?.message ||
         'Failed to log out. Please try again.';
-      toast.error(errorMessage);
+      console.warn('Logout API error:', errorMessage);
+      // Don't show error toast as we'll clear local state anyway
     } finally {
       // Clear local state regardless of API call result
       dispatch(logoutAction());

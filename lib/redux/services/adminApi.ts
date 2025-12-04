@@ -109,7 +109,7 @@ export const adminApi = createApi({
 
     // Get recent activities/audit log
     getRecentActivities: builder.query<RecentActivity[], { limit?: number }>({
-      query: ({ limit = 10 }) => `/admin/activities/?limit=${limit}`,
+      query: ({ limit = 10 }) => `/rbac/activities/recent/?limit=${limit}`,
       providesTags: ['Activities'],
     }),
   }),

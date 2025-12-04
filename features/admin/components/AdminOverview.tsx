@@ -20,11 +20,13 @@ import {
 } from 'lucide-react';
 import { useGetUserStatsQuery } from '@/lib/redux/services/usersApi';
 import { useGetPaymentStatsQuery } from '@/lib/redux/services/paymentsApi';
+import { useGetRecentActivitiesQuery } from '@/lib/redux/services/adminApi';
 
 export function AdminOverview() {
   // Fetch data from backend
   const { data: userStats, isLoading: isLoadingUsers, error: userError } = useGetUserStatsQuery();
   const { data: paymentStats, isLoading: isLoadingPayments, error: paymentError } = useGetPaymentStatsQuery();
+  const { data: activities, isLoading: isLoadingActivities } = useGetRecentActivitiesQuery({ limit: 5 });
 
   // Loading state
   if (isLoadingUsers || isLoadingPayments) {
@@ -263,15 +265,75 @@ export function AdminOverview() {
           <CardDescription>Recent platform activities and changes</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
-              <p className="text-sm text-slate-600 text-center">
-                Activity logs will be displayed here when backend integration is complete.
-              </p>
-              <p className="text-xs text-slate-500 text-center mt-2">
-                This section will show audit trails, user actions, and system events.
-              </p>
-            </div>
+          <div className="space-y-3">
+            {isLoadingActivities ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-start gap-3 rounded-lg border border-slate-100 p-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : activities && activities.length > 0 ? (
+              activities.map((activity) => {
+                // Get initials from actor name
+                const initials = activity.actor
+                  .split(' ')
+                  .map((word) => word[0])
+                  .join('')
+                  .toUpperCase()
+                  .slice(0, 2);
+                
+                // Determine icon and color based on activity type
+                const getActivityStyle = () => {
+                  if (activity.details?.action_type === 'assigned') {
+                    return { bg: 'bg-emerald-100', text: 'text-emerald-700', icon: 'bg-emerald-600' };
+                  } else if (activity.details?.action_type === 'revoked') {
+                    return { bg: 'bg-rose-100', text: 'text-rose-700', icon: 'bg-rose-600' };
+                  } else if (activity.details?.action_type === 'wallet_topup') {
+                    return { bg: 'bg-blue-100', text: 'text-blue-700', icon: 'bg-blue-600' };
+                  }
+                  return { bg: 'bg-slate-100', text: 'text-slate-700', icon: 'bg-slate-600' };
+                };
+                
+                const style = getActivityStyle();
+                
+                return (
+                  <div
+                    key={activity.id}
+                    className={`flex items-start gap-3 rounded-lg border border-slate-100 ${style.bg} p-3 hover:shadow-sm transition-all`}
+                  >
+                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${style.icon} text-sm font-bold text-white`}>
+                      {initials}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${style.text}`}>
+                        {activity.action}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {new Date(activity.timestamp).toLocaleString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-4">
+                <p className="text-sm text-slate-600 text-center">
+                  No recent activities to display
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
