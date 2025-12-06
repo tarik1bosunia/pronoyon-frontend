@@ -66,6 +66,20 @@ export const authApi = createApi({
         body,
       }),
     }),
+    passwordReset: builder.mutation<{ detail: string }, { email: string }>({
+      query: (data) => ({
+        url: '/auth/password/reset/',
+        method: 'POST',
+        body: data,
+      }),
+    }),
+    passwordResetConfirm: builder.mutation<{ detail: string }, { uid: string; token: string; new_password1: string; new_password2: string }>({
+      query: (data) => ({
+        url: '/auth/password/reset/confirm/',
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -75,4 +89,6 @@ export const {
   useLogoutMutation,
   useRefreshTokenMutation,
   useGoogleLoginMutation, // Export the new hook
+  usePasswordResetMutation,
+  usePasswordResetConfirmMutation,
 } = authApi;

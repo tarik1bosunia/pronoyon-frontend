@@ -131,55 +131,114 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
         </div>
       </div>
 
-      {/* Feature Grid */}
-      <div className="w-full max-w-4xl px-4 -mt-24 z-10 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1: ১ ক্লিকে প্রশ্ন তৈরি */}
-          <Card 
-            className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group relative overflow-hidden"
-            onClick={onStart}
-          >
-            {/* <div className="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-              ৩৮—১২শ
-            </div> */}
-            <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-green-50 transition-colors">
-                <span className="text-4xl">+</span>
+      {/* Question Setup Card */}
+      <div className="w-full max-w-2xl px-4 -mt-24 z-10 pb-20">
+        <Card className="bg-white p-8 shadow-2xl border-0 rounded-2xl">
+          <div className="text-center mb-8">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">প্রশ্নপত্র তৈরি শুরু করুন</h3>
+            <p className="text-gray-600">নিচের ইনপুট ফিল্ড গুলো সিলেক্ট করে সাবমিট করুন</p>
+            <div className="flex items-center justify-center gap-2 mt-3 text-sm">
+              <div className="flex items-center gap-1.5 text-green-600 bg-green-50 px-3 py-1.5 rounded-full">
+                <CheckCircle className="h-4 w-4" />
+                <span className="font-medium">সর্বশেষ আপডেট: a day ago</span>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">১ ক্লিকে প্রশ্ন তৈরি</h3>
             </div>
-          </Card>
+          </div>
 
-          {/* Card 2: রেডি প্রশ্ন */}
-          <Card className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group">
-            <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-50 transition-colors">
-                <BookOpen className="h-8 w-8 text-gray-700" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">রেডি প্রশ্ন</h3>
-            </div>
-          </Card>
+          <div className="space-y-5">
+            <Input 
+              placeholder="প্রোগ্রাম/পরীক্ষার নাম লিখুন *" 
+              className="h-12 border-gray-300 bg-white text-base focus-visible:ring-[#009d6e] focus-visible:border-[#009d6e]"
+            />
+            
+            <Select>
+              <SelectTrigger className="h-12 border-gray-300 bg-white focus:ring-[#009d6e]">
+                <SelectValue placeholder="শ্রেণি" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hsc">এইচএসসি</SelectItem>
+                <SelectItem value="ssc">এসএসসি</SelectItem>
+                <SelectItem value="admission">এডমিশন</SelectItem>
+              </SelectContent>
+            </Select>
 
-          {/* Card 3: OMR Evaluator */}
-          <Card className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group">
-            <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-purple-50 transition-colors">
-                <CheckCircle className="h-8 w-8 text-gray-700" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">OMR Evaluator</h3>
+            <div 
+              onClick={() => setIsSubjectModalOpen(true)}
+              className="h-12 border border-gray-300 rounded-md flex items-center justify-between px-3 cursor-pointer bg-white hover:bg-gray-50 hover:border-[#009d6e] transition-all group"
+            >
+              {selectedSubjects.length === 0 ? (
+                <span className="text-muted-foreground">বিষয়</span>
+              ) : (
+                <span className="text-gray-900 truncate font-medium">
+                  {selectedSubjects.join(', ')}
+                </span>
+              )}
+              <Maximize2 className="h-4 w-4 text-gray-400 group-hover:text-[#009d6e] transition-colors" />
             </div>
-          </Card>
 
-          {/* Card 4: অনলাইন পরীক্ষা তৈরি */}
-          <Card className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group">
-            <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-50 transition-colors">
-                <Zap className="h-8 w-8 text-gray-700" />
+            {showChapterField && (
+              <div 
+                onClick={() => setIsChapterModalOpen(true)}
+                className="h-12 border border-gray-300 rounded-md flex items-center justify-between px-3 cursor-pointer bg-white hover:bg-gray-50 hover:border-[#009d6e] transition-all group animate-in fade-in slide-in-from-top-2"
+              >
+                {selectedChapters.length === 0 ? (
+                  <span className="text-muted-foreground">অধ্যায়</span>
+                ) : (
+                  <span className="text-gray-900 truncate font-medium">
+                    {selectedChapters.join(', ')}
+                  </span>
+                )}
+                <Maximize2 className="h-4 w-4 text-gray-400 group-hover:text-[#009d6e] transition-colors" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">অনলাইন পরীক্ষা তৈরি</h3>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <Select>
+                <SelectTrigger className="h-12 border-gray-300 bg-white">
+                  <SelectValue placeholder="টাইপ" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mcq">MCQ</SelectItem>
+                  <SelectItem value="cq">CQ</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Input 
+                placeholder="প্রশ্ন সংখ্যা" 
+                defaultValue="100"
+                type="number" 
+                className="h-12 border-gray-300 bg-white" 
+              />
             </div>
-          </Card>
-        </div>
+
+            <Button 
+              className="w-full h-12 bg-[#009d6e] hover:bg-[#008a60] text-lg font-medium mt-4 shadow-lg hover:shadow-xl transition-all"
+              onClick={onStart}
+            >
+              {isAuthenticated ? 'প্রশ্ন তৈরি করুন' : 'শুরু করুন'}
+            </Button>
+
+            {!isAuthenticated && (
+              <p className="text-center text-sm text-gray-500 mt-3">
+                প্রশ্ন তৈরি করতে{' '}
+                <button 
+                  onClick={() => window.location.href = '/login'}
+                  className="text-[#009d6e] font-medium hover:underline cursor-pointer bg-transparent border-0"
+                >
+                  লগইন
+                </button>
+                {' '}করুন অথবা{' '}
+                <button 
+                  onClick={() => window.location.href = '/register'}
+                  className="text-[#009d6e] font-medium hover:underline cursor-pointer bg-transparent border-0"
+                >
+                  রেজিস্টার
+                </button>
+                {' '}করুন
+              </p>
+            )}
+          </div>
+        </Card>
       </div>
 
       {/* Footer Section */}

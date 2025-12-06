@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePasswordResetMutation } from '@/lib/redux/services/authApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -9,7 +10,7 @@ import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [passwordReset, { isLoading }] = usePasswordResetMutation();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,25 +21,13 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      // TODO: Implement password reset API call
-      // const response = await fetch('/api/auth/password-reset/', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
-
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await passwordReset({ email }).unwrap();
       setIsSuccess(true);
       toast.success('Password reset link sent to your email!');
     } catch (error: any) {
-      toast.error(error?.message || 'Failed to send reset link. Please try again.');
-    } finally {
-      setIsLoading(false);
+      const errorMsg = error?.data?.email?.[0] || error?.data?.detail || 'Failed to send reset link. Please try again.';
+      toast.error(errorMsg);
     }
   };
 

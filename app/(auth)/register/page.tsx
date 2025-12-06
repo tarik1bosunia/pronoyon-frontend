@@ -128,7 +128,7 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-gray-500">Join QBS and start your journey</p>
+            <p className="text-gray-500">Join Pronoyon and start your journey</p>
           </div>
 
           {/* Google Sign Up */}
