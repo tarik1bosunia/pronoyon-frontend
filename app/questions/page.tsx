@@ -9,16 +9,16 @@ import {
   DashboardHeader,
   QuestionBrowseView,
   FilterSidebar,
-  mockQuestions,
   type FilterState
 } from '@/features/question-bank';
+import { useGetQuestionsQuery } from '@/lib/redux/services/questionsApi';
 
 function QuestionsPageContent() {
   const router = useRouter();
-  const [selectedIds, setSelectedIds] = useState<string[]>(['1', '2', '3', '4', '5']);
-  // Initialize based on a safe default that won't cause hydration issues
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isFilterOpen, setFilterOpen] = useState(false);
+  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
     types: [],
     boards: [],
@@ -29,6 +29,12 @@ function QuestionsPageContent() {
     chapters: [],
     topics: [],
     specialFilters: []
+  });
+
+  // Fetch questions from backend
+  const { data: questionsData, isLoading, error } = useGetQuestionsQuery({
+    page,
+    page_size: 50,
   });
 
   useEffect(() => {
@@ -46,7 +52,10 @@ function QuestionsPageContent() {
   }, []);
 
   const filteredQuestions = useMemo(() => {
-    return mockQuestions.filter((q) => {
+    // Use API data directly - backend data is already in the correct format
+    const questions = questionsData?.results || [];
+    
+    return questions.filter((q: any) => {
       if (filters.types.length > 0 && !filters.types.includes(q.type)) {
         return false;
       }
@@ -91,7 +100,7 @@ function QuestionsPageContent() {
 
       return true;
     });
-  }, [filters]);
+  }, [questionsData, filters]);
 
   const toggleSelection = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((q) => q !== id) : [...prev, id]));
@@ -116,25 +125,41 @@ function QuestionsPageContent() {
         <DashboardHeader isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <div className="flex flex-1 overflow-hidden">
-          <QuestionBrowseView
-            questions={filteredQuestions}
-            selectedIds={selectedIds}
-            onToggleSelection={toggleSelection}
-            onSubmit={handleSubmitQuestions}
-            onOpenFilters={() => setFilterOpen(true)}
-            activeSpecialFilters={filters.specialFilters}
-            onToggleSpecialFilter={(value: string) =>
-              setFilters((prev) => {
-                const exists = prev.specialFilters.includes(value);
-                return {
-                  ...prev,
-                  specialFilters: exists
-                    ? prev.specialFilters.filter((tag) => tag !== value)
-                    : [...prev.specialFilters, value]
-                };
-              })
-            }
-          />
+          {isLoading ? (
+            <div className="flex flex-1 items-center justify-center">
+              <div className="text-center">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                <p className="mt-4 text-gray-600">প্রশ্ন লোড হচ্ছে...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="flex flex-1 items-center justify-center">
+              <div className="text-center text-red-600">
+                <p>প্রশ্ন লোড করতে সমস্যা হয়েছে</p>
+                <p className="text-sm mt-2">দয়া করে পরে আবার চেষ্টা করুন</p>
+              </div>
+            </div>
+          ) : (
+            <QuestionBrowseView
+              questions={filteredQuestions}
+              selectedIds={selectedIds}
+              onToggleSelection={toggleSelection}
+              onSubmit={handleSubmitQuestions}
+              onOpenFilters={() => setFilterOpen(true)}
+              activeSpecialFilters={filters.specialFilters}
+              onToggleSpecialFilter={(value: string) =>
+                setFilters((prev) => {
+                  const exists = prev.specialFilters.includes(value);
+                  return {
+                    ...prev,
+                    specialFilters: exists
+                      ? prev.specialFilters.filter((tag) => tag !== value)
+                      : [...prev.specialFilters, value]
+                  };
+                })
+              }
+            />
+          )}
 
           <FilterSidebar
             isOpen={isFilterOpen}
