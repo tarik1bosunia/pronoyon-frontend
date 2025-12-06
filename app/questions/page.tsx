@@ -61,37 +61,81 @@ function QuestionsPageContent() {
   const transformedQuestions = useMemo(() => {
     if (!questionsData?.results) return [];
     
-    return questionsData.results.map((q) => ({
-      id: q.id,
-      type: q.type as 'mcq' | 'cq',
-      question: q.question_text,
-      text: q.question_text,
-      questionHtml: q.question_text_html,
-      board: q.subject?.class_level?.name || '',
-      year: '',
-      school: '',
-      schoolYear: '',
-      subject: q.subject?.name || '',
-      chapter: q.topics?.[0]?.chapter?.name || '',
-      topic: q.topics?.[0]?.name || '',
-      marks: parseFloat(q.marks),
-      difficulty: q.difficulty,
-      specialTags: q.tags || [],
-      options: q.mcq_options?.map(opt => ({
-        id: opt.id,
-        label: opt.option_label,
-        text: opt.option_text,
-        isCorrect: opt.is_correct
-      })) || [],
-      subQuestions: q.cq_sub_questions?.map(sq => ({
-        id: sq.id,
-        label: sq.label,
-        question: sq.sub_question_text,
-        text: sq.sub_question_text,
-        marks: parseFloat(sq.marks),
-        answer: sq.answer
-      })) || []
-    }));
+    return questionsData.results.map((q) => {
+      // Parse combined MCQ structure from question_text
+      let stem = undefined;
+      let romanStatements = undefined;
+      let footer = undefined;
+      let cleanText = q.question_text;
+      
+      // Check if it's a combined MCQ with roman numerals
+      if (q.type === 'mcq' && q.mcq_subtype === 'combined' && q.question_text) {
+        const lines = q.question_text.split('\n');
+        const romanPattern = /^(i{1,3}|iv|v)\.\s+/i;
+        const romanLines: string[] = [];
+        let stemText = '';
+        let footerText = '';
+        let inRomanSection = false;
+        
+        lines.forEach((line, index) => {
+          const trimmed = line.trim();
+          if (!trimmed) return;
+          
+          if (romanPattern.test(trimmed)) {
+            inRomanSection = true;
+            romanLines.push(trimmed.replace(romanPattern, ''));
+          } else if (!inRomanSection && index === 0) {
+            stemText = trimmed;
+          } else if (inRomanSection) {
+            footerText = trimmed;
+          } else if (!inRomanSection) {
+            stemText += (stemText ? ' ' : '') + trimmed;
+          }
+        });
+        
+        if (romanLines.length > 0) {
+          stem = stemText;
+          romanStatements = romanLines;
+          footer = footerText || 'নিচের কোনটি সঠিক?';
+          cleanText = q.question_text; // Keep original for fallback
+        }
+      }
+      
+      return {
+        id: q.id,
+        type: q.type as 'mcq' | 'cq',
+        text: cleanText,
+        stem,
+        romanStatements,
+        footer,
+        question: q.question_text,
+        questionHtml: q.question_text_html,
+        board: q.subject?.class_level?.name || '',
+        year: '',
+        school: '',
+        schoolYear: '',
+        subject: q.subject?.name || '',
+        chapter: q.topics?.[0]?.chapter?.name || '',
+        topic: q.topics?.[0]?.name || '',
+        marks: parseFloat(q.marks),
+        difficulty: q.difficulty,
+        specialTags: q.tags || [],
+        options: q.mcq_options?.map(opt => ({
+          id: opt.id,
+          label: opt.option_label,
+          text: opt.option_text,
+          isCorrect: opt.is_correct
+        })) || [],
+        subQuestions: q.cq_sub_questions?.map(sq => ({
+          id: sq.id,
+          label: sq.label,
+          question: sq.sub_question_text,
+          text: sq.sub_question_text,
+          marks: parseFloat(sq.marks),
+          answer: sq.answer
+        })) || []
+      };
+    });
   }, [questionsData]);
 
   const filteredQuestions = useMemo(() => {
