@@ -4,6 +4,7 @@ import { ReduxProvider } from "@/lib/providers/ReduxProvider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { GoogleAuthProvider } from "@/components/auth/providers/GoogleAuthProvider";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
 const inter = Inter({
   variable: "--font-geist-sans",
@@ -32,7 +33,9 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <GoogleAuthProvider>
-            {children}
+            <AuthGuard>
+              {children}
+            </AuthGuard>
             <Toaster richColors position="top-center" />
           </GoogleAuthProvider>
         </ReduxProvider>
