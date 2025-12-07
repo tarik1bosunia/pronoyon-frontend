@@ -251,7 +251,7 @@ export function AdminAuditTrail() {
                           </Badge>
                         </div>
                       </div>
-                      <div className="text-right text-xs text-muted-foreground flex-shrink-0">
+                      <div className="text-right text-xs text-muted-foreground shrink-0">
                         <p>{format(new Date(activity.timestamp), 'MMM d, yyyy')}</p>
                         <p>{format(new Date(activity.timestamp), 'HH:mm:ss')}</p>
                       </div>

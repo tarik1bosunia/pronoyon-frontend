@@ -3,13 +3,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  BarChart3, 
+import {  
   TrendingUp,
   TrendingDown,
   FileText,
   CheckCircle,
-  Clock,
   Download,
   Calendar,
   Award,
@@ -210,7 +208,7 @@ export default function StatsPage() {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
                       <div
-                        className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all"
+                        className="bg-linear-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all"
                         style={{ width: `${(subject.questions / subject.target) * 100}%` }}
                       />
                     </div>
@@ -237,7 +235,7 @@ export default function StatsPage() {
                     <div className="flex-1">
                       <div className="w-full bg-gray-200 rounded-full h-8 relative">
                         <div
-                          className="bg-gradient-to-r from-[#009d6e] to-[#007a54] h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold text-sm transition-all"
+                          className="bg-linear-to-r from-[#009d6e] to-[#007a54] h-8 rounded-full flex items-center justify-end pr-3 text-white font-bold text-sm transition-all"
                           style={{ width: `${(month.questions / 60) * 100}%` }}
                         >
                           {month.questions}
@@ -275,7 +273,7 @@ export default function StatsPage() {
                 {achievements.map((achievement, index) => {
                   const Icon = achievement.icon;
                   return (
-                    <div key={index} className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
+                    <div key={index} className="flex items-center gap-4 p-4 bg-linear-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
                       <div className="bg-yellow-500 p-3 rounded-full">
                         <Icon className="h-6 w-6 text-white" />
                       </div>
