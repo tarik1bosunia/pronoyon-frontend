@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { 
   BookOpen, 
-  Users, 
   FileText, 
   BarChart3, 
   LogOut,
@@ -15,7 +14,6 @@ import {
   Plus,
   Search,
   Eye,
-  Flag,
   Award,
   Calendar
 } from 'lucide-react';
@@ -220,7 +218,7 @@ export function ManagerDashboardView({ userName }: Props) {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Banner */}
-        <div className="bg-gradient-to-r from-[#009d6e] to-[#007a54] rounded-2xl p-8 mb-8 text-white shadow-lg">
+        <div className="bg-linear-to-r from-[#009d6e] to-[#007a54] rounded-2xl p-8 mb-8 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold mb-2">

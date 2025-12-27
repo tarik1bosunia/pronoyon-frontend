@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle } from 'lucide-react';
 import { Question } from '@/types/question';
+import { MarkdownRenderer } from '@/components/editor/MarkdownRenderer';
 
 interface Props {
   question: Question;
@@ -25,10 +26,15 @@ export function QuestionListItem({ question, index, isSelected, onToggleSelect }
       
       <div className="flex justify-between items-start mb-4 pl-2">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-800 flex gap-2">
+          <div className="text-lg font-semibold text-gray-800 flex gap-2">
             <span>{index + 1}.</span>
-            <span className="line-clamp-2">{(question.stem || question.text).split('\n')[0]}</span>
-          </h3>
+            <div className="line-clamp-2 flex-1">
+              <MarkdownRenderer 
+                content={(question.stem || question.text).split('\n')[0]} 
+                compact 
+              />
+            </div>
+          </div>
           
           {/* Combined MCQ with Roman Statements */}
           {question.type === 'mcq' && question.romanStatements && question.romanStatements.length > 0 && (
@@ -36,7 +42,7 @@ export function QuestionListItem({ question, index, isSelected, onToggleSelect }
               {question.romanStatements.map((statement, idx) => (
                 <div key={idx} className="flex gap-2 text-sm">
                   <span className="font-medium">{['i', 'ii', 'iii', 'iv', 'v'][idx]})</span>
-                  <span>{statement}</span>
+                  <MarkdownRenderer content={statement} compact />
                 </div>
               ))}
             </div>
@@ -45,7 +51,7 @@ export function QuestionListItem({ question, index, isSelected, onToggleSelect }
           {/* Footer for combined questions */}
           {question.type === 'mcq' && question.footer && (
             <div className="mt-2 ml-8 text-sm text-gray-600">
-              {question.footer}
+              <MarkdownRenderer content={question.footer} compact />
             </div>
           )}
         </div>
@@ -59,7 +65,9 @@ export function QuestionListItem({ question, index, isSelected, onToggleSelect }
               <span className="font-medium text-gray-400">
                 {['ক','খ','গ','ঘ'][idx]}.
               </span>
-              <span className="truncate">{opt.text}</span>
+              <div className="truncate flex-1">
+                <MarkdownRenderer content={opt.text} compact />
+              </div>
             </div>
           ))}
         </div>

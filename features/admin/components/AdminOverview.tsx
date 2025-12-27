@@ -7,9 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   Users, 
-  UserPlus, 
   ShieldCheck, 
-  UserMinus, 
   Activity, 
   ArrowUpRight, 
   ArrowDownRight,
@@ -307,7 +305,7 @@ export function AdminOverview() {
                     key={activity.id}
                     className={`flex items-start gap-3 rounded-lg border border-slate-100 ${style.bg} p-3 hover:shadow-sm transition-all`}
                   >
-                    <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full ${style.icon} text-sm font-bold text-white`}>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${style.icon} text-sm font-bold text-white`}>
                       {initials}
                     </div>
                     <div className="flex-1 min-w-0">
