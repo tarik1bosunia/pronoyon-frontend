@@ -134,7 +134,19 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
       {/* Feature Grid */}
       <div className="w-full max-w-4xl px-4 -mt-24 z-10 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1: ১ ক্লিকে প্রশ্ন তৈরি */}
+          {/* Card 1: রেডি প্রশ্ন */}
+          <Card className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group">
+            <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-50 transition-colors">
+                <BookOpen className="h-8 w-8 text-gray-700" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">নিজে প্রশ্ন তৈরি করুন</h3>
+            </div>
+          </Card>
+
+
+
+          {/* Card 2: ১ ক্লিকে প্রশ্ন তৈরি */}
           <Card 
             className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group relative overflow-hidden"
             onClick={onStart}
@@ -150,17 +162,19 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
             </div>
           </Card>
 
-          {/* Card 2: রেডি প্রশ্ন */}
+
+
+          {/* Card 3: অনলাইন পরীক্ষা তৈরি */}
           <Card className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group">
             <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-50 transition-colors">
-                <BookOpen className="h-8 w-8 text-gray-700" />
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-50 transition-colors">
+                <Zap className="h-8 w-8 text-gray-700" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">রেডি প্রশ্ন</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">অনলাইন পরীক্ষা তৈরি</h3>
             </div>
           </Card>
 
-          {/* Card 3: OMR Evaluator */}
+          {/* Card 4: OMR Evaluator */}
           <Card className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group">
             <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-purple-50 transition-colors">
@@ -170,15 +184,7 @@ export function SetupView({ onStart, isAuthenticated = false }: Props) {
             </div>
           </Card>
 
-          {/* Card 4: অনলাইন পরীক্ষা তৈরি */}
-          <Card className="bg-white p-8 shadow-xl border-0 rounded-2xl hover:shadow-2xl transition-shadow cursor-pointer group">
-            <div className="flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-orange-50 transition-colors">
-                <Zap className="h-8 w-8 text-gray-700" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">অনলাইন পরীক্ষা তৈরি</h3>
-            </div>
-          </Card>
+
         </div>
       </div>
 
